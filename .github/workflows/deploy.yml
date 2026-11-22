@@ -15,25 +15,12 @@ jobs:
       
     - name: Build site
       run: |
-        # Build the main README.md with pandoc to generate index.html
+        # Build the main README.md with pandoc
         pandoc --toc -s README.md --template template.html -o index.html
         
-        # Create public directory for GitHub Pages deployment
+        # Copy all files to public directory for GitHub Pages
         mkdir -p public
-        
-        # Copy all necessary files to public directory
-        # Core site files
-        cp README.html index.html template.html libs/ public/
-        
-        # Course materials - copy all directories that contain generated HTML files
-        cp -r Lectures/ public/
-        cp -r Tutorials/ public/
-        cp -r Homework/ public/
-        cp -r Exercices/ public/
-        cp -r Quiz/ public/
-        
-        # Other important files
-        cp -r *.md *.csv *.Rproj public/
+        cp -r * public/
         
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3

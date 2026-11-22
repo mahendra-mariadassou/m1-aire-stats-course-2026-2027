@@ -1,0 +1,396 @@
+---
+title: "M1 AIRE 2026 - Polling intents"
+subtitle: "Esimation of the mean and confidence intervals"
+from: markdown+emoji
+author:
+  - name: Mahendra Mariadassou
+    orcid: 0000-0003-2986-354X
+    email: mahendra.mariadassou@inrae.fr
+    affiliations:
+      - name: INRAE - MaIAGE
+        adress: Domaine de Vilvert
+        city: Jouy-en-Josas
+        state: France
+date: "2026-07-14"
+date-modified: today
+lightbox: true
+format: 
+  html:
+    toc: true
+    code-fold: show
+jupyter: python3
+---
+
+## Introduction
+
+This tutorial is designed to give
+
+-   A brief introduction to the concepts of **point estimation** and **interval estimation**.
+
+-   An explanation of **sample mean** as a point estimator for the population mean.
+
+-   An overview of **confidence intervals** and what they represent (e.g., 95% CI meaning).
+
+```{python}
+#Import useful libraries
+import pandas as pd
+import seaborn as sns
+import numpy as np
+import matplotlib.pyplot as plt
+## Compute pdf and cdf of gaussian densities
+import scipy.stats as stats
+from scipy.stats import norm
+```
+
+## Sampling distribution of the mean
+
+::::::: panel-tabset
+### Normal distribution
+
+::: panel-tabset
+#### Exercice
+
+1.  Draw multiple (say 10 000) samples of varying sizes $n$ (e.g., 10, 30, 100) from a known distribution (normal distribution with a mean of $\mu = 50$ and standard deviation of $\sigma = 10$).
+
+2.  Plot histograms of the sample means for each sample size.
+
+3.  Show that as sample size increases, the distribution of the sample means becomes narrower
+
+4.  Show that the standard deviation scales as the square root of the sample size
+
+5.  Plot $\sqrt{n}(\bar{x} - \mu)/\sigma$ instead of the sample mean $\bar{x}$. How does the distribution change when $n$ increase ?
+
+#### Solution
+
+```{python}
+#| layout-ncol: 3
+# Parameters
+population_mean = 50
+population_std = 10
+
+# Sample sizes
+sample_sizes = [10, 30, 100]
+max_size = max(sample_sizes)
+num_samples = 10000
+
+means = pd.DataFrame(index=range(num_samples), columns=['mean_10', 'mean_30', 'mean_100'])
+# Sample 100 observations from a normal distribution, compute the mean based on the first 10 / 30 / 100 observations and store them
+for i in range(num_samples):
+  sample = np.random.normal(population_mean, population_std, max_size)
+  means.loc[i] = [sample[:size].mean() for size in sample_sizes] 
+```
+
+The distribution of $\bar{x}$ becomes narrower...
+
+```{python}
+#| layout-ncol: 3
+# Plot histograms of unscaled sample means
+for i, size in enumerate(sample_sizes):
+    plt.figure()
+    sns.histplot(means.iloc[:, i], bins = 20, stat="density", color = "skyblue")
+    plt.xlim(35, 65)  # Par exemple, de 0 à 50
+    
+    ## Add theoretical gaussian density
+    x = np.linspace(-35, 65, 100)
+    y = norm.pdf(x, 50, population_std / np.sqrt(size))
+    plt.plot(x, y, color="red", linewidth=2)
+    
+    plt.title(f'Sample Size = {size}')
+```
+
+...but not the one of $\sqrt{n}(\bar{x} - \mu)/\sigma$
+
+```{python}
+#| layout-ncol: 3
+# Plot histograms of rescaled sample means
+for i, size in enumerate(sample_sizes):
+    plt.figure()
+    sns.histplot( np.sqrt(size) * (means.iloc[:, i] - population_mean) / population_std, bins = 20, stat = "density", color = "skyblue")
+    plt.xlim(-5, 5)
+    ## Add theoretical gaussian density
+    x = np.linspace(-5, 5, 100)
+    y = norm.pdf(x, 0, 1)
+    plt.plot(x, y, color="red", linewidth=2)
+    
+    ## Add title
+    plt.title(f'Sample Size = {size} (rescaled estimate)')
+```
+
+:::
+
+::: callout-note
+Means of gaussian random variables are nice because, up to a $\sqrt{n}$ rescaling , their distribution doesn't depend on $n$ anymore.
+:::
+
+### Bernoulli distribution
+
+:::: panel-tabset
+#### Exercise
+
+Repeat the previous exercise but with samples from a Binomial distribution with parameters $K = 100$ and $p = 0.2$ (replace the mean and standard deviation with the correct values for that distribution).
+
+#### Solution
+
+```{python}
+#| layout-ncol: 3
+# Parameters
+number_of_trials = 100
+trial_success_prob = 0.2
+population_mean = 20
+population_std = 4
+
+# Sample sizes
+sample_sizes = [10, 30, 100]
+max_size = max(sample_sizes)
+num_samples = 10000
+
+means = pd.DataFrame(index=range(num_samples), columns=['mean_10', 'mean_30', 'mean_100'])
+# Sample 100 observations from a normal distribution, compute the mean based on the first 10 / 30 / 100 observations and store them
+for i in range(num_samples):
+  sample = np.random.binomial(number_of_trials, trial_success_prob, max_size)
+  means.loc[i] = [sample[:size].mean() for size in sample_sizes] 
+```
+
+The distribution of $\bar{x}$ becomes narrower...
+
+```{python}
+#| layout-ncol: 3
+# Plot histograms of unscaled sample means
+for i, size in enumerate(sample_sizes):
+    plt.figure()
+    sns.histplot(means.iloc[:, i], bins = 30, stat="density", color = "skyblue")
+    plt.xlim(5, 35)  # Par exemple, de 0 à 50
+    
+    ## Add theoretical density
+    x = np.linspace(5, 35, 100)
+    y = norm.pdf(x, population_mean, population_std / np.sqrt(size))
+    plt.plot(x, y, color="red", linewidth=2)
+    
+    plt.title(f'Sample Size = {size}')
+```
+
+...but not the one of $\sqrt{n}(\bar{x} - \mu)/\sigma$
+
+```{python}
+#| layout-ncol: 3
+# Plot histograms of rescaled sample means
+for i, size in enumerate(sample_sizes):
+    plt.figure()
+    sns.histplot( np.sqrt(size) * (means.iloc[:, i] - population_mean) / population_std, bins = 30, stat = "density", color = "skyblue")
+    plt.xlim(-5, 5)
+    ## Add theoretical gaussian density
+    x = np.linspace(-5, 5, 100)
+    y = norm.pdf(x, 0, 1)
+    plt.plot(x, y, color="red", linewidth=2)
+    
+    ## Add title
+    plt.title(f'Sample Size = {size} (rescaled estimate)')
+```
+
+::: callout-note
+Means of non-gaussian random variables are a bit involved as their distribution depends on $n$ for small values but converge, up to a $\sqrt{n}$ rescaling , to the same limiting distribution for large $n$ as the one of normal distributions.
+:::
+::::
+:::::::
+
+## Confidence Intervals from Normal and Non-Normal Distributions
+
+**Objective**: Explore how confidence intervals work with normal and non-normal distributions.
+
+:::::: panel-tabset
+### Normal
+
+:::: panel-tabset
+#### Exercise
+
+-   Draw a sample of size $n = 10$ from a normal distributi\\on with the same mean and standard devation as the above binomial and compute the 95% confidence interval for the mean using the formula
+
+$$IC_{0.95} = \left[ \hat{\mu} \pm \frac{\hat{\sigma}}{\sqrt{n}} q_{0.975}\right]$$
+
+where $q_{0.975}$ is the quantile of order 97.5% of the student's distribution (more on that in future lectures) that you can compute with `q0975 = stats.t.ppf(0.975, df = n-1)` and $\hat{\mu}$ and $\hat{\sigma}$ are the sample mean and sample standard deviation.
+
+::: callout-note
+If the variance was known, the confidence interval would be simpler as we would use the known value for $\sigma$.\
+$$IC_{0.95} = \left[ \hat{\mu} \pm \frac{\sigma}{\sqrt{n}} q_{0.975}\right]$$
+
+In that case, the distribution of the pivot statistic is also simpler as it's simply a standard normal distribution $\mathcal{N}(0, 1)$ , the quantiles of which you can access with `stats.norm.ppf(0.975)` . You can also compare both quantiles to see how estimating the variance impacts the width of the confidence interval.
+:::
+
+-   How frequently does the population mean fall in the confidence interval ?
+
+#### Solution
+
+```{python}
+# Parameters
+population_mean = 20
+population_std = 4
+
+# Sample size
+n = 10
+## length of confidence interval
+q0975 = stats.t.ppf(0.975, df = n-1)
+
+# Normal Distribution
+normal_sample = np.random.normal(loc=population_mean, scale=population_std, size=n)
+sample_mean = normal_sample.mean()
+sample_std = normal_sample.std()
+ci_normal = [sample_mean - q0975 * sample_std / np.sqrt(n), sample_mean + q0975 * sample_std / np.sqrt(n)]
+
+# 
+print(f"95% CI for Normal Sample Mean: {ci_normal}")
+```
+
+```{python}
+## Repeat 10 000 times and compute how often the CI covers the true parameter
+num_samples = 10000
+
+# Initialize a counter for how many times the population mean falls within the CI
+count_within_ci = 0
+
+# Loop to generate samples and compute confidence intervals
+for _ in range(num_samples):
+    sample = np.random.normal(loc=population_mean, scale=population_std, size=n)
+    sample_mean = sample.mean()
+    sample_std = sample.std()  # Sample standard deviation
+    ci_lower = sample_mean - q0975 * sample_std / np.sqrt(n)
+    ci_upper = sample_mean + q0975 * sample_std / np.sqrt(n)
+
+    # Check if the population mean falls within the confidence interval
+    if ci_lower <= population_mean <= ci_upper:
+        count_within_ci += 1
+
+# Output the results
+print(f'Population mean: {population_mean:.2f}')
+print(f'Number of confidence intervals containing the population mean: {count_within_ci}')
+print(f'Proportion of confidence intervals containing the population mean: {count_within_ci / num_samples:.2%}')
+```
+
+::::
+
+### Bernoulli
+
+::: panel-tabset
+#### Exercise
+
+-   Draw a sample from a Bernoulli distribution (same parameter as above) and compute the 95% confidence interval for the mean as you did for the gaussian. Remember that in that case, the
+
+-   How frequently does the population mean fall in the confidence interval ?
+
+#### Solution
+
+```{python}
+# Parameters
+number_of_trials = 100
+trial_success_prob = 0.2
+population_mean = 20
+population_std = 4
+
+# Sample size
+n = 10
+## length of confidence interval
+q0975 = stats.t.ppf(0.975, df = n-1)
+
+# Normal Distribution
+binom_sample = np.random.binomial(number_of_trials, trial_success_prob, size=n)
+sample_mean = binom_sample.mean()
+sample_std = binom_sample.std()
+ci_binom = [sample_mean - q0975 * sample_std / np.sqrt(n), sample_mean + q0975 * sample_std / np.sqrt(n)]
+
+# 
+print(f"95% CI for Binomial Sample Mean: {ci_binom}")
+```
+
+:::
+
+```{python}
+## Repeat 10 000 times and compute how often the CI covers the true parameter
+num_samples = 10000
+
+# Initialize a counter for how many times the population mean falls within the CI
+count_within_ci = 0
+
+# Loop to generate samples and compute confidence intervals
+for _ in range(num_samples):
+    sample = np.random.binomial(number_of_trials, trial_success_prob, size=n)
+    sample_mean = sample.mean()
+    sample_std = sample.std()  # Sample standard deviation
+    ci_lower = sample_mean - q0975 * sample_std / np.sqrt(n)
+    ci_upper = sample_mean + q0975 * sample_std / np.sqrt(n)
+
+    # Check if the population mean falls within the confidence interval
+    if ci_lower <= population_mean <= ci_upper:
+        count_within_ci += 1
+
+# Output the results
+print(f'Population mean: {population_mean:.2f}')
+print(f'Number of confidence intervals containing the population mean: {count_within_ci}')
+print(f'Proportion of confidence intervals containing the population mean: {count_within_ci / num_samples:.2%}')
+```
+
+::::::
+
+Compare the intervals, their frequency of inclusion (over 10 000 replicates) and discuss the implications when the data is not normally distributed.
+
+## Application to polling data
+
+### Data description
+
+In the following, we'll be working on (part of) the [poll data](data/president_polls.csv) collected by 538, which provides information on polls conducted for the 2024 U.S. presidential election. It includes poll details like:
+
+-   **Poll id**: unique poll ID
+
+-   **Candidate Names**: For each poll, both candidates polled (e.g., Harris, Trump).
+
+-   **Candidate Support**: Percentage of respondents supporting each candidate.
+
+-   **Pollster and Methodology**: Information on the poll’s source and methodology (e.g., online, phone).
+
+among (many others).
+
+```{python}
+# Load the 2020 U.S. presidential polls dataset from FiveThirtyEight's GitHub repository
+url = "data/president_polls.csv"
+data = pd.read_csv(url, low_memory=False)
+
+# Display the first few rows to understand the structure
+data.head()
+```
+
+We're only going to keep the polls results of one of the two final candidates, say Kamala Harris here (but you can do the same thing with Donald Trump).
+
+```{python}
+# Filter to include only polls for the 2024 election race
+df = data[(data['candidate_name'] == 'Kamala Harris') & (data['sample_size'] > 0)][['candidate_name', 'end_date', 'pct', 'sample_size']]
+```
+
+For each poll in the dataset, reconstruct the confidence interval associated with the support in favor of Kamala Harris and see how it changes with time.
+
+::: callout-caution
+This is a very simplistic analysis and is in no way intended to give you insight on the results of the elections: (i) the polls come from different organizations, some of them more reliable than other, a factor that we did not consider here and (ii) most modern polls use stratified sampling whereas we assume that simple random sampling (or equivalent) when computing our confidence intervals.
+:::
+
+```{python}
+## Compare margin of error around the mean for the confidence interval
+df["margin"] = 1.96 * np.sqrt( df['pct'] * (100 - df['pct']) / df['sample_size'])
+## Convert dates to datetime
+df['date'] = pd.to_datetime(df['end_date'], format='mixed')
+```
+
+```{python}
+import matplotlib.dates as mdates
+## Plot results across time, including confidence intervals
+sns.scatterplot(x='date', y='pct', size = 0.5, alpha = 0.4, data=df)
+plt.errorbar(x='date', y='pct', yerr = "margin", data=df, fmt='none', alpha = 0.4)
+sns.lineplot(x='date', y='pct', data=df, color='blue', errorbar = None)
+plt.legend().remove()
+plt.axhline(y=50, color='green', linestyle='--')
+## Force matplotlibe to show only one tick every two months
+plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+plt.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=2))  # 1 tick per month
+# Personnalisation de l'axe des x
+plt.xticks(rotation=90)
+plt.title('Support for Kamala Harris along time (with 95% CI)')
+plt.xlabel('Poll end date')
+plt.ylabel('Support (%)')
+```
+

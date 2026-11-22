@@ -1,0 +1,563 @@
+---
+title: "Confidence Intervals"
+subtitle: "Illustrating the Principle with Simulations"
+from: markdown+emoji
+author:
+  - name: Mahendra Mariadassou
+    orcid: 0000-0003-2986-354X
+    email: mahendra.mariadassou@inrae.fr
+    affiliations:
+      - name: INRAE - MaIAGE
+        adress: Domaine de Vilvert
+        city: Jouy-en-Josas
+        state: France
+date: "2026-11-04"
+date-modified: today
+lightbox: true
+format: 
+  html:
+    toc: true
+    code-fold: show
+    theme: cosmo
+jupyter: python3
+---
+
+## Preamble
+
+A point estimate such as $\bar{X}$ gives a *single* value for an unknown parameter $\theta$. But because the data are random, a single value almost never equals the truth: for continuous data, $P(\hat{\theta} = \theta) = 0$. A **confidence interval** replaces that single value by a *range* $[L, U]$ computed from the data, together with a **confidence level** $1-\alpha$ such that
+
+$$
+P(L \le \theta \le U) = 1 - \alpha .
+$$
+
+The aim of this notebook is to make this apparently simple formula *concrete* through simulation. The lecture (§ Confidence Interval) introduces the machinery — pivotal statistic, probability interval, confidence interval — and this tutorial lets you *see* what it all means:
+
+- the interval $[L, U]$ is **random** because it depends on the data, while $\theta$ is a **fixed** (unknown) constant;
+- the level $1-\alpha$ is a **frequency guarantee** over repetitions of the whole experiment, *not* a statement about a single interval;
+- the width of an interval is controlled by the sample size $n$ and the confidence level $1-\alpha$.
+
+::: {.callout-tip appearance="simple" title="Computing normal and Student quantiles" collapse="true"}
+
+The different confidence intervals require quantiles of the standard normal $\mathcal{N}(0,1)$ (e.g. $u_{0.975} = 1.960$) and of the Student distribution with $k$ degrees of freedom (e.g. $t_{9,0.975} = 2.262$). The upper $\alpha$-quantile $q_\alpha$ (the value such that $P(X \le q_\alpha) = \alpha$) is obtained as follows, and you can also evaluate the CDF at any point.
+
+**In Python** (`from scipy.stats import norm, t`)
+
+- Normal quantile: `norm.ppf(0.975)` and CDF: `norm.cdf(1.96)`
+- Student quantile with $k$ df: `t.ppf(0.975, df=k)` and CDF: `t.cdf(1.96, df=k)`
+
+You can check that `norm.ppf(0.975)` = $1.960$ and that `t.ppf(0.975, df=9)` = $2.262$.
+:::
+
+### Learning objectives
+
+By the end of this tutorial, you should be able to:
+
+- Explain why $L$ and $U$ are random variables while $\theta$ is fixed, and why a single interval either contains $\theta$ or does not.
+- Build a confidence interval for a Gaussian mean by following the recipe *estimate → pivot → probability interval → confidence interval*:
+  $$\frac{\bar{X} - \mu}{\sigma/\sqrt{n}} \sim \mathcal{N}(0,1) \quad\Longrightarrow\quad \text{IC}_{1-\alpha}(\mu) = \bar{X} \pm u_{1-\alpha/2}\frac{\sigma}{\sqrt{n}}.$$
+- Verify the **coverage** of an interval by Monte-Carlo simulation: repeat the sampling-and-estimation procedure many times and check that about $100(1-\alpha)\%$ of the intervals contain the true $\theta$.
+- Read a "pickle plot" (many intervals from repeated samples) and understand why only a few miss the truth.
+- Predict how the interval changes with the sample size $n$ and with the confidence level $1-\alpha$.
+- Replace the known $\sigma$ by its estimate $S$ (Student $t$ pivot) and compare with the normal pivot.
+
+## Setting Up the Environment
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** import the libraries needed for the numerical work and set a reproducible plotting style.
+
+-   **Instructions:**
+
+    -   Use `numpy` for the simulations and the normal quantiles, `pandas` to assemble tabular results, and `matplotlib` + `seaborn` for the figures.
+    -   Set a plotting style and a "global" figure size.
+    -   Set a random seed so every run of this notebook gives the same numbers.
+
+#### Solution
+
+```{python}
+#| label: importLibraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy.stats import norm, t
+import warnings
+warnings.filterwarnings('ignore')
+
+# Cosmetic
+sns.set_style("whitegrid")
+plt.rcParams['figure.figsize'] = (10, 6)
+
+# Reproducibility
+np.random.seed(2026)
+```
+
+:::
+
+Throughout the notebook we work with a single concrete, simulated problem. We assume that the weight (in grams) of an individual fruit of a given variety is Gaussian with *known* variance $\sigma$,
+
+$$
+X_1, \dots, X_n \sim \mathcal{N}(\mu, \sigma^2),
+\qquad \mu = 100,\ \sigma = 8 .
+$$
+
+We assume a known variance first to make things easier but this a bit *unrealistic*. In a real problem $\mu$ and $\sigma$ are both *unknown*; we only know them here because we simulate the data, and this is exactly what lets us *check* whether an interval really covers $\theta$. The true values are the reference against which we measure coverage. 
+
+## Section 1 — The Sampling Distribution of the Pivot
+
+The recipe for a confidence interval starts from an estimator. Here the natural estimator of $\mu$ is the sample mean $\bar{X}$, whose sampling distribution under the model is
+
+$$
+\bar{X} \sim \mathcal{N}\left(\mu, \frac{\sigma^2}{n}\right),
+\qquad\text{so}\qquad
+Z = \frac{\bar{X} - \mu}{\sigma/\sqrt{n}} \sim \mathcal{N}(0,1).
+$$
+
+The quantity $Z$ is a **pivotal statistic**: it depends on the data *and* on the unknown $\mu$, yet its distribution (the standard normal) does not.
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** revisit the sampling distribution of $\bar{X}$, then verify numerically that $Z = (\bar{X}-\mu)/(\sigma/\sqrt{n})$ is indeed approximately standard normal.
+
+-   **Instructions:**
+
+    -   Simulate $B = 10\,000$ independent samples of size $n = 30$ from $\mathcal{N}(\mu=100, \sigma=8)$, and compute the sample mean of each.
+    -   Plot a histogram of the $B$ sample means. Overlay the theoretical density $\mathcal{N}(\mu, \sigma^2/n)$. They should agree.
+    -   Standardize each mean into $z = (\bar{x}-\mu)/(\sigma/\sqrt{n})$ and plot a histogram. Overlay the standard normal density.
+    -   Report the empirical mean and standard deviation of the $z$'s (they should be near $0$ and $1$).
+
+#### Solution
+
+```{python}
+#| label: samplingDistributionPivot
+mu_true = 100.0
+sigma_true = 8.0
+n = 30
+B = 10000
+
+# Draw B samples of size n and compute each sample mean
+all_means = np.array([
+    np.random.normal(mu_true, sigma_true, n).mean()
+    for _ in range(B)
+])
+
+# Pivot: standardize each mean
+z_values = (all_means - mu_true) / (sigma_true / np.sqrt(n))
+
+# --- Left panel: sampling distribution of the mean ---
+plt.figure()
+x = np.linspace(mu_true - 3 * sigma_true/np.sqrt(n),
+                mu_true + 3 * sigma_true/np.sqrt(n), 200)
+sns.histplot(all_means, bins=40, stat="density", alpha=0.6, color="skyblue")
+plt.plot(x, norm.pdf(x, mu_true, sigma_true/np.sqrt(n)), 'r-', linewidth=2,
+         label=f"N(mu, sigma^2/n)")
+plt.axvline(mu_true, color="black", linestyle="--", label=f"true mu = {mu_true}")
+plt.xlabel("sample mean  x-bar"); plt.ylabel("density")
+plt.title("Sampling distribution of the sample mean (n=30)")
+plt.legend()
+
+# --- Right panel: the standardized pivot ---
+plt.figure()
+zgrid = np.linspace(-4, 4, 200)
+sns.histplot(z_values, bins=40, stat="density", alpha=0.6, color="lightgreen")
+plt.plot(zgrid, norm.pdf(zgrid), 'r-', linewidth=2, label="N(0,1)")
+plt.xlabel("z = (x-bar - mu)/(sigma/sqrt(n))"); plt.ylabel("density")
+plt.title("Sampling distribution of the pivot Z")
+plt.legend()
+plt.show()
+
+print(f"Empirical mean of z: {z_values.mean():.3f}  (theoretical 0)")
+print(f"Empirical sd of z:   {z_values.std():.3f}  (theoretical 1)")
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+The pivotal property is what makes the whole construction work: because $Z$ has a **known, parameter-free** distribution, we can pick its quantiles without knowing $\mu$. If instead we had standardized by an *unknown* $\sigma$ the bound would depend on $\sigma$ again — this is precisely why the known-$\sigma$ case below is the simpler starting point.
+:::
+
+## Section 2 — From Pivot to Confidence Interval
+
+For a standard normal pivot, the shortest probability interval of level $1-\alpha$ is symmetric, delimited by the quantile $u_{1-\alpha/2}$:
+
+$$
+P\left( -u_{1-\alpha/2} \le \frac{\bar{X}-\mu}{\sigma/\sqrt{n}} \le u_{1-\alpha/2} \right) = 1 - \alpha .
+$$
+
+$u_{1-\alpha/2}$ is the number such that $P(Z \le u_{1-\alpha/2}) = 1-\alpha/2$ for $Z\sim\mathcal{N}(0,1)$ (e.g. $u_{0.975}=1.960$). Isolating $\mu$ in both inequalities turns the *probability* interval into a **confidence interval**:
+
+$$
+\text{IC}_{1-\alpha}(\mu) = \left[ \bar{X} - u_{1-\alpha/2}\frac{\sigma}{\sqrt{n}};\ \bar{X} + u_{1-\alpha/2}\frac{\sigma}{\sqrt{n}} \right]
+= \bar{X} \pm u_{1-\alpha/2}\frac{\sigma}{\sqrt{n}} .
+$$
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** compute, for a *single* sample of size $n=30$, a 95% confidence interval for $\mu$ using the normal pivot.
+
+-   **Instructions:**
+
+    -   Draw one sample of $n = 30$ fruits and compute $\bar{x}$.
+    -   Using `norm.ppf(0.975)`, compute the margin $u_{0.975}\,\sigma/\sqrt{n}$ and the two bounds.
+    -   Does the interval contain the true $\mu = 100$? Note that whether it does is a **yes/no** fact about this one realization.
+
+#### Solution
+
+```{python}
+#| label: singleInterval
+alpha = 0.05
+u_half = norm.ppf(1 - alpha/2)          # upper alpha/2 quantile of N(0,1)
+print(f"u_{{1-alpha/2}} = u_{{0.975}} = {u_half:.3f}")
+
+# One single sample
+sample = np.random.normal(mu_true, sigma_true, n)
+x_bar = sample.mean()
+
+margin = u_half * sigma_true / np.sqrt(n)
+lower, upper = x_bar - margin, x_bar + margin
+
+print(f"Sample mean x-bar = {x_bar:.2f}")
+print(f"95% CI for mu    = [{lower:.2f}, {upper:.2f}]")
+print(f"Contains mu=100? -> {lower <= mu_true <= upper}")
+```
+
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question"}
+Re-run the cell above several times (or change the seed). The *procedure* (the formula) is always the same, but the interval moves around because $\bar{X}$ changes. Sometimes the interval contains $100$, sometimes not. This is exactly the point: the interval is random, the parameter is not. Confidence is a statement about the *procedure*, not about this particular interval.
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question"}
+Move from the symmetric interval to an assymetric one. Replace $u_{\alpha/2}$ and $u_{1-\alpha/2}$ with $u_{\beta}$ and $u_{1-(\alpha - \beta)}$ for any value $\beta \leq \alpha$. How does the length of the confidence interval change ? Why do we choose symmetric confidence interval here ? 
+:::
+
+## Section 3 — Coverage: the Heart of the Principle
+
+The guarantee $P(L\le\theta\le U)=1-\alpha$ is a **frequency** statement over repeated experiments. We can now check it directly: repeat the whole procedure a large number of times, and count how often the resulting interval contains the true $\mu$. That fraction is the empirical **coverage**.
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** simulate $R = 2000$ repetitions; for each, draw a sample of size $n=30$, build the 95% interval, and record whether it contains $\mu=100$.
+
+-   **Instructions:**
+
+    -   Write a loop (or a vectorized computation) that, for each repetition $r$ (reproducibly seeded), computes `lower[r]` and `upper[r]`.
+    -   Compute the proportion of intervals containing $\mu=100$.
+    -   Compare this empirical coverage with the nominal $0.95$. Repeat the whole thing to convince yourself the number fluctuates around $0.95$ but would converge to it as $R\to\infty$.
+
+#### Solution
+
+```{python}
+#| label: coverageSimulation
+R = 2000
+rng = np.random.default_rng(7)          # separate, reproducible stream
+# Pre-allocate
+sample_means = np.empty(R)
+lower = np.empty(R)
+upper = np.empty(R)
+
+for r in range(R):
+    x = rng.normal(mu_true, sigma_true, n)
+    sample_means[r] = x.mean()
+    margin = u_half * sigma_true / np.sqrt(n)
+    lower[r] = sample_means[r] - margin
+    upper[r] = sample_means[r] + margin
+
+covers = (lower <= mu_true) & (mu_true <= upper)
+empirical_coverage = covers.mean()
+
+print(f"Number of repetitions : {R}")
+print(f"Empirical coverage    : {empirical_coverage:.3f}")
+print(f"Nominal coverage      : {1 - alpha:.3f}")
+print(f"Intervals missing mu  : {R - int(covers.sum())} / {R}")
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+The empirical coverage should be close to $0.95$ — the more repetitions $R$, the closer to $0.95$. This is the concrete meaning of "95% confident": if the whole sampling-and-estimation procedure were repeated many times, about 95% of the resulting intervals would contain the true mean. Any *single* interval you actually report either does or does not contain $\mu$; the 95% applies to the procedure, not to that one interval.
+:::
+
+## Section 4 — A Cautionary Tale: Many Intervals, One Picture
+
+A single interval is hard to reason about. The classic way to *see* the frequency interpretation is the "pickle plot": draw many samples, draw each resulting 95% interval as a vertical segment, and mark in red the (few) ones that miss the true $\mu$.
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** draw $K = 100$ intervals, each from a sample of size $n = 30$, and plot them all against the true $\mu$ (displayed as a vertical line).
+
+-   **Instructions:**
+
+    -   For each of $K = 100$ samples, record its interval bounds.
+    -   Plot each interval as a vertical segment (use `plt.vlines` or a loop of `ax.plot`), and color in red the intervals that do **not** contain $\mu=100$.
+    -   Count how many red (missing) intervals you see. Around 5% is expected.
+
+#### Solution
+
+```{python}
+#| label: picklePlot
+K = 100
+rng = np.random.default_rng(11)
+int_lower = np.empty(K)
+int_upper = np.empty(K)
+miss = np.zeros(K, dtype=bool)
+
+for k in range(K):
+    x = rng.normal(mu_true, sigma_true, n)
+    xb = x.mean()
+    m = u_half * sigma_true / np.sqrt(n)
+    int_lower[k], int_upper[k] = xb - m, xb + m
+    miss[k] = not (int_lower[k] <= mu_true <= int_upper[k])
+
+order = np.arange(K)
+plt.figure(figsize=(10, 6))
+for k in range(K):
+    color = "red" if miss[k] else "black"
+    plt.vlines(k, int_lower[k], int_upper[k], color=color, linewidth=1.5)
+plt.axhline(mu_true, color="steelblue", linewidth=2, label=f"true mu = {mu_true}")
+plt.xlabel("Repetition"); plt.ylabel("interval bounds")
+plt.title(f"{K} confidence intervals at level 95% (n = {n}); red = miss mu")
+plt.ylim(mu_true - 6, mu_true + 6)
+plt.legend()
+plt.show()
+
+print(f"Intervals not covering mu: {int(miss.sum())} / {K}")
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+Look at the red intervals. They are not "wrong" somehow — each was produced by the same correct procedure; they are simply the unlucky ~5% where the data happened to be far enough from $\mu$ that the interval missed it. This is the visual answer to the question *"so is my interval one of the good ones or one of the bad ones?"*: **you cannot tell**, because confidence refers to the long-run procedure, and the parameter either is or is not inside any particular interval.
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question"}
+- Increase the sample size $n$ to $100$ and re-run. The intervals get shorter, but do you expect *more* or *fewer* red ones? The coverage should stay around 95% — a shorter interval can still cover 95% of the time because it is also more tightly centred. Verify this.
+- Reduce the level to 90% (i.e. use `u_{0.95}`) and re-run. Now roughly 10% should be red. The red fraction tracks the level $1-\alpha$, not $n$.
+:::
+
+## Section 5 — What Controls the Width of an Interval?
+
+The formula $\bar{X} \pm u_{1-\alpha/2}\sigma/\sqrt{n}$ shows exactly what drives the width $2u_{1-\alpha/2}\sigma/\sqrt{n}$:
+
+- the **confidence level** $1-\alpha$ enters through the quantile $u_{1-\alpha/2}$ — higher confidence, larger quantile, wider interval;
+- the **sample size** $n$ enters as $\sigma/\sqrt{n}$ — larger samples, smaller standard error, narrower interval.
+
+We explore both effects, first analytically (the width curve) and then by simulation.
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** plot how the half-width $u_{1-\alpha/2}\sigma/\sqrt{n}$ changes (i) with the confidence level (for fixed $n$) and (ii) with the sample size $n$ (for fixed $1-\alpha$).
+
+-   **Instructions:**
+
+    -   For a grid of levels $\alpha$ from $0.01$ to $0.30$, compute $u_{1-\alpha/2}\sigma/\sqrt{n}$ with $n=30$.
+    -   For a grid of $n$ from $10$ to $200$, compute the same half-width with $\alpha=0.05$.
+    -   Plot the two curves. Which direction does each go?
+
+#### Solution
+
+```{python}
+#| label: widthCurves
+alphas = np.linspace(0.01, 0.30, 200)
+half_width_alpha = norm.ppf(1 - alphas/2) * sigma_true / np.sqrt(n)
+
+ns = np.arange(10, 201)
+half_width_n = norm.ppf(1 - alpha/2) * sigma_true / np.sqrt(ns)
+
+# Left panel: half-width vs confidence level
+plt.figure()
+plt.plot(100*(1 - alphas), half_width_alpha, linewidth=2, color="darkgreen")
+plt.xlabel("confidence level  1 - alpha (%)"); plt.ylabel("half-width")
+plt.title(f"Half-width vs confidence level (n = {n})")
+
+# Right panel: half-width vs sample size
+plt.figure()
+plt.plot(ns, half_width_n, linewidth=2, color="darkblue")
+plt.xlabel("sample size n"); plt.ylabel("half-width")
+plt.title("Half-width vs sample size (level 95%)")
+plt.show()
+
+print(f"Half-width at 90% : {norm.ppf(0.95)*sigma_true/np.sqrt(n):.2f}")
+print(f"Half-width at 95% : {norm.ppf(0.975)*sigma_true/np.sqrt(n):.2f}")
+print(f"Half-width at 99% : {norm.ppf(0.995)*sigma_true/np.sqrt(n):.2f}")
+print(f"Half-width at n=10: {norm.ppf(0.975)*sigma_true/np.sqrt(10):.2f}")
+print(f"Half-width at n=50: {norm.ppf(0.975)*sigma_true/np.sqrt(50):.2f}")
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+Two separate forces pull the interval in opposite directions:
+
+- **Being more confident costs width.** Going from 90% to 99% widens the interval. If we want to be *surer* that we have captured $\mu$, we must accept a less precise (wider) range.
+- **More data buys precision.** Doubling $n$ divides the standard error by $\sqrt{2}$, so the half-width shrinks by a factor $\sqrt{2}$ — and $\sqrt{n}$ grows slowly, which is why squeezing an interval by collecting data has diminishing returns.
+
+There is no free lunch: the only way to keep a given level *and* narrow the interval is to increase $n$.
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question"}
+- To **halve** the half-width of a 95% interval, by what factor must $n$ grow? (Look at the $\sqrt{n}$.)
+- Would you rather report a 99% interval based on $n=30$ or a 90% interval based on $n=30$? There is no objectively right answer — it is a trade-off between certainty and precision that depends on the context.
+:::
+
+## Section 6 — Unknown Variance: the Student $t$ Pivot
+
+All the intervals so far assumed $\sigma$ **known**. In practice it almost never is, and we must replace it by its estimate $S$ (the sample standard deviation). The resulting quantity
+
+$$
+T = \frac{\bar{X} - \mu}{S/\sqrt{n}}
+$$
+
+no longer has a $\mathcal{N}(0,1)$ distribution: it follows a **Student distribution** with $n-1$ degrees of freedom, $\mathcal{T}(n-1)$, which has heavier tails than the normal. The pivotal machinery works identically once we use the Student quantile $t_{n-1,1-\alpha/2}$ instead of $u_{1-\alpha/2}$:
+
+$$
+\text{IC}_{1-\alpha}(\mu) = \bar{X} \pm t_{n-1,1-\alpha/2}\frac{S}{\sqrt{n}} .
+$$
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** compute a 95% interval for $\mu$ with the unknown-variance (Student) pivot, and compare it with the known-variance (normal) interval.
+
+-   **Instructions:**
+
+    -   On the *same* sample, compute $\bar{x}$ and the sample standard deviation $s$ (use `sample.std(ddof=1)`).
+    -   Find the Student quantile `t.ppf(0.975, df=n-1)` and build the Student-based interval.
+    -   Compare its width with the normal-based interval computed earlier. Which is wider, and why?
+
+#### Solution
+
+```{python}
+#| label: studentPivot
+sample = np.random.normal(mu_true, sigma_true, n)
+x_bar = sample.mean()
+s = sample.std(ddof=1)                # unbiased estimate of sigma
+
+t_half = t.ppf(1 - alpha/2, df=n-1)   # t_{n-1, 1-alpha/2}
+print(f"u_{{0.975}}        = {u_half:.3f}")
+print(f"t_{{n-1,0.975}}    = {t_half:.3f}   (n-1 = {n-1})")
+print(f"s (estimate of sigma) = {s:.3f}   (true sigma = {sigma_true})")
+
+margin_t = t_half * s / np.sqrt(n)
+margin_z = u_half * sigma_true / np.sqrt(n)
+print(f"\nStudent interval: [{x_bar - margin_t:.2f}, {x_bar + margin_t:.2f}]   width {2*margin_t:.2f}")
+print(f"Normal interval : [{x_bar - margin_z:.2f}, {x_bar + margin_z:.2f}]   width {2*margin_z:.2f}")
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+Two things make the Student interval wider than the normal one on the same data:
+
+- **a larger quantile**, $t_{n-1,0.975} > u_{0.975}$, because the Student distribution has heavier tails (estimating $\sigma$ from $n$ observations adds uncertainty);
+- here **$s$ also happens to differ** from $\sigma$, but that is sampling noise and could go either way.
+
+The gap is largest for small $n$ and shrinks as $n$ grows, since $t_{n-1,1-\alpha/2}\to u_{1-\alpha/2}$ and $S\to\sigma$. For large $n$ the two intervals are essentially indistinguishable.
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question"}
+- Repeat Section 3's coverage simulation using the **Student** pivot (both $S$ and $t_{n-1,0.975}$). Verify that the empirical coverage is again about 95%.
+- What would happen to the coverage if, *incorrectly*, we kept the Student pivot $T\sim\mathcal{T}(n-1)$ but calibrated it with the *normal* quantile $u_{0.975}=1.96$ instead of $t_{n-1,0.975}$? Because $1.96 < t_{n-1,0.975}$, the interval $[-1.96, 1.96]$ for $T$ shuts out *more* than 5% of the mass — so the interval **undercovers**. Compute $P(|T| \le 1.96) = F_{\mathcal{T}(n-1)}(1.96) - F_{\mathcal{T}(n-1)}(-1.96)$ with `t.cdf` and confirm it is below the nominal 0.95. This is exactly the "coverage of a mis-calibrated interval" question from the exercises.
+:::
+
+## Section 7 — Bootstrap Confidence Intervals
+
+All prior sections relied on an *assumed* parametric model (Gaussian) giving an exact or CLT-based pivot. The bootstrap drops that assumption: resample the *observed* data with replacement, recompute the statistic on each resample, and use the spread of the resulting distribution to build the interval — no normality assumption, no score formula. This is the natural computational answer to "what if we don't know the distribution?"
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** illustrate how to build a bootstrap confidence interval for a parameter estimated from a skewed sample.
+
+-   **Instructions:**
+
+    -   Simulate one sample of size $n$ from a skewed distribution (e.g. exponential or lognormal).
+    -   Bootstrap: $B$ resamples with replacement from the observed sample, recompute the statistic (e.g. mean or median) on each.
+    -   Plot the bootstrap distribution of the statistic with the percentiles marked, and report the 95% interval as the 2.5% and 97.5% empirical percentiles.
+
+#### Solution
+
+```{python}
+#| label: bootstrapInterval
+# Simulate a skewed sample (e.g. exponential distribution)
+np.random.seed(2026)  # for reproducibility
+n = 30
+B = 10000  # number of bootstrap resamples
+
+# Generate a skewed sample (exponential distribution)
+skewed_sample = np.random.exponential(scale=2, size=n)
+
+# Compute the statistic (mean) on the original sample
+original_statistic = skewed_sample.mean()
+
+# Bootstrap resampling
+bootstrap_statistics = []
+for i in range(B):
+    # Resample with replacement
+    resample = np.random.choice(skewed_sample, size=n, replace=True)
+    # Compute the statistic on the resample
+    bootstrap_statistics.append(resample.mean())
+
+# Convert to numpy array for easier computation
+bootstrap_statistics = np.array(bootstrap_statistics)
+
+# Calculate 95% confidence interval (percentile method)
+ci_lower = np.percentile(bootstrap_statistics, 2.5)
+ci_upper = np.percentile(bootstrap_statistics, 97.5)
+
+print(f"Original sample mean: {original_statistic:.3f}")
+print(f"Bootstrap 95% CI: [{ci_lower:.3f}, {ci_upper:.3f}]")
+
+# Visualize the bootstrap distribution
+plt.figure(figsize=(10, 6))
+sns.histplot(bootstrap_statistics, bins=50, stat="density", alpha=0.7, color="skyblue")
+plt.axvline(original_statistic, color="red", linestyle="--", linewidth=2, label=f"Original mean: {original_statistic:.3f}")
+plt.axvline(ci_lower, color="orange", linestyle="-", linewidth=2, label=f"Lower CI: {ci_lower:.3f}")
+plt.axvline(ci_upper, color="orange", linestyle="-", linewidth=2, label=f"Upper CI: {ci_upper:.3f}")
+plt.xlabel("Bootstrap sample means")
+plt.ylabel("Density")
+plt.title("Bootstrap Distribution of Sample Means (Skewed Data)")
+plt.legend()
+plt.show()
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+The bootstrap interval is just the percentile range of the resampled distribution — no score formula, no quantile table; it works even when the model assumption is dubious. Also note the coverage guarantee is only asymptotic/approximate.
+
+The bootstrap method is particularly useful when:
+
+- The data are not normally distributed
+- The sample size is small
+- We don't want to make strong parametric assumptions
+- We want to estimate complex statistics (like medians, quantiles, etc.)
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question"}
+- Re-run the bootstrap with a normally distributed sample and compare the bootstrap interval to the exact Student interval from Section 6 (they should roughly agree).
+- Consider the "bias" of using percentiles vs. the normal approximation under the lognormal distribution.
+- Try computing the bootstrap interval for the median instead of the mean of the skewed sample.
+:::
+
+## Summary and Key Takeaways
+
+This tutorial illustrated the *principle* of confidence intervals through simulation. The key points:
+
+1. **The interval is random, the parameter is fixed.** $L$ and $U$ are functions of the data, so they vary from sample to sample; $\theta$ is a fixed constant. For any single realization, $\theta$ is either in the interval or not.
+
+2. **The recipe.** Every confidence interval in this notebook followed the same four steps of the lecture: find an estimator → build a pivotal statistic with a known, parameter-free distribution → derive a probability interval at level $1-\alpha$ → isolate $\theta$ to obtain the confidence interval.
+
+3. **Coverage is a frequency guarantee.** The statement $P(L\le\theta\le U)=1-\alpha$ is about the *procedure* over repeated experiments. Simulation confirms it: about $100(1-\alpha)\%$ of intervals built from many samples contain the truth, and the pickle plot makes the ~5% misses concrete.
+
+4. **Width is a trade-off, driven by two levers.** More confidence ($1-\alpha$ ↑) widens the interval; more data ($n$ ↑) narrows it, only as $\sqrt{n}$. You cannot have high confidence, high precision, and a small sample all at once.
+
+5. **Unknown variance needs the Student pivot.** Replacing $\sigma$ by $S$ changes the pivot's distribution to $\mathcal{T}(n-1)$, whose heavier tails produce a wider (honest) interval that converges to the normal one as $n$ grows. Getting the critical value wrong (e.g. a normal quantile on a Student pivot) undercovers.
+
+The reusable skill is the four-step recipe: it is the same whether the parameter is a Gaussian mean with known or unknown variance, a variance via the $\chi^2$ pivot, or a proportion via the CLT + plug-in strategy. If you haven't already, work through the **follow-up questions** — the coverage re-runs and the mis-calibrated-interval check are the ones that most directly test whether the frequency interpretation has landed.

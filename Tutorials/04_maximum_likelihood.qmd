@@ -1,0 +1,696 @@
+---
+title: "Maximum Likelihood Estimation"
+subtitle: "A Progressive Tutorial on MLE for Simple Problems"
+from: markdown+emoji
+author:
+  - name: Mahendra Mariadassou
+    orcid: 0000-0003-2986-354X
+    email: mahendra.mariadassou@inrae.fr
+    affiliations:
+      - name: INRAE - MaIAGE
+        adress: Domaine de Vilvert
+        city: Jouy-en-Josas
+        state: France
+date: "2026-10-19"
+date-modified: today
+lightbox: true
+format: 
+  html:
+    toc: true
+    code-fold: show
+    theme: cosmo
+jupyter: python3
+---
+
+## Preamble
+
+In this notebook, we explore **Maximum Likelihood Estimation (MLE)**, a fundamental technique for estimating the parameters of a statistical model. We work through several simple but illustrative examples — one discrete (a Bernoulli / allele-frequency problem) and two continuous (a Normal and an Exponential problem) — to understand how MLE works in practice, both analytically and numerically.
+
+### Learning objectives
+
+By the end of this tutorial, you should be able to:
+
+- Explain the principle of the **likelihood** and of **maximum likelihood estimation**.
+- Write down the likelihood (and log-likelihood) of a sample for a parametric model, and justify the use of the log transformation.
+- Derive the MLE analytically for the Bernoulli, Normal and Exponential distributions by setting the (partial) derivative of the log-likelihood to zero.
+- Verify an analytical MLE with numerical optimization.
+- Interpret a likelihood curve / surface and read off where the (log-)likelihood is maximized.
+- Compare the MLE against the true parameter values and reason about bias (e.g. the biased Normal variance estimator $S_n^2$ vs. the unbiased $S^2_{n-1}$).
+- Illustrate numerically the asymptotic (normal) behaviour of MLEs as the sample size grows.
+
+## Setting Up the Environment
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** Import the libraries needed for the numerical work and set up a reproducible plotting style.
+
+-   **Instructions:**
+
+    -   Use `numpy` for numerical operations, `pandas` for tabular results, `matplotlib` and `seaborn` for visualizations, and `scipy` for optimization and probability densities.
+    -   Set a plotting style and a "global" figure size.
+
+#### Solution
+
+```{python}
+#| label: importLibraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy import optimize
+from scipy.stats import norm, expon
+import warnings
+warnings.filterwarnings('ignore')
+
+# Set style for better-looking plots
+sns.set_style("whitegrid")
+plt.rcParams['figure.figsize'] = (10, 6)
+```
+
+:::
+
+## A General Strategy
+
+Before diving into examples, let's lay out the general recipe that we will reuse throughout. It mirrors the one introduced in the lecture.
+
+::: {.callout-note appearance="simple"}
+**The maximum likelihood recipe.** Assume $X_1, \dots, X_n \sim \mathcal{L}(\theta)$ are i.i.d.
+
+1.  **Write the likelihood** of the observed data as a function of the unknown parameter $\theta$:
+    $$
+    Lik_{\theta}(x_1, \ldots, x_n) = \begin{cases}
+    \prod_{i=1}^{n} P_{\theta}(x_i) & \text{discrete case} \\
+    \prod_{i=1}^{n} f_{\theta}(x_i) & \text{continuous case}
+    \end{cases}
+    $$
+
+2.  **Maximize it**:
+    $$
+    \widehat{\theta} = \arg\max_{\theta}\, Lik_{\theta}(x_1, \ldots, x_n)
+    $$
+    In practice, because $\log$ is strictly increasing, we maximize the *log-likelihood* instead, and set its (partial) derivative to zero.
+:::
+
+Every example below is just this recipe applied to a specific distribution. The computations get easier as we go, so take the time to identify which step of the recipe each code cell is implementing.
+
+## Example 1 — Estimating an Allelic Frequency (Discrete Case)
+
+### Context and model
+
+::: panel-tabset
+#### Exercise
+
+Consider a biallelic genetic marker with two alleles: $A$ (reference) and $a$ (mutant). A geneticist sampled 7 individuals and obtained the following genotypes:
+
+-   Individual 1: Aa
+-   Individual 2: AA
+-   Individual 3: AA
+-   Individual 4: AA
+-   Individual 5: AA
+-   Individual 6: Aa
+-   Individual 7: AA
+
+-   **Objective:** infer the frequency $f_a$ of the mutant allele.
+
+-   **Instructions:**
+
+    -   Under the assumption that the two alleles carried by an individual are independent (Hardy–Weinberg equilibrium), each *allele* is an independent observation: $X_i = 1$ if allele $a$ is observed, $0$ otherwise, with $X_i \sim \mathrm{Bernoulli}(f_a)$ i.i.d.
+    -   Code the observed allele sequence (1 for 'a', 0 for 'A') and count how many 'a' and 'A' alleles you have. You should find $n_a$ 'a' alleles out of $2\times 7 = 14$ total alleles.
+
+#### Solution
+
+```{python}
+#| label: simulateGeneticData
+# The 7 genotypes sampled by the geneticist
+genotypes = [
+    ('A', 'a'),  # Individual 1
+    ('A', 'A'),  # Individual 2
+    ('A', 'A'),  # Individual 3
+    ('A', 'A'),  # Individual 4
+    ('A', 'A'),  # Individual 5
+    ('A', 'a'),  # Individual 6
+    ('A', 'A')   # Individual 7
+]
+
+# Extract the full allele sequence (each individual contributes 2 alleles)
+allele_sequence = []
+for genotype in genotypes:
+    allele_sequence.extend(genotype)
+
+# Convert to binary (1 for 'a', 0 for 'A')
+allele_binary = [1 if allele == 'a' else 0 for allele in allele_sequence]
+print("Allele sequence (1='a', 0='A'):")
+print(allele_binary)
+
+# Count of 'a' and 'A' alleles
+n_a = sum(allele_binary)
+n_A = len(allele_binary) - n_a
+print(f"\nNumber of 'a' alleles: {n_a}")
+print(f"Number of 'A' alleles: {n_A}")
+print(f"Total alleles: {len(allele_binary)}")
+```
+
+:::
+
+::: {.callout-note appearance="simple"}
+We have $n_a = 2$ 'a' alleles out of 14 — so the *observed* frequency is $2/14 \approx 0.143$. This is our data; the true (unknown) population frequency is a different, fixed number that we are trying to estimate. Keep the distinction between the two in mind throughout.
+:::
+
+### Likelihood and its maximization
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** write the likelihood of the observed allele sample, then find the frequency $\widehat{f}_a$ that maximizes it.
+
+-   **Instructions:**
+
+    -   The likelihood is $Lik_{f_a} = f_a^{n_a}(1-f_a)^{n_A}$ and the log-likelihood is $\ell(f_a) = n_a\log(f_a) + n_A\log(1-f_a)$.
+    -   Plot both the likelihood and the log-likelihood over $f_a \in (0,1)$ and locate where they peak. You should find the same location (monotonicity of $\log$).
+    -   Derive the maximizer analytically by setting $\frac{d\ell}{df_a} = \frac{n_a}{f_a} - \frac{n_A}{1-f_a} = 0$, giving $\widehat{f}_a = \frac{n_a}{n_a+n_A} = \frac{n_a}{n}$.
+
+#### Solution
+
+```{python}
+#| label: visualizeLikelihood
+# Define the likelihood function
+def likelihood_f_a(f_a, n_a, n_A):
+    """Calculate likelihood for Bernoulli distribution"""
+    if f_a <= 0 or f_a >= 1:
+        return 0
+    return (f_a ** n_a) * ((1 - f_a) ** n_A)
+
+# Define the log-likelihood function
+def log_likelihood_f_a(f_a, n_a, n_A):
+    """Calculate log-likelihood for Bernoulli distribution"""
+    if f_a <= 0 or f_a >= 1:
+        return -np.inf
+    return n_a * np.log(f_a) + n_A * np.log(1 - f_a)
+
+# Create a range of f_a values
+f_a_values = np.linspace(0.01, 0.99, 1000)
+
+# Calculate likelihood and log-likelihood
+likelihood_values = [likelihood_f_a(f_a, n_a, n_A) for f_a in f_a_values]
+log_likelihood_values = [log_likelihood_f_a(f_a, n_a, n_A) for f_a in f_a_values]
+
+# Find the MLE analytically
+mle_f_a = n_a / len(allele_binary)
+print(f"Maximum Likelihood Estimate: {mle_f_a:.4f}")
+
+# Plot likelihood and log-likelihood
+plt.figure(figsize=(12, 5))
+
+plt.subplot(1, 2, 1)
+plt.plot(f_a_values, likelihood_values, 'b-', linewidth=2)
+plt.axvline(mle_f_a, color='red', linestyle='--', linewidth=2,
+           label=f'MLE = {mle_f_a:.4f}')
+plt.xlabel('f_a (frequency of allele a)')
+plt.ylabel('Likelihood')
+plt.title('Likelihood Function')
+plt.legend()
+plt.grid(True, alpha=0.3)
+
+plt.subplot(1, 2, 2)
+plt.plot(f_a_values, log_likelihood_values, 'g-', linewidth=2)
+plt.axvline(mle_f_a, color='red', linestyle='--', linewidth=2,
+           label=f'MLE = {mle_f_a:.4f}')
+plt.xlabel('f_a (frequency of allele a)')
+plt.ylabel('Log-Likelihood')
+plt.title('Log-Likelihood Function')
+plt.legend()
+plt.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+Read the two panels. Where does the likelihood peak? Confirm the peak is at the observed frequency $n_a/n$, and that the likelihood and log-likelihood peak at the *same* $f_a$ even though their vertical scales differ enormously. Why is maximizing the log-likelihood equivalent to maximizing the likelihood?
+:::
+
+### Verifying the analytical MLE numerically
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** confirm the analytical result $\widehat{f}_a = n_a/n$ using numerical optimization, so we know the closed form is correct.
+
+-   **Instructions:**
+
+    -   Minimize the *negative* log-likelihood over $f_a \in (0, 1)$ with `scipy.optimize.minimize_scalar`.
+    -   Compare the numerical optimum with the analytical MLE.
+
+#### Solution
+
+```{python}
+#| label: verifyMLE
+# Define negative log-likelihood (since we want to minimize)
+def neg_log_likelihood(f_a, n_a, n_A):
+    return -log_likelihood_f_a(f_a, n_a, n_A)
+
+# Find MLE using numerical optimization
+result = optimize.minimize_scalar(neg_log_likelihood, bounds=(0.01, 0.99),
+                                  method='bounded', args=(n_a, n_A))
+numerical_mle = result.x
+print(f"Numerical MLE: {numerical_mle:.4f}")
+print(f"Analytical MLE: {mle_f_a:.4f}")
+print(f"Difference: {abs(numerical_mle - mle_f_a):.6f}")
+```
+
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question"}
+Our estimate $\widehat{f}_a = 2/14 \approx 0.143$ is computed from a single, small sample.
+
+- If the geneticist had sampled a *different* set of 7 individuals (re-run with the genotypes changed), how do you expect $\widehat{f}_a$ to differ? What does this say about the variability of the estimate?
+- Since $\widehat{F}_a = \frac{1}{n}\sum_i X_i$ is a (rescaled) sample mean of Bernoulli variables, use what you know about the mean and variance of a Bernoulli variable to argue whether this estimator is *unbiased* and how its variance scales with $n$.
+:::
+
+## Example 2 — Estimating Mean and Variance of a Normal Distribution (Continuous Case)
+
+### Context and model
+
+::: panel-tabset
+#### Exercise
+
+Grain yield was evaluated for 261 maize "dent" lines (as in the lecture). We model each yield as $X_i \sim \mathcal{N}(\mu, \sigma^2)$ i.i.d.
+
+-   **Objective:** infer both the population mean $\mu$ and the population variance $\sigma^2$ from the sample.
+
+-   **Instructions:**
+
+    -   Simulate a dataset of $n = 261$ yields using the true values used in the lecture: $\mu = 16$, $\sigma = 2$.
+    -   Verify that the sample mean and sample standard deviation are close to the truth (they won't be exactly equal — why not?).
+
+#### Solution
+
+```{python}
+#| label: generateMaizeData
+# Generate maize yield data as in the lecture
+np.random.seed(2108)
+n_samples = 261
+mu_true = 16
+sigma_true = 2
+yield_data = np.random.normal(mu_true, sigma_true, n_samples)
+
+print(f"Generated {n_samples} yield measurements")
+print(f"True mean: {mu_true}")
+print(f"True standard deviation: {sigma_true}")
+print(f"Sample mean: {np.mean(yield_data):.4f}")
+print(f"Sample standard deviation: {np.std(yield_data):.4f}")
+```
+
+:::
+
+::: {.callout-note appearance="simple"}
+This is a *two-parameter* problem: we must maximize the log-likelihood with respect to both $\mu$ and $\sigma^2$ simultaneously, so we'll use **partial derivatives** and the likelihood becomes a *surface* over the $(\mu, \sigma^2)$ plane rather than a curve.
+:::
+
+### Likelihood and its maximization
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** write the Gaussian likelihood, maximize it w.r.t. $(\mu, \sigma^2)$, and visualize the log-likelihood surface.
+
+-   **Instructions:**
+
+    -   The likelihood is $L(\mu,\sigma^2) = \prod_i \frac{1}{\sigma\sqrt{2\pi}}\exp\left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right)$; the log-likelihood is $\ell(\mu,\sigma^2) = -\frac{n}{2}\log(2\pi) - \frac{n}{2}\log(\sigma^2) - \frac{1}{2\sigma^2}\sum_i (x_i - \mu)^2$.
+    -   Setting the partial derivatives w.r.t. $\mu$ and $\sigma^2$ to zero gives $\widehat{\mu} = \bar{x}$ and $\widehat{\sigma}^2 = \frac{1}{n}\sum_i (x_i - \bar{x})^2$.
+    -   On a small subset (say the first 30 observations), plot the log-likelihood as a 3-D surface and as a contour over a grid of $(\mu, \sigma^2)$, and overlay the sample mean / sample variance as the (red) MLE point.
+
+#### Solution
+
+```{python}
+#| label: visualizeNormalMLE
+# Use a smaller sample for visualization
+sample_size = 30
+subset_data = yield_data[:sample_size]
+
+# Define the log-likelihood function for normal distribution
+def log_likelihood_normal(mu, sigma_sq, data):
+    """Calculate log-likelihood for normal distribution"""
+    if sigma_sq <= 0:
+        return -np.inf
+    n = len(data)
+    log_likelihood = (-0.5 * n * np.log(2 * np.pi * sigma_sq)
+                      - 0.5 * np.sum((data - mu)**2) / sigma_sq)
+    return log_likelihood
+
+# Create a grid of parameter values
+mu_range = np.linspace(14, 18, 50)
+sigma_sq_range = np.linspace(1, 5, 50)
+mu_grid, sigma_sq_grid = np.meshgrid(mu_range, sigma_sq_range)
+
+# Calculate log-likelihood for each combination
+log_likelihood_grid = np.zeros_like(mu_grid)
+for i in range(len(mu_range)):
+    for j in range(len(sigma_sq_range)):
+        log_likelihood_grid[j, i] = log_likelihood_normal(
+            mu_grid[j, i], sigma_sq_grid[j, i], subset_data)
+
+# Find MLE analytically
+sample_mean = np.mean(subset_data)
+sample_var = np.mean((subset_data - sample_mean)**2)
+
+print(f"Sample mean: {sample_mean:.4f}")
+print(f"Sample variance: {sample_var:.4f}")
+print(f"True mean: {mu_true}")
+print(f"True variance: {sigma_true**2}")
+
+# Plot the log-likelihood surface
+fig = plt.figure(figsize=(12, 5))
+
+# 3D surface plot
+ax1 = fig.add_subplot(121, projection='3d')
+surf = ax1.plot_surface(mu_grid, sigma_sq_grid, log_likelihood_grid,
+                        cmap='viridis', alpha=0.7)
+ax1.set_xlabel('μ')
+ax1.set_ylabel('σ²')
+ax1.set_zlabel('Log-Likelihood')
+ax1.set_title('Log-Likelihood Surface')
+
+# Contour plot
+ax2 = fig.add_subplot(122)
+contour = ax2.contour(mu_grid, sigma_sq_grid, log_likelihood_grid, levels=20)
+ax2.clabel(contour, inline=True, fontsize=8)
+ax2.scatter(sample_mean, sample_var, color='red', s=100, label='MLE')
+ax2.scatter(mu_true, sigma_true**2, color='blue', s=100, label='True Parameters')
+ax2.set_xlabel('μ')
+ax2.set_ylabel('σ²')
+ax2.set_title('Contour Plot of Log-Likelihood')
+ax2.legend()
+ax2.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+Look at the contour plot. Where is the log-likelihood maximized? Does the red MLE point (sample mean, sample variance) sit at that maximum, and how far is it from the blue "true parameters" marker? Remember the MLE is computed from a sample of size 30 while the truth describes the whole (simulated) population — a gap between them is expected.
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question"}
+The maximum-likelihood variance estimator $\widehat{\sigma}^2 = \frac{1}{n}\sum_i (x_i - \bar{x})^2$ is *biased* (its expectation is $\frac{n-1}{n}\sigma^2$), whereas $S^2_{n-1} = \frac{1}{n-1}\sum_i (x_i - \bar{x})^2$ is unbiased.
+
+- Compute both $\widehat{\sigma}^2$ and $S^2_{n-1}$ from the full $n=261$ dataset and compare them to $\sigma^2 = 4$. Which is closer?
+- Re-run with a smaller subset (say $n=30$). Does the gap between the two grow? This is the practical consequence of the bias — the MLE underestimates the variance, and more so in small samples.
+:::
+
+## Example 3 — Estimating the Rate of an Exponential Distribution
+
+### Context and model
+
+::: panel-tabset
+#### Exercise
+
+A hotline operator recorded the time spent answering the last 12 customer queries. We model each waiting time as $X_i \sim \mathcal{E}(\lambda)$, with density $f(x) = \lambda e^{-\lambda x}$ for $x \geq 0$.
+
+-   **Objective:** infer the rate parameter $\lambda$ from the sample.
+
+-   **Instructions:**
+
+    -   Simulate $n = 12$ waiting times with rate $\lambda = 10$ (i.e. `scale = 1/lambda`), as in the lecture.
+    -   Write down the likelihood $L(\lambda) = \lambda^n e^{-\lambda \sum_i x_i}$ and its log-likelihood, then verify the analytical MLE $\widehat{\lambda} = \frac{n}{\sum_i x_i} = 1/\bar{x}$ with your data.
+
+#### Solution
+
+```{python}
+#| label: generateExponentialData
+# Generate exponential data as in the lecture
+np.random.seed(20220903)
+lambda_true = 10  # rate parameter (1/mean)
+n_clients = 12
+waiting_times = np.random.exponential(scale=1/lambda_true, size=n_clients)
+
+print("Waiting times (in minutes):")
+print(waiting_times)
+print(f"True rate parameter λ: {lambda_true}")
+print(f"Sample mean: {np.mean(waiting_times):.4f}")
+```
+
+```{python}
+#| label: exponentialMLE
+# Calculate MLE for exponential distribution
+n = len(waiting_times)
+sample_mean = np.mean(waiting_times)
+mle_lambda = n / np.sum(waiting_times)  # or 1/sample_mean
+
+print(f"Number of observations: {n}")
+print(f"Sample mean: {sample_mean:.4f}")
+print(f"True rate parameter: {lambda_true}")
+print(f"MLE of λ: {mle_lambda:.4f}")
+print(f"Analytical MLE (1/mean): {1/sample_mean:.4f}")
+
+# Visualize the log-likelihood
+def log_likelihood_exp(lambda_val, data):
+    """Calculate log-likelihood for exponential distribution"""
+    if lambda_val <= 0:
+        return -np.inf
+    n = len(data)
+    sum_x = np.sum(data)
+    return n * np.log(lambda_val) - lambda_val * sum_x
+
+# Create range of lambda values
+lambda_values = np.linspace(0.1, 20, 1000)
+log_likelihood_values = [log_likelihood_exp(lambda_val, waiting_times)
+                         for lambda_val in lambda_values]
+
+plt.figure(figsize=(10, 6))
+plt.plot(lambda_values, log_likelihood_values, 'b-', linewidth=2)
+plt.axvline(mle_lambda, color='red', linestyle='--', linewidth=2,
+           label=f'MLE = {mle_lambda:.4f}')
+plt.axvline(lambda_true, color='green', linestyle=':', linewidth=2,
+           label=f'True λ = {lambda_true}')
+plt.xlabel('λ (rate parameter)')
+plt.ylabel('Log-Likelihood')
+plt.title('Log-Likelihood for Exponential Distribution')
+plt.legend()
+plt.grid(True, alpha=0.3)
+plt.show()
+```
+
+:::
+
+### Answering the hotline questions
+
+::: panel-tabset
+#### Exercise
+
+Using your estimate $\widehat{\lambda}$, answer the questions raised about the hotline operator:
+
+1.  Provide an estimate of the **average time** spent with a customer. (Recall that for an exponential distribution, $E[X] = 1/\lambda$.)
+2.  Compute $P(X > t + \delta \mid X > t)$ for $t, \delta > 0$. What does this say about the exponential distribution (memoryless property)?
+3.  If the operator has already spent 4 minutes with a customer, provide an estimate of the probability that he will spend **at least 3 more minutes** with them.
+
+#### Solution
+
+```{python}
+#| label: hotlineQuestions
+# 1. Estimated average time spent per customer = 1 / lambda_hat
+print(f"Estimated average time per customer: {1/mle_lambda:.4f} minutes")
+
+# 2. Memoryless property: P(X > t+delta | X > t) = P(X > delta) = exp(-lambda * delta)
+# with the estimated lambda
+delta = 3.0
+p_at_least_3_more = np.exp(-mle_lambda * delta)
+print(f"P(X > {delta:.1f} | X > t) = exp(-lambda_hat * {delta:.1f}) = {p_at_least_3_more:.4f}")
+
+# Alternatively using scipy's survival function
+from scipy.stats import expon as exp_dist
+p_more = exp_dist.sf(delta, scale=1/mle_lambda)
+print(f"Using scipy survival function: {p_more:.4f}")
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+Interpret your result for question 3. The probability of spending at least 3 more minutes given that 4 minutes have already elapsed is the *same* as the probability of spending at least 3 minutes from the start. This is the **memoryless property** of the exponential distribution — the effort already spent carries no information about the remaining time.
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question"}
+The MLE $\widehat{\lambda} = 1/\bar{X}$ is a *nonlinear* function of the sample mean, and it is only slightly biased for small $n$.
+
+- Repeat the exponential simulation with a much larger sample (say $n = 200$): how does $\widehat{\lambda}$ compare to the true $\lambda = 10$? Does the bias shrink?
+- Because $\widehat{\lambda}$ depends on the sample through $\bar{X}$, you can use the bootstrap (resample with replacement) to get a confidence interval for $\lambda$. Sketch how you would set that up.
+:::
+
+## Properties of Maximum Likelihood Estimators
+
+Now that we have seen MLE in action on three models, let's highlight two properties that make it so useful, and one caveat (bias).
+
+### The log-transformation property
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** verify numerically that applying the (monotonic) log transform does not move the location of the maximum.
+
+-   **Instructions:**
+
+    -   Take any positive function that peaks somewhere (we'll reuse the Bernoulli likelihood from Example 1), and plot both the function and its logarithm.
+    -   Locate the maximum of each: they should occur at the *same* $x$.
+
+#### Solution
+
+```{python}
+#| label: logTransformationProperty
+# Demonstrate the log transformation property on the Bernoulli likelihood
+f_a_values = np.linspace(0.01, 0.99, 1000)
+likelihood_values = [likelihood_f_a(f_a, n_a, n_A) for f_a in f_a_values]
+log_likelihood_values = [log_likelihood_f_a(f_a, n_a, n_A) for f_a in f_a_values]
+
+# Find maximum locations
+max_likelihood_idx = np.argmax(likelihood_values)
+max_log_likelihood_idx = np.argmax(log_likelihood_values)
+
+print("Demonstration of log transformation property:")
+print(f"Maximum likelihood occurs at f_a = {f_a_values[max_likelihood_idx]:.4f}")
+print(f"Maximum log-likelihood occurs at f_a = {f_a_values[max_log_likelihood_idx]:.4f}")
+print(f"Same location? {np.isclose(f_a_values[max_likelihood_idx], f_a_values[max_log_likelihood_idx])}")
+
+# Plot both functions
+plt.figure(figsize=(12, 5))
+
+plt.subplot(1, 2, 1)
+plt.plot(f_a_values, likelihood_values, 'b-', linewidth=2, label='Likelihood')
+plt.axvline(f_a_values[max_likelihood_idx], color='red', linestyle='--', linewidth=2)
+plt.xlabel('f_a')
+plt.ylabel('Likelihood')
+plt.title('Likelihood Function')
+plt.grid(True, alpha=0.3)
+
+plt.subplot(1, 2, 2)
+plt.plot(f_a_values, log_likelihood_values, 'g-', linewidth=2, label='Log-Likelihood')
+plt.axvline(f_a_values[max_log_likelihood_idx], color='red', linestyle='--', linewidth=2)
+plt.xlabel('f_a')
+plt.ylabel('Log-Likelihood')
+plt.title('Log-Likelihood Function')
+plt.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+```
+
+:::
+
+### The asymptotic (normal) behaviour of MLEs
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** illustrate that, as the sample size grows, the sampling distribution of an MLE becomes approximately Normal and concentrates around the true parameter.
+
+-   **Instructions:**
+
+    -   Use the bootstrap (resample with replacement) to approximate the sampling distribution of the sample mean (the MLE of $\mu$ in the maize example).
+    -   Check that the standard deviation of the bootstrap estimates is close to the theoretical standard error $\sigma/\sqrt{n}$.
+
+#### Solution
+
+```{python}
+#| label: asymptoticProperties
+# Demonstrate asymptotic properties with bootstrapping
+def bootstrap_mle(data, n_bootstrap=1000, sample_size=None):
+    """Bootstrap to estimate sampling distribution of MLE"""
+    if sample_size is None:
+        sample_size = len(data)
+
+    mle_estimates = []
+    for _ in range(n_bootstrap):
+        bootstrap_sample = np.random.choice(data, size=sample_size, replace=True)
+        # For normal mean, the MLE is the sample mean
+        mle_estimates.append(np.mean(bootstrap_sample))
+
+    return mle_estimates
+
+# Bootstrap for the normal-distribution mean
+bootstrap_size = 50
+bootstrap_means = bootstrap_mle(yield_data, n_bootstrap=1000, sample_size=bootstrap_size)
+
+plt.figure(figsize=(10, 6))
+sns.histplot(bootstrap_means, kde=True, bins=30, alpha=0.7, color='lightblue')
+plt.axvline(np.mean(yield_data), color='red', linestyle='--', linewidth=2,
+           label=f'Sample mean: {np.mean(yield_data):.4f}')
+plt.axvline(mu_true, color='green', linestyle=':', linewidth=2,
+           label=f'True mean: {mu_true}')
+plt.xlabel('Bootstrap Mean Estimates')
+plt.ylabel('Density')
+plt.title('Bootstrap Distribution of Sample Means')
+plt.legend()
+plt.grid(True, alpha=0.3)
+plt.show()
+
+print(f"Bootstrap mean of MLEs: {np.mean(bootstrap_means):.4f}")
+print(f"Standard deviation of bootstrap MLEs: {np.std(bootstrap_means):.4f}")
+print(f"Theoretical standard error (sigma/sqrt(n)): {sigma_true/np.sqrt(bootstrap_size):.4f}")
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+Compare the bootstrap standard deviation of the MLE with the theoretical standard error $\sigma/\sqrt{n}$ with $n=50$. They should be close. This is a numerical illustration of the *asymptotic normality* of MLEs: for large $n$, $\widehat{\theta} \approx \mathcal{N}(\theta, \mathrm{SE}^2)$.
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question (synthesis)"}
+You have met the three fundamental examples — Bernoulli, Normal, Exponential — and two core properties of MLEs.
+
+- The Normal variance MLE $\widehat{\sigma}^2$ is biased, but consistency and unbiasedness are different notions. Use the bootstrap or a large-`n` simulation to check whether `np.var(x)` (the biased MLE) and `x.var(ddof=1)` (the unbiased one) both converge to $\sigma^2$ as $n$ grows. Which converges "more" for a given moderate $n$, and does that change your opinion of the MLE?
+- For the exponential example, the MLE $\widehat{\lambda} = 1/\bar{X}$ is a nonlinear function of the mean. The (CLT-style) delta-method standard error would be $\lambda/\sqrt{n}$; compare it to the bootstrap standard deviation of $\widehat{\lambda}$ from a bootstrap resampling of the waiting times.
+:::
+
+## Comparison of Estimators
+
+Let's bring all the estimates together in a single table and compare them to the true parameter values.
+
+```{python}
+#| label: compareEstimators
+# Create a summary table of our results
+# (Use full-dataset MLEs for the Normal example: larger n gives more stable estimates.)
+full_data_mean = np.mean(yield_data)
+full_data_var = np.mean((yield_data - full_data_mean)**2)
+true_f_a = 0.15  # true (simulated) population frequency used in the lecture
+
+results = pd.DataFrame({
+    'Parameter': ['f_a (allele frequency)', 'μ (mean)', 'σ² (variance)', 'λ (rate)'],
+    'True Value': [true_f_a, mu_true, sigma_true**2, lambda_true],
+    'MLE': [mle_f_a, full_data_mean, full_data_var, mle_lambda],
+    'Bias': [mle_f_a - true_f_a, full_data_mean - mu_true,
+             full_data_var - sigma_true**2, mle_lambda - lambda_true]
+})
+
+print("Comparison of Maximum Likelihood Estimates:")
+print(results.round(4))
+```
+
+::: {.callout-important appearance="simple"}
+Review the table. Every estimate is reasonably close to its true value but not exactly equal — sampling error. The $\widehat{\sigma}^2$ MLE here happens to be close to $\sigma^2 = 4$; with a *different* simulated sample the sign and size of its bias column entry can fluctuate, but on average the MLE variance estimator is biased downward (see the follow-up question). Compare the entries for the different parameters to see how the scale of the bias relates to the sample size used for each example.
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question"}
+The four examples used very different sample sizes (14 alleles, 261 yields, 12 calls). Re-run the comparison with each example restricted to a similar, small sample size (or increase the seed variability) and watch how the bias entries grow — smaller samples give noisier, and on average more biased, MLEs.
+::: 
+
+## Summary and Key Takeaways
+
+This tutorial built up Maximum Likelihood Estimation step by step, applying a single recipe to increasingly rich models:
+
+1. **The recipe**: write the likelihood (product of $P_\theta(x_i)$ or $f_\theta(x_i)$), then maximize it — in practice the log-likelihood — via derivatives. This one idea produced principled estimators for every example.
+
+2. **Bernoulli / allele frequency (discrete)** — a one-parameter problem where the likelihood is a curve; $\widehat{f}_a = n_a/n$ is just an observed proportion.
+
+3. **Normal (continuous, 2 parameters)** — the likelihood becomes a surface over $(\mu, \sigma^2)$; the MLEs are the sample mean and the (biased) sample variance.
+
+4. **Exponential (continuous)** — one parameter again, $\widehat{\lambda} = 1/\bar{X}$, and the memoryless property gave us an easy way to answer the hotline probability question.
+
+5. **Properties**: the log transform is monotonic (same maximum location), MLEs are asymptotically Normal (verified numerically via the bootstrap), and the Normal variance estimator is *biased* — the one place where "maximize the likelihood" gives a result we may want to correct (use $S^2_{n-1}$).
+
+Each example used the same thinking: model the data, write the likelihood, maximize it, verify numerically. That is the reusable skill here — maximum likelihood is not three disconnected formulas but one strategy, applicable far beyond the three distributions we studied.
+
+If you haven't already, work through the **follow-up questions** in this notebook: they are designed to take each idea one step further (changing sample sizes, comparing biased vs. unbiased estimators, and bootstrapping the MLE).

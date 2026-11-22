@@ -1,0 +1,2129 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Mahendra Mariadassou">
+<meta name="dcterms.date" content="2026-07-14">
+
+<title>M1 AIRE 2026 - Housing dataset</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="02_housing_data_files/libs/clipboard/clipboard.min.js"></script>
+<script src="02_housing_data_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="02_housing_data_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="02_housing_data_files/libs/quarto-html/popper.min.js"></script>
+<script src="02_housing_data_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="02_housing_data_files/libs/quarto-html/anchor.min.js"></script>
+<link href="02_housing_data_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="02_housing_data_files/libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="02_housing_data_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="02_housing_data_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="02_housing_data_files/libs/bootstrap/bootstrap-d777dc4a7385a713376289f4dd1eab9f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="02_housing_data_files/libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="02_housing_data_files/libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="02_housing_data_files/libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#preamble" id="toc-preamble" class="nav-link active" data-scroll-target="#preamble">Preamble</a>
+  <ul class="collapse">
+  <li><a href="#learning-objectives" id="toc-learning-objectives" class="nav-link" data-scroll-target="#learning-objectives">Learning objectives</a></li>
+  </ul></li>
+  <li><a href="#data-presentation" id="toc-data-presentation" class="nav-link" data-scroll-target="#data-presentation">Data presentation</a></li>
+  <li><a href="#importing-libraries-and-datasets" id="toc-importing-libraries-and-datasets" class="nav-link" data-scroll-target="#importing-libraries-and-datasets">Importing Libraries and Datasets</a></li>
+  <li><a href="#data-cleaning" id="toc-data-cleaning" class="nav-link" data-scroll-target="#data-cleaning">Data cleaning</a></li>
+  <li><a href="#exploratory-data-analysis-eda---multivariate-view" id="toc-exploratory-data-analysis-eda---multivariate-view" class="nav-link" data-scroll-target="#exploratory-data-analysis-eda---multivariate-view">Exploratory Data Analysis (EDA) - Multivariate View</a></li>
+  <li><a href="#from-the-population-to-a-sample" id="toc-from-the-population-to-a-sample" class="nav-link" data-scroll-target="#from-the-population-to-a-sample">From the Population to a Sample</a></li>
+  <li><a href="#understanding-sampling" id="toc-understanding-sampling" class="nav-link" data-scroll-target="#understanding-sampling">Understanding Sampling</a></li>
+  <li><a href="#resampling-with-bootstrap" id="toc-resampling-with-bootstrap" class="nav-link" data-scroll-target="#resampling-with-bootstrap">Resampling with Bootstrap</a></li>
+  <li><a href="#illustrating-the-central-limit-theorem" id="toc-illustrating-the-central-limit-theorem" class="nav-link" data-scroll-target="#illustrating-the-central-limit-theorem">Illustrating the Central Limit Theorem</a>
+  <ul class="collapse">
+  <li><a href="#whats-the-clt" id="toc-whats-the-clt" class="nav-link" data-scroll-target="#whats-the-clt">What’s the CLT ?</a></li>
+  </ul></li>
+  <li><a href="#verify-the-clt-on-your-own" id="toc-verify-the-clt-on-your-own" class="nav-link" data-scroll-target="#verify-the-clt-on-your-own">Verify the CLT on Your Own</a></li>
+  <li><a href="#stratified-sampling-vs.-simple-random-sampling" id="toc-stratified-sampling-vs.-simple-random-sampling" class="nav-link" data-scroll-target="#stratified-sampling-vs.-simple-random-sampling">Stratified Sampling vs.&nbsp;Simple Random Sampling</a></li>
+  <li><a href="#bias-variance-tradeoff-in-resampling" id="toc-bias-variance-tradeoff-in-resampling" class="nav-link" data-scroll-target="#bias-variance-tradeoff-in-resampling">Bias-Variance Tradeoff in Resampling</a></li>
+  <li><a href="#hypothesis-testing-using-resampling" id="toc-hypothesis-testing-using-resampling" class="nav-link" data-scroll-target="#hypothesis-testing-using-resampling">Hypothesis Testing using Resampling</a></li>
+  <li><a href="#demonstrating-the-law-of-large-numbers-lln" id="toc-demonstrating-the-law-of-large-numbers-lln" class="nav-link" data-scroll-target="#demonstrating-the-law-of-large-numbers-lln">Demonstrating the Law of Large Numbers (LLN)</a></li>
+  <li><a href="#comparing-the-efficiency-of-sampling-methods" id="toc-comparing-the-efficiency-of-sampling-methods" class="nav-link" data-scroll-target="#comparing-the-efficiency-of-sampling-methods">Comparing the Efficiency of Sampling Methods</a></li>
+  <li><a href="#summary-and-key-takeaways" id="toc-summary-and-key-takeaways" class="nav-link" data-scroll-target="#summary-and-key-takeaways">Summary and Key Takeaways</a></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">M1 AIRE 2026 - Housing dataset</h1>
+<p class="subtitle lead">Exploring resampling techniques and multivariate analysis</p>
+</div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author">Mahendra Mariadassou <a href="mailto:mahendra.mariadassou@inrae.fr" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> <a href="https://orcid.org/0000-0003-2986-354X" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            INRAE - MaIAGE
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">July 14, 2026</p>
+    </div>
+  </div>
+  
+    <div>
+    <div class="quarto-title-meta-heading">Modified</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">October 19, 2026</p>
+    </div>
+  </div>
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="preamble" class="level2">
+<h2 class="anchored" data-anchor-id="preamble">Preamble</h2>
+<p>The objective of this notebook is to explore the concepts of sampling, resampling, and the Central Limit Theorem (CLT) through Python-based numerical examples based on a toy dataset. We will also extend our analysis to multivariate relationships and advanced sampling techniques.</p>
+<section id="learning-objectives" class="level3">
+<h3 class="anchored" data-anchor-id="learning-objectives">Learning objectives</h3>
+<p>By the end of this tutorial, you should be able to:</p>
+<ul>
+<li>Describe the structure of a multivariate dataset and check the quality of its variables.</li>
+<li>Explain the difference between the population distribution and a sample distribution.</li>
+<li>Explain and illustrate the Central Limit Theorem numerically, and the Law of Large Numbers.</li>
+<li>Compare simple random, stratified and systematic sampling methods.</li>
+<li>Use bootstrap resampling to estimate sampling distributions and build confidence intervals, and reason about the bias-variance tradeoff.</li>
+<li>Use a permutation test to perform a hypothesis test.</li>
+</ul>
+</section>
+</section>
+<section id="data-presentation" class="level2">
+<h2 class="anchored" data-anchor-id="data-presentation">Data presentation</h2>
+<section id="context" class="level4">
+<h4 class="anchored" data-anchor-id="context">Context</h4>
+<p>This dataset is derived information collected by the U.S. Census Service concerning housing in the area of Boston Mass.</p>
+</section>
+<section id="description" class="level4">
+<h4 class="anchored" data-anchor-id="description">Description:</h4>
+<p>This dataset contains information collected by the U.S Census Service concerning housing in the area of Boston Mass. It was obtained from the <a href="http://lib.stat.cmu.edu/datasets/boston">StatLib archive</a>, and has been used extensively throughout the literature to benchmark algorithms. The dataset is small in size with only 506 cases.</p>
+<p>The data was originally published by <a href="https://www.sciencedirect.com/science/article/abs/pii/0095069678900062">Harrison, D. and Rubinfeld, D.L. ‘Hedonic prices and the demand for clean air’, J. Environ. Economics &amp; Management, vol.5, 81-102, 1978.</a>, which you can read (it’s Open Access) if you’re interested.</p>
+<p>As usual, the dataset is available from the <a href="data/BostonHousing.csv">lecture’s website</a> or via a <a href="">gitlab url</a> and was downloaded from <a href="https://www.kaggle.com/datasets/arunjathari/bostonhousepricedata">Kaggle</a></p>
+</section>
+<section id="column-description" class="level4">
+<h4 class="anchored" data-anchor-id="column-description">Column description</h4>
+<pre><code>Variables in order:
+ CRIM     per capita crime rate by town
+ ZN       proportion of residential land zoned for lots over 25,000 sq.ft.
+ INDUS    proportion of non-retail business acres per town
+ CHAS     Charles River dummy variable (= 1 if tract bounds river; 0 otherwise)
+ NOX      nitric oxides concentration (parts per 10 million)
+ RM       average number of rooms per dwelling
+ AGE      proportion of owner-occupied units built prior to 1940
+ DIS      weighted distances to five Boston employment centres
+ RAD      index of accessibility to radial highways
+ TAX      full-value property-tax rate per $10,000
+ PTRATIO  pupil-teacher ratio by town
+ B        1000(Bk - 0.63)^2 where Bk is the proportion of blacks by town
+ LSTAT    % lower status of the population
+ MEDV     Median value of owner-occupied homes in $1000's</code></pre>
+</section>
+</section>
+<section id="importing-libraries-and-datasets" class="level2">
+<h2 class="anchored" data-anchor-id="importing-libraries-and-datasets">Importing Libraries and Datasets</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true" href="">Exercise</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false" href="">Solution</a></li></ul>
+<div class="tab-content">
+<div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-1-1-tab">
+<ul>
+<li><p><strong>Objective:</strong> Introduce the necessary libraries and load a dataset for numerical experiments.</p></li>
+<li><p><strong>Instructions:</strong></p>
+<ul>
+<li>Use pandas for data manipulation, numpy for numerical operations, and matplotlib and seaborn for visualizations.</li>
+<li>Load the dataset of choice. For this exercise, we’ll use a dataset with a continuous variable, namely the “Boston House Prices” dataset from Kaggle.</li>
+</ul></li>
+</ul>
+</div>
+<div id="tabset-1-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-1-2-tab">
+<div id="importlibraries" class="cell" data-execution_count="1">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Import the Libraries</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> seaborn <span class="im">as</span> sns</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> warnings</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>warnings.filterwarnings(<span class="st">'ignore'</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Set style for better-looking plots</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>sns.set_style(<span class="st">"whitegrid"</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>plt.rcParams[<span class="st">'figure.figsize'</span>] <span class="op">=</span> (<span class="dv">10</span>, <span class="dv">6</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="loaddata" class="cell" data-execution_count="2">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load dataset</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> pd.read_csv(<span class="st">'data/BostonHousing.csv'</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Or from URL</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># url = "https://raw.githubusercontent.com/selva86/datasets/master/BostonHousing.csv"</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co"># data = pd.read_csv(url)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+<p>Let’s look at the first few rows of the dataset:</p>
+<div id="cell-showDataHead" class="cell" data-execution_count="3">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">## Show the first five lines of the dataset</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>data.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="showdatahead" class="cell-output cell-output-display" data-execution_count="43">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">crim</th>
+<th data-quarto-table-cell-role="th">zn</th>
+<th data-quarto-table-cell-role="th">indus</th>
+<th data-quarto-table-cell-role="th">chas</th>
+<th data-quarto-table-cell-role="th">nox</th>
+<th data-quarto-table-cell-role="th">rm</th>
+<th data-quarto-table-cell-role="th">age</th>
+<th data-quarto-table-cell-role="th">dis</th>
+<th data-quarto-table-cell-role="th">rad</th>
+<th data-quarto-table-cell-role="th">tax</th>
+<th data-quarto-table-cell-role="th">ptratio</th>
+<th data-quarto-table-cell-role="th">b</th>
+<th data-quarto-table-cell-role="th">lstat</th>
+<th data-quarto-table-cell-role="th">medv</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">0</th>
+<td>0.00632</td>
+<td>18.0</td>
+<td>2.31</td>
+<td>0</td>
+<td>0.538</td>
+<td>6.575</td>
+<td>65.2</td>
+<td>4.0900</td>
+<td>1</td>
+<td>296</td>
+<td>15.3</td>
+<td>396.90</td>
+<td>4.98</td>
+<td>24.0</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">1</th>
+<td>0.02731</td>
+<td>0.0</td>
+<td>7.07</td>
+<td>0</td>
+<td>0.469</td>
+<td>6.421</td>
+<td>78.9</td>
+<td>4.9671</td>
+<td>2</td>
+<td>242</td>
+<td>17.8</td>
+<td>396.90</td>
+<td>9.14</td>
+<td>21.6</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">2</th>
+<td>0.02729</td>
+<td>0.0</td>
+<td>7.07</td>
+<td>0</td>
+<td>0.469</td>
+<td>7.185</td>
+<td>61.1</td>
+<td>4.9671</td>
+<td>2</td>
+<td>242</td>
+<td>17.8</td>
+<td>392.83</td>
+<td>4.03</td>
+<td>34.7</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">3</th>
+<td>0.03237</td>
+<td>0.0</td>
+<td>2.18</td>
+<td>0</td>
+<td>0.458</td>
+<td>6.998</td>
+<td>45.8</td>
+<td>6.0622</td>
+<td>3</td>
+<td>222</td>
+<td>18.7</td>
+<td>394.63</td>
+<td>2.94</td>
+<td>33.4</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">4</th>
+<td>0.06905</td>
+<td>0.0</td>
+<td>2.18</td>
+<td>0</td>
+<td>0.458</td>
+<td>7.147</td>
+<td>54.2</td>
+<td>6.0622</td>
+<td>3</td>
+<td>222</td>
+<td>18.7</td>
+<td>396.90</td>
+<td>5.33</td>
+<td>36.2</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Let’s have a quick summary of the data:</p>
+<ul>
+<li>the dimensions of the data set (number of zones, number of variables)</li>
+</ul>
+<div id="cell-showDataShape" class="cell" data-execution_count="4">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>data.shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="showdatashape" class="cell-output cell-output-display" data-execution_count="44">
+<pre><code>(506, 14)</code></pre>
+</div>
+</div>
+<ul>
+<li>and a short summary of data type.</li>
+</ul>
+<div id="showdatainfo" class="cell" data-execution_count="5">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>data.info()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>&lt;class 'pandas.DataFrame'&gt;
+RangeIndex: 506 entries, 0 to 505
+Data columns (total 14 columns):
+ #   Column   Non-Null Count  Dtype  
+---  ------   --------------  -----  
+ 0   crim     506 non-null    float64
+ 1   zn       506 non-null    float64
+ 2   indus    506 non-null    float64
+ 3   chas     506 non-null    int64  
+ 4   nox      506 non-null    float64
+ 5   rm       506 non-null    float64
+ 6   age      506 non-null    float64
+ 7   dis      506 non-null    float64
+ 8   rad      506 non-null    int64  
+ 9   tax      506 non-null    int64  
+ 10  ptratio  506 non-null    float64
+ 11  b        506 non-null    float64
+ 12  lstat    506 non-null    float64
+ 13  medv     506 non-null    float64
+dtypes: float64(11), int64(3)
+memory usage: 55.5 KB</code></pre>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>In this notebook, we’re going to focus mostly on the median value of houses in the dataset (<code>medv</code>) but you could replace it with other <strong>continuous</strong> variables.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="data-cleaning" class="level2">
+<h2 class="anchored" data-anchor-id="data-cleaning">Data cleaning</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-2-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-1" role="tab" aria-controls="tabset-2-1" aria-selected="true" href="">Exercise</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-2-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-2-2" role="tab" aria-controls="tabset-2-2" aria-selected="false" href="">Solution</a></li></ul>
+<div class="tab-content">
+<div id="tabset-2-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-2-1-tab">
+<ul>
+<li>Look at the dataset structure and describe the columns, particularly focusing on a continuous variable, like <code>medv</code> (median value of homes).</li>
+<li>Do we need to apply some data cleaning techniques for this variable ?</li>
+</ul>
+</div>
+<div id="tabset-2-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-2-2-tab">
+<p>There are no missing data in the dataset.</p>
+<div id="cell-checkMissingData" class="cell" data-execution_count="6">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Check for missing data</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>data.isnull().<span class="bu">sum</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="checkmissingdata" class="cell-output cell-output-display" data-execution_count="46">
+<pre><code>crim       0
+zn         0
+indus      0
+chas       0
+nox        0
+rm         0
+age        0
+dis        0
+rad        0
+tax        0
+ptratio    0
+b          0
+lstat      0
+medv       0
+dtype: int64</code></pre>
+</div>
+</div>
+<p>The distribution of prices (<a href="#fig-histogram-medv" class="quarto-xref">Figure&nbsp;1</a>) is not unimodal (there’s an excess of high-end homes, corresponding to wealthy zones) but no value stands out as a potential outlier.</p>
+<div id="cell-fig-histogram-medv" class="cell" data-execution_count="7">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Histogram for medv</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">6</span>))</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>sns.histplot(data[<span class="st">'medv'</span>].dropna(), bins<span class="op">=</span><span class="dv">20</span>, kde<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, color<span class="op">=</span><span class="st">'skyblue'</span>)</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Distribution of the Median Value of Owner-Occupied Homes Across Zones"</span>, fontsize<span class="op">=</span><span class="dv">14</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Median Value ($1000s)"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Frequency"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-histogram-medv" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-histogram-medv-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="02_housing_data_files/figure-html/fig-histogram-medv-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: Distribution of the median value of owner-occupied homes across zones."><img src="02_housing_data_files/figure-html/fig-histogram-medv-output-1.png" width="808" height="527" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-histogram-medv-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Distribution of the median value of owner-occupied homes across zones.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>When applying the IQR rule to this column, the filtering thresholds are located on the red lines in <a href="#fig-iqr-thresholds" class="quarto-xref">Figure&nbsp;2</a>.</p>
+<div id="cell-fig-iqr-thresholds" class="cell" data-execution_count="8">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Detect outliers in Fare using the IQR rule </span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>Q1 <span class="op">=</span> data[<span class="st">'medv'</span>].quantile(<span class="fl">0.25</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>Q3 <span class="op">=</span> data[<span class="st">'medv'</span>].quantile(<span class="fl">0.75</span>)</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>IQR <span class="op">=</span> Q3 <span class="op">-</span> Q1</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>lower_bound <span class="op">=</span> Q1 <span class="op">-</span> <span class="fl">1.5</span> <span class="op">*</span> IQR</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>upper_bound <span class="op">=</span> Q3 <span class="op">+</span> <span class="fl">1.5</span> <span class="op">*</span> IQR</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co">## Add several lines to the histogram (lower/upper bounds, Q1/Q3 and median)</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>d <span class="op">=</span> {</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">"x"</span> : [lower_bound, Q1, data[<span class="st">'medv'</span>].median(), Q3, upper_bound], </span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>  <span class="st">"color"</span> : [<span class="st">'#ffeda0'</span>, <span class="st">'#fed976'</span>, <span class="st">'#fd8d3c'</span>, <span class="st">'#e31a1c'</span>, <span class="st">'#800026'</span>],</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>  <span class="st">"style"</span> : [<span class="st">"--"</span>, <span class="st">"-"</span>, <span class="st">"-"</span>, <span class="st">"-"</span>, <span class="st">"--"</span>],</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>  <span class="st">"label"</span> : [<span class="st">"Q1 - 1.5*IQR"</span>, <span class="st">"Q1"</span>, <span class="st">"Median"</span>, <span class="st">"Q3"</span>, <span class="st">"Q3+1.5*IQR"</span>]</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">6</span>))</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>sns.histplot(data[<span class="st">'medv'</span>].dropna(), bins<span class="op">=</span><span class="dv">20</span>, kde<span class="op">=</span><span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, color<span class="op">=</span><span class="st">'skyblue'</span>)</span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Distribution of the Median Value of Owner-Occupied Homes Across Zones"</span>, fontsize<span class="op">=</span><span class="dv">14</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>)</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Median Value ($1000s)"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Frequency"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5</span>):</span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>  plt.axvline(x<span class="op">=</span>d[<span class="st">"x"</span>][i], color<span class="op">=</span>d[<span class="st">"color"</span>][i], linestyle<span class="op">=</span>d[<span class="st">"style"</span>][i], </span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>  linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span>d[<span class="st">"label"</span>][i])</span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Adding a legend for the lines</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-iqr-thresholds" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-iqr-thresholds-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="02_housing_data_files/figure-html/fig-iqr-thresholds-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;2: Distribution of the median value of owner-occupied homes with IQR bounds, quartiles and median overlaid."><img src="02_housing_data_files/figure-html/fig-iqr-thresholds-output-1.png" width="808" height="527" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-iqr-thresholds-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Distribution of the median value of owner-occupied homes with IQR bounds, quartiles and median overlaid.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>If we were to clean the dataset using the IQR rule, we would end up with 466 zones only.</p>
+<div id="cell-countAfterCleaning" class="cell" data-execution_count="9">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Number of zones after cleaning</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>data[(data[<span class="st">'medv'</span>] <span class="op">&gt;=</span> lower_bound) <span class="op">&amp;</span> (data[<span class="st">'medv'</span>] <span class="op">&lt;=</span> upper_bound)].shape[<span class="dv">0</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="countaftercleaning" class="cell-output cell-output-display" data-execution_count="49">
+<pre><code>466</code></pre>
+</div>
+</div>
+<p>Since we expect to have a few wealthy countries around Boston and the “extreme” values are not that far away from the rest of the distribution as in the titanic example, we don’t consider those points as outliers and keep them in the dataset.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>In the rest of this tutorial notebook, we assume that no cleaning was necessary and work on the original dataset.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-tip callout-titled" title="Follow-up question">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Follow-up question
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Apply the IQR rule to another variable (e.g.&nbsp;<code>rm</code> or <code>lstat</code>). Does it flag the same zones as outliers? Do you think a variable-by-variable cleaning approach is sound, or would you need to consider several variables jointly?</p>
+<p>Another angle: if you were to clean the data, would you drop the flagged zones entirely, or would you investigate why they are extreme? How should you report these choices in an analysis?</p>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>You can train by looking at other continuous variables to identify peculiar patterns.</p>
+</div>
+</div>
+</div>
+</section>
+<section id="exploratory-data-analysis-eda---multivariate-view" class="level2">
+<h2 class="anchored" data-anchor-id="exploratory-data-analysis-eda---multivariate-view">Exploratory Data Analysis (EDA) - Multivariate View</h2>
+<p>We have looked at <code>medv</code> in isolation. But housing prices rarely depend on a single factor. Before moving to sampling theory, let’s get a feel for how the variables relate to one another with the full dataset.</p>
+<div id="cell-fig-correlation-matrix" class="cell" data-execution_count="10">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Correlation matrix</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>correlations <span class="op">=</span> data.corr()</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot correlation heatmap</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">10</span>))</span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>mask <span class="op">=</span> np.triu(np.ones_like(correlations, dtype<span class="op">=</span><span class="bu">bool</span>))</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>sns.heatmap(correlations, mask<span class="op">=</span>mask, annot<span class="op">=</span><span class="va">True</span>, cmap<span class="op">=</span><span class="st">'coolwarm'</span>, center<span class="op">=</span><span class="dv">0</span>,</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>            square<span class="op">=</span><span class="va">True</span>, linewidths<span class="op">=</span><span class="fl">0.5</span>, cbar_kws<span class="op">=</span>{<span class="st">"shrink"</span>: <span class="fl">.8</span>})</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Correlation Matrix of Boston Housing Variables"</span>, fontsize<span class="op">=</span><span class="dv">16</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-correlation-matrix" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-correlation-matrix-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="02_housing_data_files/figure-html/fig-correlation-matrix-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;3: Correlation matrix of the Boston housing variables."><img src="02_housing_data_files/figure-html/fig-correlation-matrix-output-1.png" width="1050" height="946" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-correlation-matrix-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Correlation matrix of the Boston housing variables.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Which variables show the strongest (positive or negative) correlation with <code>medv</code> (see <a href="#fig-correlation-matrix" class="quarto-xref">Figure&nbsp;3</a>)? You should find, for instance, a strong positive correlation with <code>rm</code> (rooms) and a strong negative correlation with <code>lstat</code> (lower status). Let’s look at those relationships directly, first as a matrix of scatter plots (<a href="#fig-pairplot" class="quarto-xref">Figure&nbsp;4</a>), then as individual panels (<a href="#fig-scatter-predictors" class="quarto-xref">Figure&nbsp;5</a>).</p>
+<div id="cell-fig-pairplot" class="cell" data-execution_count="11">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Scatter plot matrix for key variables</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>key_vars <span class="op">=</span> [<span class="st">'medv'</span>, <span class="st">'rm'</span>, <span class="st">'lstat'</span>, <span class="st">'ptratio'</span>, <span class="st">'nox'</span>]</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>sns.pairplot(data[key_vars], diag_kind<span class="op">=</span><span class="st">'kde'</span>, plot_kws<span class="op">=</span>{<span class="st">'alpha'</span>: <span class="fl">0.6</span>})</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>plt.suptitle(<span class="st">'Pairwise Relationships Between Key Variables'</span>, y<span class="op">=</span><span class="fl">1.02</span>, fontsize<span class="op">=</span><span class="dv">16</span>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-pairplot" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-pairplot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="02_housing_data_files/figure-html/fig-pairplot-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;4: Pairwise relationships between key variables (diagonal shows kernel density estimates)."><img src="02_housing_data_files/figure-html/fig-pairplot-output-1.png" width="1183" height="1224" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-pairplot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Pairwise relationships between key variables (diagonal shows kernel density estimates).
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div id="cell-fig-scatter-predictors" class="cell" data-execution_count="12">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Relationship between median value and key predictors</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">15</span>, <span class="dv">10</span>))</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Room count vs price</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>,<span class="dv">0</span>].scatter(data[<span class="st">'rm'</span>], data[<span class="st">'medv'</span>], alpha<span class="op">=</span><span class="fl">0.6</span>, color<span class="op">=</span><span class="st">'blue'</span>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>,<span class="dv">0</span>].set_xlabel(<span class="st">'Average Number of Rooms'</span>)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>,<span class="dv">0</span>].set_ylabel(<span class="st">'Median Value ($1000s)'</span>)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>,<span class="dv">0</span>].set_title(<span class="st">'Median Value vs Average Number of Rooms'</span>)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>,<span class="dv">0</span>].grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Low status percentage vs price  </span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>,<span class="dv">1</span>].scatter(data[<span class="st">'lstat'</span>], data[<span class="st">'medv'</span>], alpha<span class="op">=</span><span class="fl">0.6</span>, color<span class="op">=</span><span class="st">'green'</span>)</span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>,<span class="dv">1</span>].set_xlabel(<span class="st">'</span><span class="sc">% Lo</span><span class="st">wer Status Population'</span>)</span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>,<span class="dv">1</span>].set_ylabel(<span class="st">'Median Value ($1000s)'</span>)</span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>,<span class="dv">1</span>].set_title(<span class="st">'Median Value vs </span><span class="sc">% Lo</span><span class="st">wer Status Population'</span>)</span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">0</span>,<span class="dv">1</span>].grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a><span class="co"># Nitric oxides vs price</span></span>
+<span id="cb17-19"><a href="#cb17-19" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>,<span class="dv">0</span>].scatter(data[<span class="st">'nox'</span>], data[<span class="st">'medv'</span>], alpha<span class="op">=</span><span class="fl">0.6</span>, color<span class="op">=</span><span class="st">'red'</span>)</span>
+<span id="cb17-20"><a href="#cb17-20" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>,<span class="dv">0</span>].set_xlabel(<span class="st">'Nitric Oxides Concentration'</span>)</span>
+<span id="cb17-21"><a href="#cb17-21" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>,<span class="dv">0</span>].set_ylabel(<span class="st">'Median Value ($1000s)'</span>)</span>
+<span id="cb17-22"><a href="#cb17-22" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>,<span class="dv">0</span>].set_title(<span class="st">'Median Value vs Nitric Oxides Concentration'</span>)</span>
+<span id="cb17-23"><a href="#cb17-23" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>,<span class="dv">0</span>].grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb17-24"><a href="#cb17-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-25"><a href="#cb17-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Crime rate vs price</span></span>
+<span id="cb17-26"><a href="#cb17-26" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>,<span class="dv">1</span>].scatter(data[<span class="st">'crim'</span>], data[<span class="st">'medv'</span>], alpha<span class="op">=</span><span class="fl">0.6</span>, color<span class="op">=</span><span class="st">'orange'</span>)</span>
+<span id="cb17-27"><a href="#cb17-27" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>,<span class="dv">1</span>].set_xlabel(<span class="st">'Per Capita Crime Rate'</span>)</span>
+<span id="cb17-28"><a href="#cb17-28" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>,<span class="dv">1</span>].set_ylabel(<span class="st">'Median Value ($1000s)'</span>)</span>
+<span id="cb17-29"><a href="#cb17-29" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>,<span class="dv">1</span>].set_title(<span class="st">'Median Value vs Crime Rate'</span>)</span>
+<span id="cb17-30"><a href="#cb17-30" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">1</span>,<span class="dv">1</span>].grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb17-31"><a href="#cb17-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-32"><a href="#cb17-32" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb17-33"><a href="#cb17-33" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-scatter-predictors" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-scatter-predictors-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="02_housing_data_files/figure-html/fig-scatter-predictors-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;5: Median value against four key predictors: number of rooms, percentage of lower-status population, nitric oxide concentration and crime rate."><img src="02_housing_data_files/figure-html/fig-scatter-predictors-output-1.png" width="1432" height="950" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-scatter-predictors-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Median value against four key predictors: number of rooms, percentage of lower-status population, nitric oxide concentration and crime rate.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-tip callout-titled" title="Follow-up question">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Follow-up question
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Not all the relationships in the pairplot are linear. Compare, for instance, the <code>medv</code> vs <code>rm</code> plot (roughly linear) with the <code>medv</code> vs <code>lstat</code> plot (markedly curved).</p>
+<ul>
+<li>How would you describe the shape of each relationship?</li>
+<li>Look at the top-right cluster in the <code>rm</code> vs <code>medv</code> plot (houses with many rooms and very high prices). Did the IQR rule flag those as outliers earlier? What does this tell you about the interplay between cleaning and modelling?</li>
+</ul>
+<p>An optional challenge: compute the correlation between <code>medv</code> and the logarithm of <code>lstat</code>. Does the (transformed) relationship look more linear?</p>
+</div>
+</div>
+</section>
+<section id="from-the-population-to-a-sample" class="level2">
+<h2 class="anchored" data-anchor-id="from-the-population-to-a-sample">From the Population to a Sample</h2>
+<p>So far we have worked on the <em>whole</em> dataset, which we can think of as our <strong>population</strong> (the 506 Boston census tracts). In practice we rarely have access to the whole population — we observe only a <strong>sample</strong> and must infer population quantities from it. This is the core of statistical inference.</p>
+<p>We begin with the simplest tool: <strong>simple random sampling</strong> (drawing observations without replacement, each equally likely).</p>
+</section>
+<section id="understanding-sampling" class="level2">
+<h2 class="anchored" data-anchor-id="understanding-sampling">Understanding Sampling</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-3-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-1" role="tab" aria-controls="tabset-3-1" aria-selected="true" href="">Exercise</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-3-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-3-2" role="tab" aria-controls="tabset-3-2" aria-selected="false" href="">Solution</a></li></ul>
+<div class="tab-content">
+<div id="tabset-3-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-3-1-tab">
+<ul>
+<li><p><strong>Objective:</strong> Learn about simple random sampling (sampling without replacement) and how to compute basic statistics on samples.</p></li>
+<li><p><strong>Instructions:</strong></p>
+<ul>
+<li><p>Create random samples from the population (full dataset) using <code>sample()</code> and calculate sample means.</p></li>
+<li><p>Plot histograms of samples with different sizes.</p></li>
+</ul></li>
+</ul>
+</div>
+<div id="tabset-3-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-3-2-tab">
+<div class="cell" data-execution_count="13">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Population distribution (using 'medv' column)</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">6</span>))</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>sns.histplot(data[<span class="st">'medv'</span>], kde<span class="op">=</span><span class="va">True</span>, bins<span class="op">=</span><span class="dv">30</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, color<span class="op">=</span><span class="st">'lightblue'</span>)</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Population Distribution of Median House Value (medv)"</span>, fontsize<span class="op">=</span><span class="dv">14</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Median Value ($1000s)"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Density"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Take random samples of varying sizes (n = 30, 100, 300)</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>sample_sizes <span class="op">=</span> [<span class="dv">30</span>, <span class="dv">100</span>, <span class="dv">300</span>]</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> size <span class="kw">in</span> sample_sizes:</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    sample <span class="op">=</span> data[<span class="st">'medv'</span>].sample(size, random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">6</span>))</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>    sns.histplot(sample, kde<span class="op">=</span><span class="va">True</span>, bins<span class="op">=</span><span class="dv">10</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, color<span class="op">=</span><span class="st">'lightgreen'</span>)</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>    plt.title(<span class="ss">f"Sample Distribution (n = </span><span class="sc">{</span>size<span class="sc">}</span><span class="ss">)"</span>, fontsize<span class="op">=</span><span class="dv">14</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>)</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>    plt.xlabel(<span class="st">"Median Value ($1000s)"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>    plt.ylabel(<span class="st">"Density"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>    plt.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a>    plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="fig-sampling-distributions" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="13">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-sampling-distributions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output cell-output-display">
+<div id="fig-sampling-distributions-1" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-sampling-distributions-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="02_housing_data_files/figure-html/fig-sampling-distributions-output-1.png" class="lightbox" data-gallery="fig-sampling-distributions" title="Figure&nbsp;6&nbsp;(a): Population distribution of median house value and its approximation by simple random samples of increasing size."><img src="02_housing_data_files/figure-html/fig-sampling-distributions-output-1.png" data-ref-parent="fig-sampling-distributions" width="808" height="527" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-sampling-distributions-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) Population distribution of median house value and its approximation by simple random samples of increasing size.
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div id="fig-sampling-distributions-2" class="quarto-float quarto-figure quarto-figure-center anchored" width="800" height="527">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-sampling-distributions-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="02_housing_data_files/figure-html/fig-sampling-distributions-output-2.png" class="lightbox" data-gallery="fig-sampling-distributions" title="Figure&nbsp;6&nbsp;(b): "><img src="02_housing_data_files/figure-html/fig-sampling-distributions-output-2.png" id="fig-sampling-distributions-2" data-ref-parent="fig-sampling-distributions" width="800" height="527" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-sampling-distributions-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b)
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div id="fig-sampling-distributions-3" class="quarto-float quarto-figure quarto-figure-center anchored" width="808" height="527">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-sampling-distributions-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="02_housing_data_files/figure-html/fig-sampling-distributions-output-3.png" class="lightbox" data-gallery="fig-sampling-distributions" title="Figure&nbsp;6&nbsp;(c): "><img src="02_housing_data_files/figure-html/fig-sampling-distributions-output-3.png" id="fig-sampling-distributions-3" data-ref-parent="fig-sampling-distributions" width="808" height="527" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-sampling-distributions-3-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(c)
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div id="fig-sampling-distributions-4" class="quarto-float quarto-figure quarto-figure-center anchored" width="808" height="527">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-sampling-distributions-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="02_housing_data_files/figure-html/fig-sampling-distributions-output-4.png" class="lightbox" data-gallery="fig-sampling-distributions" title="Figure&nbsp;6&nbsp;(d): "><img src="02_housing_data_files/figure-html/fig-sampling-distributions-output-4.png" id="fig-sampling-distributions-4" data-ref-parent="fig-sampling-distributions" width="808" height="527" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-sampling-distributions-4-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(d)
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-sampling-distributions-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-important">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>Compare the sample distributions in <a href="#fig-sampling-distributions" class="quarto-xref">Figure&nbsp;6</a> to the full population. How does sample size affect the approximation to the population distribution?</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-tip callout-titled" title="Follow-up question">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Follow-up question
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Each time we draw a sample, we get a slightly different histogram. Because we fixed <code>random_state=42</code>, the samples above are reproducible.</p>
+<ul>
+<li>Re-run the cell with a <em>different</em> <code>random_state</code> (or none at all) and see how the histograms change. How much does the estimated mean vary across repeated samples of the same size?</li>
+<li>This variability from one sample to the next is what bootstrap resampling (next section) tries to quantify. Before moving on, why do you think a larger sample tends to give a histogram closer to the population histogram?</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="resampling-with-bootstrap" class="level2">
+<h2 class="anchored" data-anchor-id="resampling-with-bootstrap">Resampling with Bootstrap</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-4-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-1" role="tab" aria-controls="tabset-4-1" aria-selected="true" href="">Exercise</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-4-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-4-2" role="tab" aria-controls="tabset-4-2" aria-selected="false" href="">Solution</a></li></ul>
+<div class="tab-content">
+<div id="tabset-4-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-4-1-tab">
+<ul>
+<li><p><strong>Objective:</strong> Learn the concept of resampling using bootstrap (resampling with replacement) to estimate the sampling distribution of the sample mean.</p></li>
+<li><p><strong>Instructions:</strong></p>
+<ul>
+<li><p>Take 1000 repeated bootstrap samples of size 100 using <code>sample(..., replace = True)</code> from the dataset and compute the mean of each sample. You can write a function <code>bootstrap_sample_mean()</code> to help you compute those bootstrap means.</p></li>
+<li><p>Plot the distribution of the sample means (bootstrap distribution).</p></li>
+<li><p>Compute the quantile of order 2.5% and 97.5% of the bootstrap distribution to get a confidence interval for the population mean (more on that in future classes).</p></li>
+<li><p>Change the number of bootstrap samples and/or the size of each to see how the results change.</p></li>
+</ul></li>
+</ul>
+</div>
+<div id="tabset-4-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-4-2-tab">
+<div id="cell-fig-bootstrap" class="cell" data-execution_count="14">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bootstrap_sample_mean(data, n_iterations<span class="op">=</span><span class="dv">1000</span>, sample_size<span class="op">=</span><span class="dv">100</span>):</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    means <span class="op">=</span> []</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_iterations):</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>        sample <span class="op">=</span> data.sample(sample_size, replace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>        means.append(sample.mean())</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> means</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Bootstrap distribution of the mean</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>bootstrap_means <span class="op">=</span> bootstrap_sample_mean(data[<span class="st">'medv'</span>], n_iterations<span class="op">=</span><span class="dv">1000</span>, sample_size<span class="op">=</span><span class="dv">100</span>)</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">6</span>))</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>sns.histplot(bootstrap_means, kde<span class="op">=</span><span class="va">True</span>, bins<span class="op">=</span><span class="dv">30</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, color<span class="op">=</span><span class="st">'lightcoral'</span>)</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">"Bootstrap Distribution of Sample Means (n = 100, iterations = 1000)"</span>, fontsize<span class="op">=</span><span class="dv">14</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>)</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Sample Mean"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Density"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Print confidence interval</span></span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>ci_lower <span class="op">=</span> np.percentile(bootstrap_means, <span class="fl">2.5</span>)</span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>ci_upper <span class="op">=</span> np.percentile(bootstrap_means, <span class="fl">97.5</span>)</span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"95% Confidence Interval for the Mean: [</span><span class="sc">{</span>ci_lower<span class="sc">:.2f}</span><span class="ss">, </span><span class="sc">{</span>ci_upper<span class="sc">:.2f}</span><span class="ss">]"</span>)</span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare with actual population mean</span></span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>population_mean <span class="op">=</span> data[<span class="st">'medv'</span>].mean()</span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Population Mean: </span><span class="sc">{</span>population_mean<span class="sc">:.2f}</span><span class="ss">"</span>)</span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Confidence interval contains population mean: </span><span class="sc">{</span>ci_lower <span class="op">&lt;=</span> population_mean <span class="op">&lt;=</span> ci_upper<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-bootstrap" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-bootstrap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="02_housing_data_files/figure-html/fig-bootstrap-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10" title="Figure&nbsp;7: Bootstrap distribution of the sample mean (n = 100, 1000 replications)."><img src="02_housing_data_files/figure-html/fig-bootstrap-output-1.png" width="808" height="527" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bootstrap-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: Bootstrap distribution of the sample mean (n = 100, 1000 replications).
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>95% Confidence Interval for the Mean: [20.75, 24.27]
+Population Mean: 22.53
+Confidence interval contains population mean: True</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-important">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>Interpret the bootstrap distribution in <a href="#fig-bootstrap" class="quarto-xref">Figure&nbsp;7</a> and compare the confidence interval of the mean to the population mean.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-tip callout-titled" title="Follow-up question">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Follow-up question
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The bootstrap is a general idea: we can resample <em>any</em> statistic, not just the mean.</p>
+<ul>
+<li>Redo the bootstrap for the <strong>median</strong> (or the standard deviation) of <code>medv</code> instead of the mean. How does the bootstrap distribution of the median compare to that of the mean?</li>
+<li>Then change the <strong>sample size</strong> used in the bootstrap (e.g.&nbsp;to 30 or 300) and see how the width of the confidence interval changes. Why do larger sample sizes give narrower confidence intervals?</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="illustrating-the-central-limit-theorem" class="level2">
+<h2 class="anchored" data-anchor-id="illustrating-the-central-limit-theorem">Illustrating the Central Limit Theorem</h2>
+<section id="whats-the-clt" class="level3">
+<h3 class="anchored" data-anchor-id="whats-the-clt">What’s the CLT ?</h3>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>The <strong>Central Limit Theorem (CLT)</strong> says that if you take a bunch of random samples from any population (no matter how it’s shaped—whether it’s skewed, uniform, or weird-looking) and calculate the average (or mean) of those samples, the distribution of those sample means will (under very mild conditions) eventually look like a <strong>normal distribution</strong> (bell-shaped curve) as long as your sample size is big enough.</p>
+<p>In other words:</p>
+<ul>
+<li><p>If you keep sampling and averaging, the averages will cluster around the true population mean.</p></li>
+<li><p>This works no matter what the original data looks like, as long as the sample size is reasonably large.</p></li>
+</ul>
+<p>So, the CLT helps us use averages from samples to make predictions about the whole population, which is super useful in statistics!</p>
+</div>
+</div>
+</div>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-5-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-1" role="tab" aria-controls="tabset-5-1" aria-selected="true" href="">Exercise</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-5-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-5-2" role="tab" aria-controls="tabset-5-2" aria-selected="false" href="">Solution</a></li></ul>
+<div class="tab-content">
+<div id="tabset-5-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-5-1-tab">
+<ul>
+<li><p><strong>Objective:</strong> Use resampling to illustrate the Central Limit Theorem (CLT) by showing how the distribution of sample means approaches a normal distribution as the sample size increases.</p></li>
+<li><p><strong>Instructions:</strong></p>
+<ul>
+<li><p>Generate multiple (say 1000) random samples of increasing size (e.g., 30, 50, 100, 500, 1000).</p></li>
+<li><p>For each sample size, compute the mean and plot the distribution of means.</p></li>
+<li><p>You can write a function <code>sample_means_by_size()</code> to help you with the computations.</p></li>
+<li><p>Change the number of bootstrap samples to see how the results change.</p></li>
+</ul></li>
+</ul>
+</div>
+<div id="tabset-5-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-5-2-tab">
+<div class="cell" data-execution_count="15">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> sample_means_by_size(data, n_iterations<span class="op">=</span><span class="dv">1000</span>, sizes<span class="op">=</span>[<span class="dv">30</span>, <span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">500</span>, <span class="dv">1000</span>]):</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>    means_dict <span class="op">=</span> {}</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> size <span class="kw">in</span> sizes:</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>        means <span class="op">=</span> []</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_iterations):</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>            sample <span class="op">=</span> data.sample(size, replace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>            means.append(sample.mean())</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>        means_dict[size] <span class="op">=</span> means</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> means_dict</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate sample means for different sample sizes</span></span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>sample_sizes <span class="op">=</span> [<span class="dv">30</span>, <span class="dv">50</span>, <span class="dv">100</span>, <span class="dv">500</span>, <span class="dv">1000</span>]</span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>clt_means <span class="op">=</span> sample_means_by_size(data[<span class="st">'medv'</span>], n_iterations<span class="op">=</span><span class="dv">1000</span>, sizes<span class="op">=</span>sample_sizes)</span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot distributions of sample means for different sizes</span></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>fig, axes <span class="op">=</span> plt.subplots(<span class="dv">2</span>, <span class="dv">3</span>, figsize<span class="op">=</span>(<span class="dv">18</span>, <span class="dv">12</span>))</span>
+<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>axes <span class="op">=</span> axes.ravel()</span>
+<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> i, size <span class="kw">in</span> <span class="bu">enumerate</span>(sample_sizes):</span>
+<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>    sns.histplot(clt_means[size], kde<span class="op">=</span><span class="va">True</span>, bins<span class="op">=</span><span class="dv">30</span>, ax<span class="op">=</span>axes[i], alpha<span class="op">=</span><span class="fl">0.7</span>, color<span class="op">=</span><span class="st">'lightseagreen'</span>)</span>
+<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>    axes[i].set_title(<span class="ss">f"Distribution of Sample Means (n = </span><span class="sc">{</span>size<span class="sc">}</span><span class="ss">) - CLT Illustration"</span>, fontsize<span class="op">=</span><span class="dv">12</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>)</span>
+<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a>    axes[i].set_xlabel(<span class="st">"Sample Mean"</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a>    axes[i].set_ylabel(<span class="st">"Density"</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>    axes[i].grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Remove the last unused subplot</span></span>
+<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>axes[<span class="dv">5</span>].remove()</span>
+<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare with normal distribution</span></span>
+<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy <span class="im">import</span> stats</span>
+<span id="cb21-34"><a href="#cb21-34" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">6</span>))</span>
+<span id="cb21-35"><a href="#cb21-35" aria-hidden="true" tabindex="-1"></a>sample_size <span class="op">=</span> <span class="dv">1000</span></span>
+<span id="cb21-36"><a href="#cb21-36" aria-hidden="true" tabindex="-1"></a>sample_means <span class="op">=</span> clt_means[sample_size]</span>
+<span id="cb21-37"><a href="#cb21-37" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot histogram</span></span>
+<span id="cb21-38"><a href="#cb21-38" aria-hidden="true" tabindex="-1"></a>sns.histplot(sample_means, kde<span class="op">=</span><span class="va">True</span>, bins<span class="op">=</span><span class="dv">30</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, color<span class="op">=</span><span class="st">'lightseagreen'</span>)</span>
+<span id="cb21-39"><a href="#cb21-39" aria-hidden="true" tabindex="-1"></a><span class="co"># Overlay normal distribution</span></span>
+<span id="cb21-40"><a href="#cb21-40" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> np.linspace(<span class="bu">min</span>(sample_means), <span class="bu">max</span>(sample_means), <span class="dv">100</span>)</span>
+<span id="cb21-41"><a href="#cb21-41" aria-hidden="true" tabindex="-1"></a>mu <span class="op">=</span> np.mean(sample_means)</span>
+<span id="cb21-42"><a href="#cb21-42" aria-hidden="true" tabindex="-1"></a>sigma <span class="op">=</span> np.std(sample_means)</span>
+<span id="cb21-43"><a href="#cb21-43" aria-hidden="true" tabindex="-1"></a>normal_curve <span class="op">=</span> stats.norm.pdf(x, mu, sigma)</span>
+<span id="cb21-44"><a href="#cb21-44" aria-hidden="true" tabindex="-1"></a>plt.plot(x, normal_curve <span class="op">*</span> <span class="bu">len</span>(sample_means) <span class="op">*</span> (<span class="bu">max</span>(sample_means) <span class="op">-</span> <span class="bu">min</span>(sample_means)) <span class="op">/</span> <span class="dv">30</span>, </span>
+<span id="cb21-45"><a href="#cb21-45" aria-hidden="true" tabindex="-1"></a>         <span class="st">'r-'</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="ss">f'Normal Curve (μ=</span><span class="sc">{</span>mu<span class="sc">:.2f}</span><span class="ss">, σ=</span><span class="sc">{</span>sigma<span class="sc">:.2f}</span><span class="ss">)'</span>)</span>
+<span id="cb21-46"><a href="#cb21-46" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="ss">f"Sample Means Distribution vs Normal Distribution (n = </span><span class="sc">{</span>sample_size<span class="sc">}</span><span class="ss">)"</span>, fontsize<span class="op">=</span><span class="dv">14</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>)</span>
+<span id="cb21-47"><a href="#cb21-47" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">"Sample Mean"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb21-48"><a href="#cb21-48" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">"Density"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb21-49"><a href="#cb21-49" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb21-50"><a href="#cb21-50" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb21-51"><a href="#cb21-51" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="fig-clt" class="cell quarto-float quarto-figure quarto-figure-center anchored" data-execution_count="15">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-clt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output cell-output-display">
+<div id="fig-clt-1" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-clt-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="02_housing_data_files/figure-html/fig-clt-output-1.png" class="lightbox" data-gallery="fig-clt" title="Figure&nbsp;8&nbsp;(a): Distribution of sample means for increasing sample sizes, illustrating the Central Limit Theorem."><img src="02_housing_data_files/figure-html/fig-clt-output-1.png" data-ref-parent="fig-clt" width="1720" height="1142" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-clt-1-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(a) Distribution of sample means for increasing sample sizes, illustrating the Central Limit Theorem.
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div id="fig-clt-2" class="quarto-float quarto-figure quarto-figure-center anchored" width="830" height="527">
+<figure class="quarto-float quarto-subfloat-fig figure">
+<div aria-describedby="fig-clt-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="02_housing_data_files/figure-html/fig-clt-output-2.png" class="lightbox" data-gallery="fig-clt" title="Figure&nbsp;8&nbsp;(b): "><img src="02_housing_data_files/figure-html/fig-clt-output-2.png" id="fig-clt-2" data-ref-parent="fig-clt" width="830" height="527" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-subfloat-caption quarto-subfloat-fig" id="fig-clt-2-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+(b)
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-clt-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-important">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>Explain how the sample mean distributions in <a href="#fig-clt" class="quarto-xref">Figure&nbsp;8</a> change as the sample size increases. Does the shape of the distribution become more normal? Why?</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-tip callout-titled" title="Follow-up question">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Follow-up question
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The CLT does not depend on the <em>population</em> being Normal — only on the sample means becoming Normal in the large-<span class="math inline">\(n\)</span> limit. Test it on a very skewed variable in this dataset, e.g.&nbsp;<code>crim</code> (crime rate).</p>
+<ul>
+<li>Plot the population distribution of <code>crim</code> (it is heavily skewed to the right).</li>
+<li>Then re-run the CLT illustration for <code>crim</code>: how large must <span class="math inline">\(n\)</span> be before the distribution of sample means looks roughly Normal?</li>
+</ul>
+<p>Optional challenge: derive the <em>theoretical</em> standard error of the sample mean, <span class="math inline">\(\sigma/\sqrt{n}\)</span>, and check it against the observed spread of your sample means for each <span class="math inline">\(n\)</span>.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="verify-the-clt-on-your-own" class="level2">
+<h2 class="anchored" data-anchor-id="verify-the-clt-on-your-own">Verify the CLT on Your Own</h2>
+<p>Before moving on, take a short pause to check that you have really grasped the machinery of the previous sections. The exercise below has <strong>no provided solution</strong> — it is designed to be solved with the functions you have already written (<code>sample_means_by_size()</code> and the CLT plotting code).</p>
+<ul>
+<li><p><strong>Objective:</strong> Select your own sample sizes, repeat the process, and verify the Central Limit Theorem.</p></li>
+<li><p><strong>Instructions:</strong></p>
+<ul>
+<li><p>Choose three different sample sizes.</p></li>
+<li><p>Plot the resulting distributions of sample means and compute the sample mean and standard deviation.</p></li>
+<li><p>Discuss why the standard deviation decreases as the sample size increases</p></li>
+</ul></li>
+</ul>
+<div class="callout callout-style-simple callout-important">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>Summarize how the Central Limit Theorem applies to this dataset and describe how sample size influences the accuracy of the estimate of the population mean.</p>
+</div>
+</div>
+</div>
+<p>Once you are comfortable, we move on to comparing <em>different</em> ways of sampling from the population — a step up in sophistication.</p>
+</section>
+<section id="stratified-sampling-vs.-simple-random-sampling" class="level2">
+<h2 class="anchored" data-anchor-id="stratified-sampling-vs.-simple-random-sampling">Stratified Sampling vs.&nbsp;Simple Random Sampling</h2>
+<div class="callout callout-style-simple callout-warning">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>This section and the following sections are devoted to slightly more advanced material that’s not or not fully covered in the lectures. They assume some familiarity with mathematics and / or grouped operations on data frames.</p>
+</div>
+</div>
+</div>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-6-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-1" role="tab" aria-controls="tabset-6-1" aria-selected="true" href="">Exercise</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-6-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-6-2" role="tab" aria-controls="tabset-6-2" aria-selected="false" href="">Solution</a></li></ul>
+<div class="tab-content">
+<div id="tabset-6-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-6-1-tab">
+<ul>
+<li><p><strong>Objective:</strong> Introduce stratified sampling and compare it to simple random sampling to understand how different sampling methods affect estimates.</p></li>
+<li><p><strong>Instructions:</strong></p>
+<ul>
+<li><p>Split the dataset into strata based on a categorical variable, here <code>chas</code> (location next to the river or not).</p></li>
+<li><p>Perform stratified sampling from each group and compute sample statistics (i.e.&nbsp;do resampling <em>within each group</em>).</p></li>
+<li><p>Compare the results of simple random sampling vs.&nbsp;stratified sampling for the same sample size.</p></li>
+</ul></li>
+</ul>
+</div>
+<div id="tabset-6-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-6-2-tab">
+<div id="cell-fig-stratified-sampling" class="cell" data-execution_count="16">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Stratified sampling based on 'chas' in Boston Housing dataset</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>strata <span class="op">=</span> data.groupby(<span class="st">'chas'</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>stratified_sample <span class="op">=</span> strata.<span class="bu">apply</span>(<span class="kw">lambda</span> x: x.sample(frac<span class="op">=</span><span class="fl">0.3</span>, random_state<span class="op">=</span><span class="dv">42</span>)).reset_index(drop<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Simple random sample of same size</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>random_sample <span class="op">=</span> data.sample(n<span class="op">=</span><span class="bu">len</span>(stratified_sample), random_state<span class="op">=</span><span class="dv">42</span>)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare means and variances of 'medv'</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Stratified Sample Mean:"</span>, stratified_sample[<span class="st">'medv'</span>].mean())</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Simple Random Sample Mean:"</span>, random_sample[<span class="st">'medv'</span>].mean())</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Stratified Sample Variance:"</span>, stratified_sample[<span class="st">'medv'</span>].var())</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Simple Random Sample Variance:"</span>, random_sample[<span class="st">'medv'</span>].var())</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a><span class="co"># Visual comparison</span></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">5</span>))</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>plt.subplot(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>)</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>sns.histplot(stratified_sample[<span class="st">'medv'</span>], kde<span class="op">=</span><span class="va">True</span>, bins<span class="op">=</span><span class="dv">20</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, color<span class="op">=</span><span class="st">'lightblue'</span>)</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Stratified Sample Distribution'</span>, fontsize<span class="op">=</span><span class="dv">12</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>)</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Median Value ($1000s)'</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Density'</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>plt.subplot(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>sns.histplot(random_sample[<span class="st">'medv'</span>], kde<span class="op">=</span><span class="va">True</span>, bins<span class="op">=</span><span class="dv">20</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, color<span class="op">=</span><span class="st">'lightcoral'</span>)</span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Simple Random Sample Distribution'</span>, fontsize<span class="op">=</span><span class="dv">12</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>)</span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Median Value ($1000s)'</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Density'</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Stratified Sample Mean: 22.456953642384107
+Simple Random Sample Mean: 21.46622516556291
+Stratified Sample Variance: 75.05260132450331
+Simple Random Sample Variance: 74.98598498896247</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div id="fig-stratified-sampling" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-stratified-sampling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="02_housing_data_files/figure-html/fig-stratified-sampling-output-2.png" class="lightbox" data-gallery="quarto-lightbox-gallery-13" title="Figure&nbsp;9: Distributions of the median value for stratified and simple random samples of the same size."><img src="02_housing_data_files/figure-html/fig-stratified-sampling-output-2.png" width="1143" height="470" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-stratified-sampling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9: Distributions of the median value for stratified and simple random samples of the same size.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-important">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>Interpret which sampling method provides better estimates of the population mean (compare <span class="citation" data-cites="figStratifiedSampling">@figStratifiedSampling</span>) and why stratified sampling may lead to more accurate results in some cases.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-tip callout-titled" title="Follow-up question">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Follow-up question
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The Boston dataset is sorted geographically (by census tract), so consecutive rows tend to be similar.</p>
+<ul>
+<li>Compare a <em>systematic</em> sample (every <span class="math inline">\(k\)</span>-th row) to a simple random sample of the same size: which estimate of the mean is closer to the population mean?</li>
+<li>Stratified sampling here used <code>chas</code> as the strata variable. Try stratifying on a <em>different</em> variable (e.g.&nbsp;bin <code>medv</code> into low/high groups first). Does the choice of stratum matter for the quality of the estimate?</li>
+</ul>
+<p>Optional challenge: repeat each sampling method many times (say 1000) and compare the <em>spread</em> of the resulting estimates (their standard error) rather than a single draw.</p>
+</div>
+</div>
+</section>
+<section id="bias-variance-tradeoff-in-resampling" class="level2">
+<h2 class="anchored" data-anchor-id="bias-variance-tradeoff-in-resampling">Bias-Variance Tradeoff in Resampling</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-7-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-1" role="tab" aria-controls="tabset-7-1" aria-selected="true" href="">Exercise</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-7-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-7-2" role="tab" aria-controls="tabset-7-2" aria-selected="false" href="">Solution</a></li></ul>
+<div class="tab-content">
+<div id="tabset-7-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-7-1-tab">
+<ul>
+<li><p><strong>Objective:</strong> Introduce the bias-variance tradeoff and its relevance to resampling techniques.</p></li>
+<li><p><strong>Instructions:</strong></p>
+<ul>
+<li><p>Take bootstrap samples from the dataset and compute the sample mean and variance.</p></li>
+<li><p>Increase the number of bootstrap iterations and observe how the bias and variance of the estimate change.</p></li>
+<li><p>Explore the tradeoff between high variance (due to small samples) and high bias (due to poor estimation methods).</p></li>
+</ul></li>
+</ul>
+</div>
+<div id="tabset-7-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-7-2-tab">
+<div id="cell-fig-bias-variance" class="cell" data-execution_count="17">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> bootstrap_bias_variance(data, sample_size<span class="op">=</span><span class="dv">100</span>, n_iterations<span class="op">=</span><span class="dv">1000</span>):</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>    sample_means <span class="op">=</span> []</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_iterations):</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>        sample <span class="op">=</span> data.sample(sample_size, replace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>        sample_means.append(sample.mean())</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    bias <span class="op">=</span> np.mean(sample_means) <span class="op">-</span> data.mean()</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    variance <span class="op">=</span> np.var(sample_means)</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> bias, variance</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate bias and variance for different bootstrap iterations</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>iterations_list <span class="op">=</span> [<span class="dv">100</span>, <span class="dv">500</span>, <span class="dv">1000</span>, <span class="dv">5000</span>]</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>bias_values <span class="op">=</span> []</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>variance_values <span class="op">=</span> []</span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> n_iter <span class="kw">in</span> iterations_list:</span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>    bias, var <span class="op">=</span> bootstrap_bias_variance(data[<span class="st">'medv'</span>], sample_size<span class="op">=</span><span class="dv">100</span>, n_iterations<span class="op">=</span>n_iter)</span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>    bias_values.append(bias)</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>    variance_values.append(var)</span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f"Iterations: </span><span class="sc">{</span>n_iter<span class="sc">}</span><span class="ss">, Bias: </span><span class="sc">{</span>bias<span class="sc">:.4f}</span><span class="ss">, Variance: </span><span class="sc">{</span>var<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Plot bias and variance</span></span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">6</span>))</span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>plt.plot(iterations_list, bias_values, marker<span class="op">=</span><span class="st">'o'</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">'Bias'</span>)</span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>plt.plot(iterations_list, variance_values, marker<span class="op">=</span><span class="st">'s'</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="st">'Variance'</span>)</span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Number of Bootstrap Iterations'</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Value'</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Bias-Variance Tradeoff in Bootstrap Sampling'</span>, fontsize<span class="op">=</span><span class="dv">14</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>)</span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a>plt.legend()</span>
+<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Iterations: 100, Bias: 0.0807, Variance: 0.8104
+Iterations: 500, Bias: 0.0160, Variance: 0.9060
+Iterations: 1000, Bias: -0.0069, Variance: 0.8311
+Iterations: 5000, Bias: -0.0127, Variance: 0.8159</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div id="fig-bias-variance" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-bias-variance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="02_housing_data_files/figure-html/fig-bias-variance-output-2.png" class="lightbox" data-gallery="quarto-lightbox-gallery-14" title="Figure&nbsp;10: Bias and variance of the bootstrap mean estimate as a function of the number of iterations."><img src="02_housing_data_files/figure-html/fig-bias-variance-output-2.png" width="812" height="527" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-bias-variance-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10: Bias and variance of the bootstrap mean estimate as a function of the number of iterations.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-important">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>Analyze how increasing the number of iterations reduces variance but can introduce bias (<a href="#fig-bias-variance" class="quarto-xref">Figure&nbsp;10</a>). Think about the implications of bias-variance tradeoff in practical statistical analysis.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-tip callout-titled" title="Follow-up question">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Follow-up question
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>In the code above we varied the number of bootstrap <em>iterations</em> while keeping the <em>sample size</em> fixed.</p>
+<ul>
+<li>What happens if instead you keep the iterations fixed and vary the <strong>bootstrap sample size</strong> (e.g.&nbsp;30, 100, 300)? Which quantity — bias or variance — is most affected?</li>
+<li>Think about the distinction between the two sources of variability: one due to the <em>resampling</em> (which you control by taking more iterations), and one due to the <em>sample you started from</em> (which you do not). Which one does the bootstrap actually reduce?</li>
+</ul>
+</div>
+</div>
+</section>
+<section id="hypothesis-testing-using-resampling" class="level2">
+<h2 class="anchored" data-anchor-id="hypothesis-testing-using-resampling">Hypothesis Testing using Resampling</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-8-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-1" role="tab" aria-controls="tabset-8-1" aria-selected="true" href="">Exercise</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-8-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-8-2" role="tab" aria-controls="tabset-8-2" aria-selected="false" href="">Solution</a></li></ul>
+<div class="tab-content">
+<div id="tabset-8-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-8-1-tab">
+<ul>
+<li><p><strong>Objective:</strong> Use resampling methods (e.g., permutation testing) to perform hypothesis testing.</p></li>
+<li><p><strong>Instructions:</strong></p>
+<ul>
+<li><p>Formulate a hypothesis about the data (e.g., the mean house price in <code>chas</code> = 1 is different from <code>chas</code> = 0).</p></li>
+<li><p>Perform a permutation test by randomly shuffling the <code>chas</code> labels and computing the mean difference.</p></li>
+<li><p>Compare the observed mean difference to the permutation distribution to determine if the difference is statistically significant. You can do that using the p-value, the probability that a sample from the permutation distribution exceeds (in absolute value) the observed mean.</p></li>
+</ul></li>
+</ul>
+</div>
+<div id="tabset-8-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-8-2-tab">
+<div id="cell-fig-permutation-test" class="cell" data-execution_count="18">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> permutation_test(data, group_col, value_col, n_permutations<span class="op">=</span><span class="dv">1000</span>):</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Observed difference in means</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    observed_diff <span class="op">=</span> data.groupby(group_col)[value_col].mean().diff().iloc[<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>    perm_diffs <span class="op">=</span> []</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> _ <span class="kw">in</span> <span class="bu">range</span>(n_permutations):</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>        permuted <span class="op">=</span> data.copy()</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>        permuted[group_col] <span class="op">=</span> np.random.permutation(permuted[group_col])</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>        perm_diff <span class="op">=</span> permuted.groupby(group_col)[value_col].mean().diff().iloc[<span class="op">-</span><span class="dv">1</span>]</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>        perm_diffs.append(perm_diff)</span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Plot permutation distribution</span></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>    plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">6</span>))</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>    sns.histplot(perm_diffs, kde<span class="op">=</span><span class="va">True</span>, bins<span class="op">=</span><span class="dv">30</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, color<span class="op">=</span><span class="st">'lightgreen'</span>)</span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>    plt.axvline(observed_diff, color<span class="op">=</span><span class="st">'red'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="ss">f'Observed Diff: </span><span class="sc">{</span>observed_diff<span class="sc">:.2f}</span><span class="ss">'</span>)</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>    plt.axvline(<span class="op">-</span>observed_diff, color<span class="op">=</span><span class="st">'red'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="ss">f'-Observed Diff: </span><span class="sc">{</span><span class="op">-</span>observed_diff<span class="sc">:.2f}</span><span class="ss">'</span>)</span>
+<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>    plt.title(<span class="ss">f"Permutation Test Distribution</span><span class="ch">\n</span><span class="ss">(observed diff = </span><span class="sc">{</span>observed_diff<span class="sc">:.2f}</span><span class="ss">)"</span>, fontsize<span class="op">=</span><span class="dv">14</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>)</span>
+<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>    plt.xlabel(<span class="st">"Difference in Means"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>    plt.ylabel(<span class="st">"Density"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>    plt.legend()</span>
+<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>    plt.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>    plt.show()</span>
+<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Calculate p-value</span></span>
+<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a>    p_value <span class="op">=</span> np.mean(np.<span class="bu">abs</span>(perm_diffs) <span class="op">&gt;=</span> np.<span class="bu">abs</span>(observed_diff))</span>
+<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> observed_diff, p_value</span>
+<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Perform permutation test on 'chas' vs 'medv'</span></span>
+<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a>obs_diff, p_val <span class="op">=</span> permutation_test(data, <span class="st">'chas'</span>, <span class="st">'medv'</span>)</span>
+<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"Observed Difference: </span><span class="sc">{</span>obs_diff<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb26-31"><a href="#cb26-31" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f"P-value: </span><span class="sc">{</span>p_val<span class="sc">:.4f}</span><span class="ss">"</span>)</span>
+<span id="cb26-32"><a href="#cb26-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-33"><a href="#cb26-33" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> p_val <span class="op">&lt;</span> <span class="fl">0.05</span>:</span>
+<span id="cb26-34"><a href="#cb26-34" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"The difference is statistically significant (p &lt; 0.05)"</span>)</span>
+<span id="cb26-35"><a href="#cb26-35" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb26-36"><a href="#cb26-36" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="st">"The difference is not statistically significant (p &gt;= 0.05)"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-permutation-test" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-permutation-test-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="02_housing_data_files/figure-html/fig-permutation-test-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-15" title="Figure&nbsp;11: Permutation distribution of the mean difference, with the observed difference marked in red."><img src="02_housing_data_files/figure-html/fig-permutation-test-output-1.png" width="815" height="549" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-permutation-test-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;11: Permutation distribution of the mean difference, with the observed difference marked in red.
+</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Observed Difference: 6.3462
+P-value: 0.0010
+The difference is statistically significant (p &lt; 0.05)</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-important">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>Interpret the results of the hypothesis test and the meaning of the p-value in this context, using the permutation distribution shown in <a href="#fig-permutation-test" class="quarto-xref">Figure&nbsp;11</a>. Reflect on the relevance of the method if the population is structured in some way.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-tip callout-titled" title="Follow-up question">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Follow-up question
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The permutation test shuffles the <code>chas</code> labels, assuming the labels are <em>exchangeable</em> under the null hypothesis.</p>
+<ul>
+<li>Formulate a second hypothesis involving another grouping variable (e.g.&nbsp;does <code>medv</code> differ between tracts with high vs.&nbsp;low <code>ptratio</code>, split at its median?) and run the permutation test again.</li>
+<li>Because <code>chas</code> has very unequal group sizes, the permutation test here is not very powerful. Try testing on <code>ptratio</code> (more balanced groups) and compare the p-values.</li>
+</ul>
+<p>Optional challenge: the p-value depends on the number of permutations. Re-run the test with only 100 permutations a few times — how stable is the p-value? How does the stability improve with more permutations?</p>
+</div>
+</div>
+</section>
+<section id="demonstrating-the-law-of-large-numbers-lln" class="level2">
+<h2 class="anchored" data-anchor-id="demonstrating-the-law-of-large-numbers-lln">Demonstrating the Law of Large Numbers (LLN)</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-9-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-9-1" role="tab" aria-controls="tabset-9-1" aria-selected="true" href="">Exercise</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-9-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-9-2" role="tab" aria-controls="tabset-9-2" aria-selected="false" href="">Solution</a></li></ul>
+<div class="tab-content">
+<div id="tabset-9-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-9-1-tab">
+<ul>
+<li><p><strong>Objective:</strong> Illustrate how the Law of Large Numbers works by showing that sample means converge to the population mean as sample size increases.</p></li>
+<li><p><strong>Instructions:</strong></p>
+<ul>
+<li>Take repeated samples of increasing sizes and plot how the sample mean converges to the population mean.</li>
+</ul></li>
+</ul>
+</div>
+<div id="tabset-9-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-9-2-tab">
+<div id="cell-fig-lln" class="cell" data-execution_count="19">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> law_of_large_numbers(data, max_sample_size<span class="op">=</span><span class="dv">500</span>, step<span class="op">=</span><span class="dv">50</span>):</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>    sample_sizes <span class="op">=</span> <span class="bu">range</span>(<span class="dv">50</span>, max_sample_size, step)</span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>    sample_means <span class="op">=</span> []</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> size <span class="kw">in</span> sample_sizes:</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>        sample <span class="op">=</span> data.sample(size, replace<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>        sample_means.append(sample.mean())</span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Plot sample means vs. sample size</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>    plt.figure(figsize<span class="op">=</span>(<span class="dv">10</span>, <span class="dv">6</span>))</span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>    plt.plot(sample_sizes, sample_means, marker<span class="op">=</span><span class="st">'o'</span>, linewidth<span class="op">=</span><span class="dv">2</span>, markersize<span class="op">=</span><span class="dv">6</span>, color<span class="op">=</span><span class="st">'blue'</span>)</span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>    plt.axhline(data.mean(), color<span class="op">=</span><span class="st">'red'</span>, linestyle<span class="op">=</span><span class="st">'--'</span>, linewidth<span class="op">=</span><span class="dv">2</span>, label<span class="op">=</span><span class="ss">f'Population Mean: </span><span class="sc">{</span>data<span class="sc">.</span>mean()<span class="sc">:.2f}</span><span class="ss">'</span>)</span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>    plt.title(<span class="st">"Law of Large Numbers: Sample Means Converging to Population Mean"</span>, fontsize<span class="op">=</span><span class="dv">14</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>)</span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>    plt.xlabel(<span class="st">"Sample Size"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>    plt.ylabel(<span class="st">"Sample Mean"</span>, fontsize<span class="op">=</span><span class="dv">12</span>)</span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>    plt.legend()</span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>    plt.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a>    plt.show()</span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply LLN demonstration</span></span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a>law_of_large_numbers(data[<span class="st">'medv'</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-display">
+<div id="fig-lln" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-lln-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="02_housing_data_files/figure-html/fig-lln-output-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-16" title="Figure&nbsp;12: Law of Large Numbers: sample means converging to the population mean as the sample size increases."><img src="02_housing_data_files/figure-html/fig-lln-output-1.png" width="819" height="527" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-lln-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;12: Law of Large Numbers: sample means converging to the population mean as the sample size increases.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-important">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>Explain how the LLN works and why larger samples tend to give more accurate estimates of the population mean, with reference to <a href="#fig-lln" class="quarto-xref">Figure&nbsp;12</a>. Discuss the variability you observe in smaller samples.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-tip callout-titled" title="Follow-up question">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Follow-up question
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>The LLN tells us that the sample mean <em>converges</em> to the population mean, but it doesn’t tell us <em>how quickly</em>.</p>
+<ul>
+<li>The standard deviation of the sample mean decreases like <span class="math inline">\(\sigma/\sqrt{n}\)</span>. Superimpose the “theoretical” curve <span class="math inline">\(\sigma/\sqrt{n}\)</span> on the LLN plot — does it match the observed variability of the sample means?</li>
+<li>What does this imply in practical terms? Roughly how many times larger a sample do you need to halve the uncertainty in your estimate of the mean?</li>
+</ul>
+<p>Bonus: the LLN plot shows a single sample trajectory. Plot <em>several</em> trajectories (with different <code>random_state</code>s) on the same figure to see the band of convergence shrink with <span class="math inline">\(n\)</span>.</p>
+</div>
+</div>
+</section>
+<section id="comparing-the-efficiency-of-sampling-methods" class="level2">
+<h2 class="anchored" data-anchor-id="comparing-the-efficiency-of-sampling-methods">Comparing the Efficiency of Sampling Methods</h2>
+<div class="tabset-margin-container"></div><div class="panel-tabset">
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-10-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-10-1" role="tab" aria-controls="tabset-10-1" aria-selected="true" href="">Exercise</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-10-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-10-2" role="tab" aria-controls="tabset-10-2" aria-selected="false" href="">Solution</a></li></ul>
+<div class="tab-content">
+<div id="tabset-10-1" class="tab-pane active" role="tabpanel" aria-labelledby="tabset-10-1-tab">
+<ul>
+<li><p><strong>Objective:</strong> Compare different sampling methods (simple random, stratified, systematic) and determine which is the most efficient in terms of variance and accuracy.</p></li>
+<li><p><strong>Instructions:</strong></p>
+<ul>
+<li><p>Implement systematic sampling (selecting every <em>k</em>-th element) alongside random and stratified sampling.</p></li>
+<li><p>Compare the variance of the sample mean for each method.</p></li>
+</ul></li>
+</ul>
+</div>
+<div id="tabset-10-2" class="tab-pane" role="tabpanel" aria-labelledby="tabset-10-2-tab">
+<div id="cell-fig-systematic-sampling" class="cell" data-execution_count="20">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> systematic_sampling(data, step):</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> data.iloc[::step, :]</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Systematic sample (e.g., every 5th row)</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>sys_sample <span class="op">=</span> systematic_sampling(data, <span class="dv">5</span>)</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare sample means and variance</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Systematic Sample Mean:"</span>, sys_sample[<span class="st">'medv'</span>].mean())</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Systematic Sample Variance:"</span>, sys_sample[<span class="st">'medv'</span>].var())</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Simple Random Sample Mean:"</span>, data.sample(n<span class="op">=</span><span class="bu">len</span>(sys_sample), random_state<span class="op">=</span><span class="dv">42</span>)[<span class="st">'medv'</span>].mean())</span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="st">"Simple Random Sample Variance:"</span>, data.sample(n<span class="op">=</span><span class="bu">len</span>(sys_sample), random_state<span class="op">=</span><span class="dv">42</span>)[<span class="st">'medv'</span>].var())</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Compare all methods visually</span></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>plt.figure(figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">5</span>))</span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>plt.subplot(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>)</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a>sns.histplot(sys_sample[<span class="st">'medv'</span>], kde<span class="op">=</span><span class="va">True</span>, bins<span class="op">=</span><span class="dv">20</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, color<span class="op">=</span><span class="st">'lightblue'</span>)</span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Systematic Sample Distribution'</span>, fontsize<span class="op">=</span><span class="dv">12</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>)</span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Median Value ($1000s)'</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Density'</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a>plt.subplot(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">2</span>)</span>
+<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a>sns.histplot(data.sample(n<span class="op">=</span><span class="bu">len</span>(sys_sample), random_state<span class="op">=</span><span class="dv">42</span>)[<span class="st">'medv'</span>], kde<span class="op">=</span><span class="va">True</span>, bins<span class="op">=</span><span class="dv">20</span>, alpha<span class="op">=</span><span class="fl">0.7</span>, color<span class="op">=</span><span class="st">'lightcoral'</span>)</span>
+<span id="cb29-25"><a href="#cb29-25" aria-hidden="true" tabindex="-1"></a>plt.title(<span class="st">'Random Sample Distribution'</span>, fontsize<span class="op">=</span><span class="dv">12</span>, fontweight<span class="op">=</span><span class="st">'bold'</span>)</span>
+<span id="cb29-26"><a href="#cb29-26" aria-hidden="true" tabindex="-1"></a>plt.xlabel(<span class="st">'Median Value ($1000s)'</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb29-27"><a href="#cb29-27" aria-hidden="true" tabindex="-1"></a>plt.ylabel(<span class="st">'Density'</span>, fontsize<span class="op">=</span><span class="dv">10</span>)</span>
+<span id="cb29-28"><a href="#cb29-28" aria-hidden="true" tabindex="-1"></a>plt.grid(<span class="va">True</span>, alpha<span class="op">=</span><span class="fl">0.3</span>)</span>
+<span id="cb29-29"><a href="#cb29-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-30"><a href="#cb29-30" aria-hidden="true" tabindex="-1"></a>plt.tight_layout()</span>
+<span id="cb29-31"><a href="#cb29-31" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>Systematic Sample Mean: 21.67941176470588
+Systematic Sample Variance: 78.03115608619686
+Simple Random Sample Mean: 21.488235294117644
+Simple Random Sample Variance: 74.05986022131626</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div id="fig-systematic-sampling" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-systematic-sampling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="02_housing_data_files/figure-html/fig-systematic-sampling-output-2.png" class="lightbox" data-gallery="quarto-lightbox-gallery-17" title="Figure&nbsp;13: Distributions of the median value for systematic and simple random samples."><img src="02_housing_data_files/figure-html/fig-systematic-sampling-output-2.png" width="1143" height="470" class="figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-systematic-sampling-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;13: Distributions of the median value for systematic and simple random samples.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-important">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>Analyze the advantages and disadvantages of each sampling method (compare <a href="#fig-systematic-sampling" class="quarto-xref">Figure&nbsp;13</a>). Summarize which method provides the most precise estimate of the population mean and attempt to explain why.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-tip callout-titled" title="Follow-up question (synthesis)">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Follow-up question (synthesis)
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>You have now covered sampling, the CLT, the bootstrap, the LLN, and hypothesis testing with permutations. Connect them together:</p>
+<ul>
+<li>Use the <strong>bootstrap</strong> to give a confidence interval for the mean of <code>medv</code>, then compare it to the <strong>CLT-based</strong> interval <span class="math inline">\(\bar{x} \pm 1.96 \cdot \sigma/\sqrt{n}\)</span>. Are they close? Why might the bootstrap interval be preferable when the population is skewed?</li>
+<li>The <strong>permutation test</strong> told you whether <code>medv</code> differs by <code>chas</code>. Could the <strong>bootstrap</strong> be used to answer the same question (e.g.&nbsp;by comparing bootstrap confidence intervals for the two groups)? How do the two approaches differ philosophically — one randomizes the labels, the other resamples within groups?</li>
+</ul>
+<p>This is a natural place to stop; the concepts here are the building blocks for predictive modelling, which the rest of the course will build upon.</p>
+</div>
+</div>
+</section>
+<section id="summary-and-key-takeaways" class="level2">
+<h2 class="anchored" data-anchor-id="summary-and-key-takeaways">Summary and Key Takeaways</h2>
+<p>This tutorial has built up, step by step, the core toolkit of statistical inference. Each section rests on the previous one:</p>
+<ol type="1">
+<li><p><strong>Data Exploration</strong>: we first checked data quality and visualized <code>medv</code> on its own, then examined how it relates to the other variables. Knowing your data is a prerequisite to any inference.</p></li>
+<li><p><strong>From population to sample</strong>: we distinguished the full dataset (our population) from the samples we draw from it, and saw that larger samples approximate the population distribution better.</p></li>
+<li><p><strong>Central Limit Theorem</strong>: the distribution of sample means becomes Normal as the sample size grows, no matter the population shape — the theoretical engine behind inference on means.</p></li>
+<li><p><strong>The Law of Large Numbers</strong>: sample means converge to the population mean as the sample size increases, and the standard error shrinks like <span class="math inline">\(\sigma/\sqrt{n}\)</span>.</p></li>
+<li><p><strong>Bootstrap resampling</strong>: by resampling with replacement from the observed sample, we can approximate the sampling distribution of any statistic (e.g.&nbsp;the mean) and build confidence intervals.</p></li>
+<li><p><strong>Comparing sampling methods</strong>: simple random, stratified and systematic sampling differ in precision; their choice matters for real surveys and experiments.</p></li>
+<li><p><strong>Hypothesis testing by permutation</strong>: we used resampling to test whether a difference between groups (e.g.&nbsp;by <code>chas</code>) could be due to chance alone, via a p-value.</p></li>
+</ol>
+<p>Taken together, these ideas — sampling distributions, the CLT, the bootstrap, the LLN, and permutation tests — form the foundation of modern statistical inference. They are the building blocks you will reuse throughout the course, including when we move on to predictive modelling. If you haven’t already, work through the <strong>follow-up questions</strong> in this notebook: they are designed to take each idea one step further and to connect the methods to one another.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+</body></html>

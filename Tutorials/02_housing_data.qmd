@@ -1,0 +1,913 @@
+---
+title: "M1 AIRE 2026 - Housing dataset"
+subtitle: "Exploring resampling techniques and multivariate analysis"
+from: markdown+emoji
+author:
+  - name: Mahendra Mariadassou
+    orcid: 0000-0003-2986-354X
+    email: mahendra.mariadassou@inrae.fr
+    affiliations:
+      - name: INRAE - MaIAGE
+        adress: Domaine de Vilvert
+        city: Jouy-en-Josas
+        state: France
+date: "2026-07-14"
+date-modified: today
+lightbox: true
+format: 
+  html:
+    toc: true
+    code-fold: show
+    theme: cosmo
+jupyter: python3
+---
+
+## Preamble
+
+The objective of this notebook is to explore the concepts of sampling, resampling, and the Central Limit Theorem (CLT) through Python-based numerical examples based on a toy dataset. We will also extend our analysis to multivariate relationships and advanced sampling techniques.
+
+### Learning objectives
+
+By the end of this tutorial, you should be able to:
+
+- Describe the structure of a multivariate dataset and check the quality of its variables.
+- Explain the difference between the population distribution and a sample distribution.
+- Explain and illustrate the Central Limit Theorem numerically, and the Law of Large Numbers.
+- Compare simple random, stratified and systematic sampling methods.
+- Use bootstrap resampling to estimate sampling distributions and build confidence intervals, and reason about the bias-variance tradeoff.
+- Use a permutation test to perform a hypothesis test.
+
+## Data presentation
+
+#### Context
+
+This dataset is derived information collected by the U.S. Census Service concerning housing in the area of Boston Mass.
+
+#### Description:
+
+This dataset contains information collected by the U.S Census Service concerning housing in the area of Boston Mass. It was obtained from the [StatLib archive](http://lib.stat.cmu.edu/datasets/boston), and has been used extensively throughout the literature to benchmark algorithms. The dataset is small in size with only 506 cases.
+
+The data was originally published by [Harrison, D. and Rubinfeld, D.L. 'Hedonic prices and the demand for clean air', J. Environ. Economics & Management, vol.5, 81-102, 1978.](https://www.sciencedirect.com/science/article/abs/pii/0095069678900062), which you can read (it's Open Access) if you're interested.
+
+As usual, the dataset is available from the [lecture's website](data/BostonHousing.csv) or via a [gitlab url]() and was downloaded from [Kaggle](https://www.kaggle.com/datasets/arunjathari/bostonhousepricedata)
+
+#### Column description
+
+```         
+Variables in order:
+ CRIM     per capita crime rate by town
+ ZN       proportion of residential land zoned for lots over 25,000 sq.ft.
+ INDUS    proportion of non-retail business acres per town
+ CHAS     Charles River dummy variable (= 1 if tract bounds river; 0 otherwise)
+ NOX      nitric oxides concentration (parts per 10 million)
+ RM       average number of rooms per dwelling
+ AGE      proportion of owner-occupied units built prior to 1940
+ DIS      weighted distances to five Boston employment centres
+ RAD      index of accessibility to radial highways
+ TAX      full-value property-tax rate per $10,000
+ PTRATIO  pupil-teacher ratio by town
+ B        1000(Bk - 0.63)^2 where Bk is the proportion of blacks by town
+ LSTAT    % lower status of the population
+ MEDV     Median value of owner-occupied homes in $1000's
+```
+
+## Importing Libraries and Datasets
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** Introduce the necessary libraries and load a dataset for numerical experiments.
+
+-   **Instructions:**
+
+    -   Use pandas for data manipulation, numpy for numerical operations, and matplotlib and seaborn for visualizations.
+    -   Load the dataset of choice. For this exercise, we'll use a dataset with a continuous variable, namely the "Boston House Prices" dataset from Kaggle.
+
+#### Solution
+
+```{python}
+#| label: importLibraries
+# Import the Libraries
+import pandas as pd
+import seaborn as sns
+import numpy as np
+import matplotlib.pyplot as plt
+import warnings
+warnings.filterwarnings('ignore')
+
+# Set style for better-looking plots
+sns.set_style("whitegrid")
+plt.rcParams['figure.figsize'] = (10, 6)
+```
+
+```{python}
+#| label: loadData
+# Load dataset
+data = pd.read_csv('data/BostonHousing.csv')
+# Or from URL
+# url = "https://raw.githubusercontent.com/selva86/datasets/master/BostonHousing.csv"
+# data = pd.read_csv(url)
+```
+
+:::
+
+Let's look at the first few rows of the dataset:
+
+```{python}
+#| label: showDataHead
+## Show the first five lines of the dataset
+data.head()
+```
+
+Let's have a quick summary of the data:
+
+-   the dimensions of the data set (number of zones, number of variables)
+
+```{python}
+#| label: showDataShape
+data.shape
+```
+
+-   and a short summary of data type.
+
+```{python}
+#| label: showDataInfo
+data.info()
+```
+
+::: {.callout-note appearance="simple"}
+In this notebook, we're going to focus mostly on the median value of houses in the dataset (`medv`) but you could replace it with other **continuous** variables.
+:::
+
+## Data cleaning
+
+::: panel-tabset
+#### Exercise
+
+-   Look at the dataset structure and describe the columns, particularly focusing on a continuous variable, like `medv` (median value of homes).
+-   Do we need to apply some data cleaning techniques for this variable ?
+
+#### Solution
+
+There are no missing data in the dataset.
+
+```{python}
+#| label: checkMissingData
+# Check for missing data
+data.isnull().sum()
+```
+
+The distribution of prices (@fig-histogram-medv) is not unimodal (there's an excess of high-end homes, corresponding to wealthy zones) but no value stands out as a potential outlier.
+
+```{python}
+#| label: fig-histogram-medv
+#| fig-cap: "Distribution of the median value of owner-occupied homes across zones."
+# Histogram for medv
+plt.figure(figsize=(10, 6))
+sns.histplot(data['medv'].dropna(), bins=20, kde=True, alpha=0.7, color='skyblue')
+plt.title("Distribution of the Median Value of Owner-Occupied Homes Across Zones", fontsize=14, fontweight='bold')
+plt.xlabel("Median Value ($1000s)", fontsize=12)
+plt.ylabel("Frequency", fontsize=12)
+plt.grid(True, alpha=0.3)
+plt.show()
+```
+
+When applying the IQR rule to this column, the filtering thresholds are located on the red lines in @fig-iqr-thresholds.
+
+```{python}
+#| label: fig-iqr-thresholds
+#| fig-cap: "Distribution of the median value of owner-occupied homes with IQR bounds, quartiles and median overlaid."
+# Detect outliers in Fare using the IQR rule 
+Q1 = data['medv'].quantile(0.25)
+Q3 = data['medv'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+## Add several lines to the histogram (lower/upper bounds, Q1/Q3 and median)
+d = {
+  "x" : [lower_bound, Q1, data['medv'].median(), Q3, upper_bound], 
+  "color" : ['#ffeda0', '#fed976', '#fd8d3c', '#e31a1c', '#800026'],
+  "style" : ["--", "-", "-", "-", "--"],
+  "label" : ["Q1 - 1.5*IQR", "Q1", "Median", "Q3", "Q3+1.5*IQR"]
+}
+
+plt.figure(figsize=(10, 6))
+sns.histplot(data['medv'].dropna(), bins=20, kde=True, alpha=0.7, color='skyblue')
+plt.title("Distribution of the Median Value of Owner-Occupied Homes Across Zones", fontsize=14, fontweight='bold')
+plt.xlabel("Median Value ($1000s)", fontsize=12)
+plt.ylabel("Frequency", fontsize=12)
+
+for i in range(5):
+  plt.axvline(x=d["x"][i], color=d["color"][i], linestyle=d["style"][i], 
+  linewidth=2, label=d["label"][i])
+
+# Adding a legend for the lines
+plt.legend()
+plt.grid(True, alpha=0.3)
+plt.show()
+```
+
+If we were to clean the dataset using the IQR rule, we would end up with 466 zones only.
+
+```{python}
+#| label: countAfterCleaning
+# Number of zones after cleaning
+data[(data['medv'] >= lower_bound) & (data['medv'] <= upper_bound)].shape[0]
+```
+
+Since we expect to have a few wealthy countries around Boston and the "extreme" values are not that far away from the rest of the distribution as in the titanic example, we don't consider those points as outliers and keep them in the dataset.
+:::
+
+::: {.callout-note appearance="simple"}
+In the rest of this tutorial notebook, we assume that no cleaning was necessary and work on the original dataset.
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question"}
+Apply the IQR rule to another variable (e.g. `rm` or `lstat`). Does it flag the same zones as outliers? Do you think a variable-by-variable cleaning approach is sound, or would you need to consider several variables jointly?
+
+Another angle: if you were to clean the data, would you drop the flagged zones entirely, or would you investigate why they are extreme? How should you report these choices in an analysis?
+:::
+
+::: {.callout-note appearance="simple"}
+You can train by looking at other continuous variables to identify peculiar patterns.
+:::
+
+## Exploratory Data Analysis (EDA) - Multivariate View
+
+We have looked at `medv` in isolation. But housing prices rarely depend on a single factor. Before moving to sampling theory, let's get a feel for how the variables relate to one another with the full dataset.
+
+```{python}
+#| label: fig-correlation-matrix
+#| fig-cap: "Correlation matrix of the Boston housing variables."
+# Correlation matrix
+correlations = data.corr()
+
+# Plot correlation heatmap
+plt.figure(figsize=(12, 10))
+mask = np.triu(np.ones_like(correlations, dtype=bool))
+sns.heatmap(correlations, mask=mask, annot=True, cmap='coolwarm', center=0,
+            square=True, linewidths=0.5, cbar_kws={"shrink": .8})
+plt.title("Correlation Matrix of Boston Housing Variables", fontsize=16, fontweight='bold')
+plt.tight_layout()
+plt.show()
+```
+
+Which variables show the strongest (positive or negative) correlation with `medv` (see @fig-correlation-matrix)? You should find, for instance, a strong positive correlation with `rm` (rooms) and a strong negative correlation with `lstat` (lower status). Let's look at those relationships directly, first as a matrix of scatter plots (@fig-pairplot), then as individual panels (@fig-scatter-predictors).
+
+```{python}
+#| label: fig-pairplot
+#| fig-cap: "Pairwise relationships between key variables (diagonal shows kernel density estimates)."
+# Scatter plot matrix for key variables
+key_vars = ['medv', 'rm', 'lstat', 'ptratio', 'nox']
+sns.pairplot(data[key_vars], diag_kind='kde', plot_kws={'alpha': 0.6})
+plt.suptitle('Pairwise Relationships Between Key Variables', y=1.02, fontsize=16)
+plt.show()
+```
+
+```{python}
+#| label: fig-scatter-predictors
+#| fig-cap: "Median value against four key predictors: number of rooms, percentage of lower-status population, nitric oxide concentration and crime rate."
+# Relationship between median value and key predictors
+fig, axes = plt.subplots(2, 2, figsize=(15, 10))
+
+# Room count vs price
+axes[0,0].scatter(data['rm'], data['medv'], alpha=0.6, color='blue')
+axes[0,0].set_xlabel('Average Number of Rooms')
+axes[0,0].set_ylabel('Median Value ($1000s)')
+axes[0,0].set_title('Median Value vs Average Number of Rooms')
+axes[0,0].grid(True, alpha=0.3)
+
+# Low status percentage vs price  
+axes[0,1].scatter(data['lstat'], data['medv'], alpha=0.6, color='green')
+axes[0,1].set_xlabel('% Lower Status Population')
+axes[0,1].set_ylabel('Median Value ($1000s)')
+axes[0,1].set_title('Median Value vs % Lower Status Population')
+axes[0,1].grid(True, alpha=0.3)
+
+# Nitric oxides vs price
+axes[1,0].scatter(data['nox'], data['medv'], alpha=0.6, color='red')
+axes[1,0].set_xlabel('Nitric Oxides Concentration')
+axes[1,0].set_ylabel('Median Value ($1000s)')
+axes[1,0].set_title('Median Value vs Nitric Oxides Concentration')
+axes[1,0].grid(True, alpha=0.3)
+
+# Crime rate vs price
+axes[1,1].scatter(data['crim'], data['medv'], alpha=0.6, color='orange')
+axes[1,1].set_xlabel('Per Capita Crime Rate')
+axes[1,1].set_ylabel('Median Value ($1000s)')
+axes[1,1].set_title('Median Value vs Crime Rate')
+axes[1,1].grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+```
+
+::: {.callout-tip appearance="simple" title="Follow-up question"}
+Not all the relationships in the pairplot are linear. Compare, for instance, the `medv` vs `rm` plot (roughly linear) with the `medv` vs `lstat` plot (markedly curved). 
+
+- How would you describe the shape of each relationship?
+- Look at the top-right cluster in the `rm` vs `medv` plot (houses with many rooms and very high prices). Did the IQR rule flag those as outliers earlier? What does this tell you about the interplay between cleaning and modelling?
+
+An optional challenge: compute the correlation between `medv` and the logarithm of `lstat`. Does the (transformed) relationship look more linear?
+:::
+
+## From the Population to a Sample
+
+So far we have worked on the *whole* dataset, which we can think of as our **population** (the 506 Boston census tracts). In practice we rarely have access to the whole population — we observe only a **sample** and must infer population quantities from it. This is the core of statistical inference.
+
+We begin with the simplest tool: **simple random sampling** (drawing observations without replacement, each equally likely).
+
+## Understanding Sampling
+
+::: panel-tabset
+### Exercise
+
+-   **Objective:** Learn about simple random sampling (sampling without replacement) and how to compute basic statistics on samples.
+
+-   **Instructions:**
+
+    -   Create random samples from the population (full dataset) using `sample()` and calculate sample means.
+
+    -   Plot histograms of samples with different sizes.
+
+### Solution
+
+```{python}
+#| label: fig-sampling-distributions
+#| fig-cap: "Population distribution of median house value and its approximation by simple random samples of increasing size."
+# Population distribution (using 'medv' column)
+plt.figure(figsize=(10, 6))
+sns.histplot(data['medv'], kde=True, bins=30, alpha=0.7, color='lightblue')
+plt.title("Population Distribution of Median House Value (medv)", fontsize=14, fontweight='bold')
+plt.xlabel("Median Value ($1000s)", fontsize=12)
+plt.ylabel("Density", fontsize=12)
+plt.grid(True, alpha=0.3)
+plt.show()
+
+# Take random samples of varying sizes (n = 30, 100, 300)
+sample_sizes = [30, 100, 300]
+
+for size in sample_sizes:
+    sample = data['medv'].sample(size, random_state=42)
+    plt.figure(figsize=(10, 6))
+    sns.histplot(sample, kde=True, bins=10, alpha=0.7, color='lightgreen')
+    plt.title(f"Sample Distribution (n = {size})", fontsize=14, fontweight='bold')
+    plt.xlabel("Median Value ($1000s)", fontsize=12)
+    plt.ylabel("Density", fontsize=12)
+    plt.grid(True, alpha=0.3)
+    plt.show()
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+Compare the sample distributions in @fig-sampling-distributions to the full population. How does sample size affect the approximation to the population distribution?
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question"}
+Each time we draw a sample, we get a slightly different histogram. Because we fixed `random_state=42`, the samples above are reproducible. 
+
+- Re-run the cell with a *different* `random_state` (or none at all) and see how the histograms change. How much does the estimated mean vary across repeated samples of the same size?
+- This variability from one sample to the next is what bootstrap resampling (next section) tries to quantify. Before moving on, why do you think a larger sample tends to give a histogram closer to the population histogram?
+:::
+
+## Resampling with Bootstrap
+
+::: panel-tabset
+### Exercise
+
+-   **Objective:** Learn the concept of resampling using bootstrap (resampling with replacement) to estimate the sampling distribution of the sample mean.
+
+-   **Instructions:**
+
+    -   Take 1000 repeated bootstrap samples of size 100 using `sample(..., replace = True)` from the dataset and compute the mean of each sample. You can write a function `bootstrap_sample_mean()` to help you compute those bootstrap means.
+
+    -   Plot the distribution of the sample means (bootstrap distribution).
+
+    -   Compute the quantile of order 2.5% and 97.5% of the bootstrap distribution to get a confidence interval for the population mean (more on that in future classes).
+
+    -   Change the number of bootstrap samples and/or the size of each to see how the results change.
+
+### Solution
+
+```{python}
+#| label: fig-bootstrap
+#| fig-cap: "Bootstrap distribution of the sample mean (n = 100, 1000 replications)."
+def bootstrap_sample_mean(data, n_iterations=1000, sample_size=100):
+    means = []
+    for _ in range(n_iterations):
+        sample = data.sample(sample_size, replace=True)
+        means.append(sample.mean())
+    return means
+
+# Bootstrap distribution of the mean
+bootstrap_means = bootstrap_sample_mean(data['medv'], n_iterations=1000, sample_size=100)
+
+plt.figure(figsize=(10, 6))
+sns.histplot(bootstrap_means, kde=True, bins=30, alpha=0.7, color='lightcoral')
+plt.title("Bootstrap Distribution of Sample Means (n = 100, iterations = 1000)", fontsize=14, fontweight='bold')
+plt.xlabel("Sample Mean", fontsize=12)
+plt.ylabel("Density", fontsize=12)
+plt.grid(True, alpha=0.3)
+plt.show()
+
+# Print confidence interval
+ci_lower = np.percentile(bootstrap_means, 2.5)
+ci_upper = np.percentile(bootstrap_means, 97.5)
+print(f"95% Confidence Interval for the Mean: [{ci_lower:.2f}, {ci_upper:.2f}]")
+
+# Compare with actual population mean
+population_mean = data['medv'].mean()
+print(f"Population Mean: {population_mean:.2f}")
+print(f"Confidence interval contains population mean: {ci_lower <= population_mean <= ci_upper}")
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+Interpret the bootstrap distribution in @fig-bootstrap and compare the confidence interval of the mean to the population mean.
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question"}
+The bootstrap is a general idea: we can resample *any* statistic, not just the mean.
+
+- Redo the bootstrap for the **median** (or the standard deviation) of `medv` instead of the mean. How does the bootstrap distribution of the median compare to that of the mean?
+- Then change the **sample size** used in the bootstrap (e.g. to 30 or 300) and see how the width of the confidence interval changes. Why do larger sample sizes give narrower confidence intervals?
+:::
+
+## Illustrating the Central Limit Theorem
+
+### What's the CLT ?
+
+::: {.callout-note appearance="simple"}
+The **Central Limit Theorem (CLT)** says that if you take a bunch of random samples from any population (no matter how it's shaped—whether it's skewed, uniform, or weird-looking) and calculate the average (or mean) of those samples, the distribution of those sample means will (under very mild conditions) eventually look like a **normal distribution** (bell-shaped curve) as long as your sample size is big enough.
+
+In other words:
+
+-   If you keep sampling and averaging, the averages will cluster around the true population mean.
+
+-   This works no matter what the original data looks like, as long as the sample size is reasonably large.
+
+So, the CLT helps us use averages from samples to make predictions about the whole population, which is super useful in statistics!
+:::
+
+::: panel-tabset
+### Exercise
+
+-   **Objective:** Use resampling to illustrate the Central Limit Theorem (CLT) by showing how the distribution of sample means approaches a normal distribution as the sample size increases.
+
+-   **Instructions:**
+
+    -   Generate multiple (say 1000) random samples of increasing size (e.g., 30, 50, 100, 500, 1000).
+
+    -   For each sample size, compute the mean and plot the distribution of means.
+
+    -   You can write a function `sample_means_by_size()` to help you with the computations.
+
+    -   Change the number of bootstrap samples to see how the results change.
+
+### Solution
+
+```{python}
+#| label: fig-clt
+#| fig-cap: "Distribution of sample means for increasing sample sizes, illustrating the Central Limit Theorem."
+def sample_means_by_size(data, n_iterations=1000, sizes=[30, 50, 100, 500, 1000]):
+    means_dict = {}
+    for size in sizes:
+        means = []
+        for _ in range(n_iterations):
+            sample = data.sample(size, replace=True)
+            means.append(sample.mean())
+        means_dict[size] = means
+    return means_dict
+
+# Generate sample means for different sample sizes
+sample_sizes = [30, 50, 100, 500, 1000]
+clt_means = sample_means_by_size(data['medv'], n_iterations=1000, sizes=sample_sizes)
+
+# Plot distributions of sample means for different sizes
+fig, axes = plt.subplots(2, 3, figsize=(18, 12))
+axes = axes.ravel()
+
+for i, size in enumerate(sample_sizes):
+    sns.histplot(clt_means[size], kde=True, bins=30, ax=axes[i], alpha=0.7, color='lightseagreen')
+    axes[i].set_title(f"Distribution of Sample Means (n = {size}) - CLT Illustration", fontsize=12, fontweight='bold')
+    axes[i].set_xlabel("Sample Mean", fontsize=10)
+    axes[i].set_ylabel("Density", fontsize=10)
+    axes[i].grid(True, alpha=0.3)
+
+# Remove the last unused subplot
+axes[5].remove()
+
+plt.tight_layout()
+plt.show()
+
+# Compare with normal distribution
+from scipy import stats
+plt.figure(figsize=(10, 6))
+sample_size = 1000
+sample_means = clt_means[sample_size]
+# Plot histogram
+sns.histplot(sample_means, kde=True, bins=30, alpha=0.7, color='lightseagreen')
+# Overlay normal distribution
+x = np.linspace(min(sample_means), max(sample_means), 100)
+mu = np.mean(sample_means)
+sigma = np.std(sample_means)
+normal_curve = stats.norm.pdf(x, mu, sigma)
+plt.plot(x, normal_curve * len(sample_means) * (max(sample_means) - min(sample_means)) / 30, 
+         'r-', linewidth=2, label=f'Normal Curve (μ={mu:.2f}, σ={sigma:.2f})')
+plt.title(f"Sample Means Distribution vs Normal Distribution (n = {sample_size})", fontsize=14, fontweight='bold')
+plt.xlabel("Sample Mean", fontsize=12)
+plt.ylabel("Density", fontsize=12)
+plt.legend()
+plt.grid(True, alpha=0.3)
+plt.show()
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+Explain how the sample mean distributions in @fig-clt change as the sample size increases. Does the shape of the distribution become more normal? Why?
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question"}
+The CLT does not depend on the *population* being Normal — only on the sample means becoming Normal in the large-$n$ limit. Test it on a very skewed variable in this dataset, e.g. `crim` (crime rate).
+
+- Plot the population distribution of `crim` (it is heavily skewed to the right). 
+- Then re-run the CLT illustration for `crim`: how large must $n$ be before the distribution of sample means looks roughly Normal?
+
+Optional challenge: derive the *theoretical* standard error of the sample mean, $\sigma/\sqrt{n}$, and check it against the observed spread of your sample means for each $n$.
+:::
+
+## Verify the CLT on Your Own
+
+Before moving on, take a short pause to check that you have really grasped the machinery of the previous sections. The exercise below has **no provided solution** — it is designed to be solved with the functions you have already written (`sample_means_by_size()` and the CLT plotting code).
+
+-   **Objective:** Select your own sample sizes, repeat the process, and verify the Central Limit Theorem.
+
+-   **Instructions:**
+
+    -   Choose three different sample sizes.
+
+    -   Plot the resulting distributions of sample means and compute the sample mean and standard deviation.
+
+    -   Discuss why the standard deviation decreases as the sample size increases
+
+::: {.callout-important appearance="simple"}
+Summarize how the Central Limit Theorem applies to this dataset and describe how sample size influences the accuracy of the estimate of the population mean.
+:::
+
+Once you are comfortable, we move on to comparing *different* ways of sampling from the population — a step up in sophistication.
+
+## Stratified Sampling vs. Simple Random Sampling
+
+::: {.callout-warning appearance="simple"}
+This section and the following sections are devoted to slightly more advanced material that's not or not fully covered in the lectures. They assume some familiarity with mathematics and / or grouped operations on data frames.
+:::
+
+::: panel-tabset
+### Exercise
+
+-   **Objective:** Introduce stratified sampling and compare it to simple random sampling to understand how different sampling methods affect estimates.
+
+-   **Instructions:**
+
+    -   Split the dataset into strata based on a categorical variable, here `chas` (location next to the river or not).
+
+    -   Perform stratified sampling from each group and compute sample statistics (i.e. do resampling *within each group*).
+
+    -   Compare the results of simple random sampling vs. stratified sampling for the same sample size.
+
+### Solution
+
+```{python}
+#| label: fig-stratified-sampling
+#| fig-cap: "Distributions of the median value for stratified and simple random samples of the same size."
+# Stratified sampling based on 'chas' in Boston Housing dataset
+strata = data.groupby('chas')
+stratified_sample = strata.apply(lambda x: x.sample(frac=0.3, random_state=42)).reset_index(drop=True)
+
+# Simple random sample of same size
+random_sample = data.sample(n=len(stratified_sample), random_state=42)
+
+# Compare means and variances of 'medv'
+print("Stratified Sample Mean:", stratified_sample['medv'].mean())
+print("Simple Random Sample Mean:", random_sample['medv'].mean())
+
+print("Stratified Sample Variance:", stratified_sample['medv'].var())
+print("Simple Random Sample Variance:", random_sample['medv'].var())
+
+# Visual comparison
+plt.figure(figsize=(12, 5))
+
+plt.subplot(1, 2, 1)
+sns.histplot(stratified_sample['medv'], kde=True, bins=20, alpha=0.7, color='lightblue')
+plt.title('Stratified Sample Distribution', fontsize=12, fontweight='bold')
+plt.xlabel('Median Value ($1000s)', fontsize=10)
+plt.ylabel('Density', fontsize=10)
+plt.grid(True, alpha=0.3)
+
+plt.subplot(1, 2, 2)
+sns.histplot(random_sample['medv'], kde=True, bins=20, alpha=0.7, color='lightcoral')
+plt.title('Simple Random Sample Distribution', fontsize=12, fontweight='bold')
+plt.xlabel('Median Value ($1000s)', fontsize=10)
+plt.ylabel('Density', fontsize=10)
+plt.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+Interpret which sampling method provides better estimates of the population mean (compare @figStratifiedSampling) and why stratified sampling may lead to more accurate results in some cases.
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question"}
+The Boston dataset is sorted geographically (by census tract), so consecutive rows tend to be similar. 
+
+- Compare a *systematic* sample (every $k$-th row) to a simple random sample of the same size: which estimate of the mean is closer to the population mean?
+- Stratified sampling here used `chas` as the strata variable. Try stratifying on a *different* variable (e.g. bin `medv` into low/high groups first). Does the choice of stratum matter for the quality of the estimate?
+
+Optional challenge: repeat each sampling method many times (say 1000) and compare the *spread* of the resulting estimates (their standard error) rather than a single draw.
+:::
+
+## Bias-Variance Tradeoff in Resampling
+
+::: panel-tabset
+### Exercise
+
+-   **Objective:** Introduce the bias-variance tradeoff and its relevance to resampling techniques.
+
+-   **Instructions:**
+
+    -   Take bootstrap samples from the dataset and compute the sample mean and variance.
+
+    -   Increase the number of bootstrap iterations and observe how the bias and variance of the estimate change.
+
+    -   Explore the tradeoff between high variance (due to small samples) and high bias (due to poor estimation methods).
+
+### Solution
+
+```{python}
+#| label: fig-bias-variance
+#| fig-cap: "Bias and variance of the bootstrap mean estimate as a function of the number of iterations."
+def bootstrap_bias_variance(data, sample_size=100, n_iterations=1000):
+    sample_means = []
+    for _ in range(n_iterations):
+        sample = data.sample(sample_size, replace=True)
+        sample_means.append(sample.mean())
+    bias = np.mean(sample_means) - data.mean()
+    variance = np.var(sample_means)
+    return bias, variance
+
+# Calculate bias and variance for different bootstrap iterations
+iterations_list = [100, 500, 1000, 5000]
+bias_values = []
+variance_values = []
+
+for n_iter in iterations_list:
+    bias, var = bootstrap_bias_variance(data['medv'], sample_size=100, n_iterations=n_iter)
+    bias_values.append(bias)
+    variance_values.append(var)
+    print(f"Iterations: {n_iter}, Bias: {bias:.4f}, Variance: {var:.4f}")
+
+# Plot bias and variance
+plt.figure(figsize=(10, 6))
+plt.plot(iterations_list, bias_values, marker='o', linewidth=2, label='Bias')
+plt.plot(iterations_list, variance_values, marker='s', linewidth=2, label='Variance')
+plt.xlabel('Number of Bootstrap Iterations', fontsize=12)
+plt.ylabel('Value', fontsize=12)
+plt.title('Bias-Variance Tradeoff in Bootstrap Sampling', fontsize=14, fontweight='bold')
+plt.legend()
+plt.grid(True, alpha=0.3)
+plt.show()
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+Analyze how increasing the number of iterations reduces variance but can introduce bias (@fig-bias-variance). Think about the implications of bias-variance tradeoff in practical statistical analysis.
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question"}
+In the code above we varied the number of bootstrap *iterations* while keeping the *sample size* fixed. 
+
+- What happens if instead you keep the iterations fixed and vary the **bootstrap sample size** (e.g. 30, 100, 300)? Which quantity — bias or variance — is most affected?
+- Think about the distinction between the two sources of variability: one due to the *resampling* (which you control by taking more iterations), and one due to the *sample you started from* (which you do not). Which one does the bootstrap actually reduce?
+:::
+
+## Hypothesis Testing using Resampling
+
+::: panel-tabset
+### Exercise
+
+-   **Objective:** Use resampling methods (e.g., permutation testing) to perform hypothesis testing.
+
+-   **Instructions:**
+
+    -   Formulate a hypothesis about the data (e.g., the mean house price in `chas` = 1 is different from `chas` = 0).
+
+    -   Perform a permutation test by randomly shuffling the `chas` labels and computing the mean difference.
+
+    -   Compare the observed mean difference to the permutation distribution to determine if the difference is statistically significant. You can do that using the p-value, the probability that a sample from the permutation distribution exceeds (in absolute value) the observed mean.
+
+### Solution
+
+```{python}
+#| label: fig-permutation-test
+#| fig-cap: "Permutation distribution of the mean difference, with the observed difference marked in red."
+def permutation_test(data, group_col, value_col, n_permutations=1000):
+    # Observed difference in means
+    observed_diff = data.groupby(group_col)[value_col].mean().diff().iloc[-1]
+
+    perm_diffs = []
+    for _ in range(n_permutations):
+        permuted = data.copy()
+        permuted[group_col] = np.random.permutation(permuted[group_col])
+        perm_diff = permuted.groupby(group_col)[value_col].mean().diff().iloc[-1]
+        perm_diffs.append(perm_diff)
+
+    # Plot permutation distribution
+    plt.figure(figsize=(10, 6))
+    sns.histplot(perm_diffs, kde=True, bins=30, alpha=0.7, color='lightgreen')
+    plt.axvline(observed_diff, color='red', linestyle='--', linewidth=2, label=f'Observed Diff: {observed_diff:.2f}')
+    plt.axvline(-observed_diff, color='red', linestyle='--', linewidth=2, label=f'-Observed Diff: {-observed_diff:.2f}')
+    plt.title(f"Permutation Test Distribution\n(observed diff = {observed_diff:.2f})", fontsize=14, fontweight='bold')
+    plt.xlabel("Difference in Means", fontsize=12)
+    plt.ylabel("Density", fontsize=12)
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.show()
+
+    # Calculate p-value
+    p_value = np.mean(np.abs(perm_diffs) >= np.abs(observed_diff))
+    return observed_diff, p_value
+
+# Perform permutation test on 'chas' vs 'medv'
+obs_diff, p_val = permutation_test(data, 'chas', 'medv')
+print(f"Observed Difference: {obs_diff:.4f}")
+print(f"P-value: {p_val:.4f}")
+
+if p_val < 0.05:
+    print("The difference is statistically significant (p < 0.05)")
+else:
+    print("The difference is not statistically significant (p >= 0.05)")
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+Interpret the results of the hypothesis test and the meaning of the p-value in this context, using the permutation distribution shown in @fig-permutation-test. Reflect on the relevance of the method if the population is structured in some way.
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question"}
+The permutation test shuffles the `chas` labels, assuming the labels are *exchangeable* under the null hypothesis. 
+
+- Formulate a second hypothesis involving another grouping variable (e.g. does `medv` differ between tracts with high vs. low `ptratio`, split at its median?) and run the permutation test again.
+- Because `chas` has very unequal group sizes, the permutation test here is not very powerful. Try testing on `ptratio` (more balanced groups) and compare the p-values.
+
+Optional challenge: the p-value depends on the number of permutations. Re-run the test with only 100 permutations a few times — how stable is the p-value? How does the stability improve with more permutations?
+:::
+
+## Demonstrating the Law of Large Numbers (LLN)
+
+::: panel-tabset
+### Exercise
+
+-   **Objective:** Illustrate how the Law of Large Numbers works by showing that sample means converge to the population mean as sample size increases.
+
+-   **Instructions:**
+
+    -   Take repeated samples of increasing sizes and plot how the sample mean converges to the population mean.
+
+### Solution
+
+```{python}
+#| label: fig-lln
+#| fig-cap: "Law of Large Numbers: sample means converging to the population mean as the sample size increases."
+def law_of_large_numbers(data, max_sample_size=500, step=50):
+    sample_sizes = range(50, max_sample_size, step)
+    sample_means = []
+
+    for size in sample_sizes:
+        sample = data.sample(size, replace=False)
+        sample_means.append(sample.mean())
+
+    # Plot sample means vs. sample size
+    plt.figure(figsize=(10, 6))
+    plt.plot(sample_sizes, sample_means, marker='o', linewidth=2, markersize=6, color='blue')
+    plt.axhline(data.mean(), color='red', linestyle='--', linewidth=2, label=f'Population Mean: {data.mean():.2f}')
+    plt.title("Law of Large Numbers: Sample Means Converging to Population Mean", fontsize=14, fontweight='bold')
+    plt.xlabel("Sample Size", fontsize=12)
+    plt.ylabel("Sample Mean", fontsize=12)
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.show()
+
+# Apply LLN demonstration
+law_of_large_numbers(data['medv'])
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+Explain how the LLN works and why larger samples tend to give more accurate estimates of the population mean, with reference to @fig-lln. Discuss the variability you observe in smaller samples.
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question"}
+The LLN tells us that the sample mean *converges* to the population mean, but it doesn't tell us *how quickly*.
+
+- The standard deviation of the sample mean decreases like $\sigma/\sqrt{n}$. Superimpose the "theoretical" curve $\sigma/\sqrt{n}$ on the LLN plot — does it match the observed variability of the sample means?
+- What does this imply in practical terms? Roughly how many times larger a sample do you need to halve the uncertainty in your estimate of the mean?
+
+Bonus: the LLN plot shows a single sample trajectory. Plot *several* trajectories (with different `random_state`s) on the same figure to see the band of convergence shrink with $n$.
+:::
+
+## Comparing the Efficiency of Sampling Methods
+
+::: panel-tabset
+### Exercise
+
+-   **Objective:** Compare different sampling methods (simple random, stratified, systematic) and determine which is the most efficient in terms of variance and accuracy.
+
+-   **Instructions:**
+
+    -   Implement systematic sampling (selecting every *k*-th element) alongside random and stratified sampling.
+
+    -   Compare the variance of the sample mean for each method.
+
+### Solution
+
+```{python}
+#| label: fig-systematic-sampling
+#| fig-cap: "Distributions of the median value for systematic and simple random samples."
+def systematic_sampling(data, step):
+    return data.iloc[::step, :]
+
+# Systematic sample (e.g., every 5th row)
+sys_sample = systematic_sampling(data, 5)
+
+# Compare sample means and variance
+print("Systematic Sample Mean:", sys_sample['medv'].mean())
+print("Systematic Sample Variance:", sys_sample['medv'].var())
+print("Simple Random Sample Mean:", data.sample(n=len(sys_sample), random_state=42)['medv'].mean())
+print("Simple Random Sample Variance:", data.sample(n=len(sys_sample), random_state=42)['medv'].var())
+
+# Compare all methods visually
+plt.figure(figsize=(12, 5))
+
+plt.subplot(1, 2, 1)
+sns.histplot(sys_sample['medv'], kde=True, bins=20, alpha=0.7, color='lightblue')
+plt.title('Systematic Sample Distribution', fontsize=12, fontweight='bold')
+plt.xlabel('Median Value ($1000s)', fontsize=10)
+plt.ylabel('Density', fontsize=10)
+plt.grid(True, alpha=0.3)
+
+plt.subplot(1, 2, 2)
+sns.histplot(data.sample(n=len(sys_sample), random_state=42)['medv'], kde=True, bins=20, alpha=0.7, color='lightcoral')
+plt.title('Random Sample Distribution', fontsize=12, fontweight='bold')
+plt.xlabel('Median Value ($1000s)', fontsize=10)
+plt.ylabel('Density', fontsize=10)
+plt.grid(True, alpha=0.3)
+
+plt.tight_layout()
+plt.show()
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+Analyze the advantages and disadvantages of each sampling method (compare @fig-systematic-sampling). Summarize which method provides the most precise estimate of the population mean and attempt to explain why.
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question (synthesis)"}
+You have now covered sampling, the CLT, the bootstrap, the LLN, and hypothesis testing with permutations. Connect them together:
+
+- Use the **bootstrap** to give a confidence interval for the mean of `medv`, then compare it to the **CLT-based** interval $\bar{x} \pm 1.96 \cdot \sigma/\sqrt{n}$. Are they close? Why might the bootstrap interval be preferable when the population is skewed?
+- The **permutation test** told you whether `medv` differs by `chas`. Could the **bootstrap** be used to answer the same question (e.g. by comparing bootstrap confidence intervals for the two groups)? How do the two approaches differ philosophically — one randomizes the labels, the other resamples within groups?
+
+This is a natural place to stop; the concepts here are the building blocks for predictive modelling, which the rest of the course will build upon.
+:::
+
+## Summary and Key Takeaways
+
+This tutorial has built up, step by step, the core toolkit of statistical inference. Each section rests on the previous one:
+
+1. **Data Exploration**: we first checked data quality and visualized `medv` on its own, then examined how it relates to the other variables. Knowing your data is a prerequisite to any inference.
+
+2. **From population to sample**: we distinguished the full dataset (our population) from the samples we draw from it, and saw that larger samples approximate the population distribution better.
+
+3. **Central Limit Theorem**: the distribution of sample means becomes Normal as the sample size grows, no matter the population shape — the theoretical engine behind inference on means.
+
+4. **The Law of Large Numbers**: sample means converge to the population mean as the sample size increases, and the standard error shrinks like $\sigma/\sqrt{n}$.
+
+5. **Bootstrap resampling**: by resampling with replacement from the observed sample, we can approximate the sampling distribution of any statistic (e.g. the mean) and build confidence intervals.
+
+6. **Comparing sampling methods**: simple random, stratified and systematic sampling differ in precision; their choice matters for real surveys and experiments.
+
+7. **Hypothesis testing by permutation**: we used resampling to test whether a difference between groups (e.g. by `chas`) could be due to chance alone, via a p-value.
+
+Taken together, these ideas — sampling distributions, the CLT, the bootstrap, the LLN, and permutation tests — form the foundation of modern statistical inference. They are the building blocks you will reuse throughout the course, including when we move on to predictive modelling. If you haven't already, work through the **follow-up questions** in this notebook: they are designed to take each idea one step further and to connect the methods to one another.

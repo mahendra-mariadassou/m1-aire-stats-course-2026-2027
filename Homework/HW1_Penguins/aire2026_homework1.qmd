@@ -1,0 +1,148 @@
+---
+title: "AIRE Master 2026 - Exploratory Data Analysis with Palmer Penguins"
+subtitle: "Homework I - Correction"
+from: markdown+emoji
+author:
+  - name: Mahendra Mariadassou
+    orcid: 0000-0003-2986-354X
+    email: mahendra.mariadassou@inrae.fr
+    affiliations:
+      - name: INRAE - MaIAGE
+        adress: Domaine de Vilvert
+        city: Jouy-en-Josas
+        state: France
+date: "2026-07-14"
+date-modified: today
+lightbox: true
+format: 
+  html:
+    toc: true
+    code-fold: show
+jupyter: python3
+---
+
+## Homework objectives
+
+The homework is designed to allow you students to apply summary statistics, data visualization, sampling, and confidence intervals to a widely available dataset: the `Palmer Penguins`.
+
+This [dataset](https://www.kaggle.com/datasets/parulpandey/palmer-archipelago-antarctica-penguin-data) contains measurements for 344 penguins of three species, collected from islands in the Palmer Archipelago, Antarctica. This dataset is available in the seaborn packages so you that you don't need to download or import any dataset.
+
+## Learning Objectives
+
+-   Practice summary statistics and data visualization.
+-   Explore data transformations and missing data handling.
+-   Apply parameter estimation and compute confidence intervals.
+-   Formulate insights based on data analysis.
+
+You'll be evaluated on **data interpretation** rather than simply completing tasks and writing code, so make sure to comment what you do and to back up your conclusions / claims (when necessary) with figures and/or graphs (as you would in a report).
+
+```{python}
+# Imports
+import seaborn as sns
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy import stats
+```
+
+### **Instructions**
+
+1.  **Load the Dataset**:
+
+    -   Use the `seaborn` library's built-in `load_dataset` function to import the Palmer Penguins dataset.
+
+    -   Preview the data by printing out the first few rows.
+
+2.  **Data Summary and Basic Exploration**:
+
+    -   **Question**: What are the types of each variable in this dataset? Identify whether each column is numerical or categorical.
+
+    -   **Question**: Calculate and report in a table the **mean**, **median**, and **standard deviation** for each of the numerical columns. Comment on any patterns or differences you observe.
+
+    -   **Question**: Repeat the operations but within each species. Comment the **differences** between the results obtained on the full dataset and those obtained per species.
+
+3.  **Missing Data Check**:
+
+    -   **Question**: Are there any missing values in the dataset? If so, how would you handle them (the answer can depend on the variable) ? Write down your approach and give a few lines of rationale.
+
+    -   **Action**: If any missing values were found, apply the method you chose to handle them (e.g., remove rows, impute values, etc.). In the rest of the homework, work only on the **cleaned version** of the dataset.
+
+4.  **Visualizing Data**:
+
+    -   Plot the distribution of each numerical variable using histograms or KDE plots.
+
+        -   **Question**: What do these distributions tell you about the spread and central tendency of each variable?
+
+    -   Create boxplots to explore potential **outliers** in each variable.
+
+        -   **Question**: Are there any noticeable outliers? If so, describe their potential impact on the analysis. How many outliers are identified for each numerical variable by the IQR rule ?
+
+5.  **Exploring Relationships between Variables**:
+
+    -   Use adapted plots to investigate relationships between pairs of features. You should examine at least (but can consider also consider others):
+
+        -   bill length vs. bill depth
+
+        -   body mass vs. flipper length
+
+        -   body mass vs. species
+
+    -   **Question**: Do any variables seem to have a linear or other type of relationship? Describe any trends or patterns you observe between numerical variables using the appropriate measure. What do you conclude ?
+
+6.  **Random Sampling and Confidence Intervals**:
+
+    -   Take a random sample of $n = 30$ **observations** from the dataset (you can use `random.sample()` from `sklearn` or a similar function).
+
+        -   **Question**: Calculate the mean of **bill length** for this sample. How does it compare to the mean of the entire dataset?
+
+    -   Generate a **95% confidence interval** for the mean bill length of this sample using the formula:
+
+        $$\hat{\mu} \pm 1.96 \hat{\sigma}/\sqrt{n}$$ where $\hat{\mu}$ and $\hat{\sigma}$ are the sample mean and standard deviation.
+
+    -   Does your confidence interval contains the population mean of bill length ?
+
+    -   Repeat the operation 100 times and report the number of times your confidence interval contains the population mean. Comment on the result.
+
+7.  **Comparing Species Groups**:
+
+    -   Group the dataset by the **species** column and calculate the mean and standard deviation of **flipper length** for each species.
+
+        -   **Question**: What differences do you observe between species in terms of mean flipper length? How do they compare to the standard deviations?
+
+    -   Take a sample of **15 observations** per species and compute a **90% confidence interval** for the mean flipper length within each group.
+
+        -   **Question**: Interpret the confidence intervals. Do they overlap between species? What does this suggest about the differences in flipper length across species?
+
+8.  **To go further**:
+
+    -   **Question**: If you were to extend this analysis, what other questions would you investigate ? You're not expected to actually investigate them, just to come up with ideas that can be explored using this dataset.
+
+9.  **Notebook structure**
+
+    You can (but don't have to) use the following structure for your notebook.
+
+```{python}
+# 1. Load Dataset
+data = sns.load_dataset("penguins")
+
+# 2. Data Summary and Basic Exploration
+# Student tasks: describe the dataset, calculate summary statistics
+
+# 3. Missing Data Check
+# Check for missing data and handle appropriately
+
+# 4. Visualizing Data
+# Create histograms, KDEs, boxplots for numerical variables
+
+# 5. Exploring Relationships between Variables
+# Scatter plots and discussions on potential correlations
+
+# 6. Random Sampling and Confidence Intervals
+# Take a sample, calculate sample mean and confidence intervals
+
+# 7. Comparing Species Groups
+# Group by species, calculate summary statistics and confidence intervals
+
+# 8. To go further
+# Write-up summarizing findings and discussing further analysis steps
+```

@@ -1,0 +1,261 @@
+---
+title: "Confidence Interval Exercises"
+subtitle: "Two Practice Problems"
+from: markdown+emoji
+author:
+  - name: Mahendra Mariadassou
+    orcid: 0000-0003-2986-354X
+    email: mahendra.mariadassou@inrae.fr
+    affiliations:
+      - name: INRAE - MaIAGE
+        adress: Domaine de Vilvert
+        city: Jouy-en-Josas
+        state: France
+date: "2026-11-04"
+date-modified: today
+lightbox: true
+format:
+  html:
+    toc: true
+    code-fold: show
+    theme: cosmo
+  typst:
+    number-sections: true
+---
+
+::: {.callout-tip appearance="simple" title="Computing normal and Student quantiles" collapse="true"}
+
+Both exercises require quantiles of the standard normal $\mathcal{N}(0,1)$ (e.g. $u_{0.975} = 1.960$) and of the Student distribution with $k$ degrees of freedom (e.g. $t_{9,0.975} = 2.262$). The upper $\alpha$-quantile $q_\alpha$ (the value such that $P(X \le q_\alpha) = \alpha$) is obtained as follows, and you can also evaluate the CDF at any point.
+
+**In R**
+
+- Normal quantile: `qnorm(0.975)` and CDF: `pnorm(1.96)`
+- Student quantile with $k$ df: `qt(0.975, df = k)` and CDF: `pt(1.96, df = k)`
+
+**In Python** (`from scipy.stats import norm, t`)
+
+- Normal quantile: `norm.ppf(0.975)` and CDF: `norm.cdf(1.96)`
+- Student quantile with $k$ df: `t.ppf(0.975, df=k)` and CDF: `t.cdf(1.96, df=k)`
+
+You can check that `qnorm(0.975)` = `norm.ppf(0.975)` = $1.960$ and that `qt(0.975, df = 9)` = `t.ppf(0.975, df=9)` = $2.262$.
+:::
+
+# Exercise 1: Mean Height with Unknown Variance {#sec-exe1}
+
+Adult height in a given population is well approximated by a Gaussian distribution, but the population variance is rarely known in practice. This exercise builds a confidence interval for the population mean when the variance must be *estimated* from the data, using the Student distribution as a pivot.
+
+## Context
+
+Consider a sample of $n$ adult heights $X_1, \dots, X_n$ modelled as i.i.d. random variables
+
+$$X_1, \dots, X_n \sim \mathcal{N}(\mu, \sigma^2),$$
+
+where both the mean $\mu$ and the variance $\sigma^2$ are **unknown**. Recall the two key sampling results used in the lectures:
+
+$$\frac{(n-1)S^2}{\sigma^2} \sim \chi^2(n-1)
+\quad\text{and}\quad
+\frac{\bar{X} - \mu}{S/\sqrt{n}} \sim \mathcal{T}(n-1),$$
+
+where $\bar{X} = \frac{1}{n}\sum_i X_i$ is the sample mean and $S^2 = \frac{1}{n-1}\sum_i (X_i - \bar{X})^2$ is the unbiased sample variance.
+
+## Problem Statement
+
+A researcher measures the height (in cm) of $n = 10$ adults sampled at random from the population. The measurements are:
+
+$$168, \ 172, \ 165, \ 177, \ 170, \ 174, \ 166, \ 173, \ 169, \ 176.$$
+
+1. Compute the sample mean $\bar{x}$ and the sample variance $s^2$.
+2. Identify a **pivotal statistic** for $\mu$ that does not depend on $\sigma$. Justify why it is a pivot (its distribution is known and free of unknown parameters).
+3. Using the symmetry of the Student distribution, derive the **probability interval**: write $P\left( L \leq \frac{\bar{X} - \mu}{S/\sqrt{n}} \leq U \right) = 1 - \alpha$ for an optimal choice of $L$ and $U$.
+4. Isolate $\mu$ to obtain the formula of the **confidence interval** at level $1-\alpha$.
+5. Apply the formula with $\alpha = 0.05$: report the quantile $t_{n-1, 1-\alpha/2}$ used and give the numerical 95% confidence interval for $\mu$.
+6. (Advanced) Compare with the interval you would have obtained had you (incorrectly) assumed the variance **known** and equal to the true population value $\sigma^2 = 16$ (i.e. using the standard normal pivot). Which interval is wider, and why?
+7. (Advanced, coverage) Suppose that, instead of using the correct Student quantile $t_{n-1, 1-\alpha/2}$, you (incorrectly) calibrate the interval with the normal quantile $u_{1-\alpha/2}$, while keeping the *correct* T pivot $T = \frac{\bar{X}-\mu}{S/\sqrt{n}} \sim \mathcal{T}(n-1)$. Compute the **true (theoretical) coverage** of this mis-calibrated interval at level 95%, i.e. the probability $P\left( |T| \le u_{0.975} \right)$, and compare it with the nominal 0.95. Interpret the discrepancy in terms of the heavier tails of the Student distribution.
+
+# Solution 1 {#sec-sol1}
+
+::: {.callout-note appearance="simple"}
+Work through these steps after attempting the exercise on your own. Each step corresponds to an instruction in @sec-exe1.
+:::
+
+### Sample mean and variance
+
+The sample mean is
+
+$$\bar{x} = \frac{168+172+165+177+170+174+166+173+169+176}{10} = \frac{1710}{10} = 171.$$
+
+The sum of squared deviations is $\sum_i (x_i - \bar{x})^2 = 150$, hence the unbiased sample variance and standard deviation are
+
+$$s^2 = \frac{1}{n-1}\sum_{i=1}^{n}(x_i-\bar{x})^2 = \frac{150}{9} = \frac{50}{3} \approx 16.67,
+\qquad s = \sqrt{\frac{50}{3}} \approx 4.08.$$
+
+### Pivotal statistic
+
+Since $\sigma$ is unknown, the standard normal pivot $\frac{\bar{X}-\mu}{\sigma/\sqrt{n}}$ cannot be computed. Replacing $\sigma$ by its estimator $S$, the quantity
+
+$$T = \frac{\bar{X} - \mu}{S/\sqrt{n}} \sim \mathcal{T}(n-1)$$
+
+has a known distribution (Student with $n-1$ degrees of freedom) that **does not depend** on either $\mu$ or $\sigma$. It is therefore a pivotal statistic. (This follows because $\bar{X}$ and $S^2$ are independent and $\frac{(n-1)S^2}{\sigma^2}\sim\chi^2(n-1)$.)
+
+### Probability interval
+
+The Student density is symmetric, so the shortest two-sided probability interval for a chosen level $1-\alpha$ is centred:
+
+$$P\left( -t_{n-1,1-\alpha/2} \leq \frac{\bar{X}-\mu}{S/\sqrt{n}} \leq t_{n-1,1-\alpha/2} \right) = 1-\alpha.$$
+
+### From probability interval to confidence interval
+
+Each of the two inequalities isolates $\mu$. Starting from $-t_{n-1,1-\alpha/2} \leq \frac{\bar{X}-\mu}{S/\sqrt{n}}$ we get $\mu \leq \bar{X} + t_{n-1,1-\alpha/2}\frac{S}{\sqrt{n}}$, and from $\frac{\bar{X}-\mu}{S/\sqrt{n}} \leq t_{n-1,1-\alpha/2}$ we get $\mu \geq \bar{X} - t_{n-1,1-\alpha/2}\frac{S}{\sqrt{n}}$. Therefore
+
+$$\text{IC}_{1-\alpha}(\mu) = \left[ \bar{X} - t_{n-1,1-\alpha/2}\frac{S}{\sqrt{n}};\ \bar{X} + t_{n-1,1-\alpha/2}\frac{S}{\sqrt{n}} \right].$$
+
+### Numerical application
+
+With $n = 10$, $\alpha = 0.05$ and $t_{9, 0.975} \approx 2.262$:
+
+$$\bar{x} \pm t_{9,0.975}\frac{s}{\sqrt{n}} = 171 \pm 2.262 \times \frac{4.08}{\sqrt{10}} = 171 \pm 2.262 \times 1.291 \approx 171 \pm 2.92.$$
+
+$$\text{IC}_{0.95}(\mu) \approx [\,168.08;\ 173.92\,].$$
+
+We are 95% confident the true mean height lies between roughly 168 and 174 cm.
+
+### Comparison with the known-variance interval (Advanced)
+
+Had we (incorrectly) assumed $\sigma^2 = 16$ known, the pivot would be $Z = \frac{\bar{X}-\mu}{\sigma/\sqrt{n}}\sim\mathcal{N}(0,1)$ and the interval would use $u_{0.975} = 1.960$ instead of $t_{9,0.975} = 2.262$:
+
+$$\text{IC}_{0.95}(\mu)_{\text{known }\sigma} = 171 \pm 1.960\times \frac{4}{\sqrt{10}} \approx 171 \pm 2.48 = [\,168.52;\ 173.48\,].$$
+
+The interval built with the unknown-variance (Student) pivot is **wider**. This is because:
+
+- the Student quantile is larger than the normal one ($2.262 > 1.960$), reflecting the additional uncertainty from having to estimate $\sigma$ from a small sample;
+- here the *estimated* $s=4.08$ also happens to exceed the assumed $\sigma=4$ but it could also be smaller. 
+
+As $n$ grows, $t_{n-1,1-\alpha/2}\to u_{1-\alpha/2}$ and the two intervals converge.
+
+### Coverage of the mis-calibrated interval (Advanced)
+
+Here the random interval is $\left[\bar{X} \pm u_{0.975}\frac{S}{\sqrt{n}}\right]$, i.e. we keep the correct pivot $T = \frac{\bar{X}-\mu}{S/\sqrt{n}} \sim \mathcal{T}(n-1)$ but replace the correct critical value $t_{n-1,0.975}$ by the smaller normal value $u_{0.975} = 1.96$. The true coverage is therefore
+
+$$\text{Coverage} = P\left( |T| \le u_{0.975}\right) = F_{\mathcal{T}(n-1)}(u_{0.975}) - F_{\mathcal{T}(n-1)}(-u_{0.975}),$$
+
+where $F_{\mathcal{T}(n-1)}$ is the Student CDF with $n-1$ degrees of freedom. With $n = 10$, evaluating the Student(9) CDF at $\pm 1.96$:
+
+$$P\left(T \le 1.96\right) \approx 0.959, \qquad P\left(T \le -1.96\right) \approx 0.041,$$
+
+so the true coverage is
+
+$$\text{Coverage} = 0.959 - 0.041 \approx 0.918.$$
+
+Because $1.96 < t_{9,0.975} = 2.262$, the interval $[-u_{0.975}, u_{0.975}]$ shuts out *more* than the intended $\alpha = 5\%$ of the probability mass: the Student distribution has heavier tails than the normal, so more of its mass lies beyond $\pm 1.96$. The result is that the mis-calibrated interval covers the true mean only $91.8\%$ of the time instead of the nominal $95\%$. Using the wrong distribution for the critical value undercovers the parameter.
+
+# Exercise 2: Proportion of Tall Individuals {#sec-exe2}
+
+Here we build a confidence interval for a **Bernoulli proportion** $p$, a discrete problem with no exact Gaussian pivot. We rely on the Central Limit Theorem and the plug-in strategy presented in the lectures.
+
+## Context
+
+Let $X_i$ be a Bernoulli random variable with $P(X_i = 1) = p$, indicating whether the $i$-th randomly sampled adult is taller than 180 cm. Then $E[X_i] = p$ and $V[X_i] = p(1-p)$. For $n$ i.i.d. observations, by the Central Limit Theorem the proportion
+
+$$\widehat{P} = \bar{X} = \frac{1}{n}\sum_{i=1}^{n} X_i$$
+
+satisfies, for large $n$,
+
+$$Z = \frac{\widehat{P} - p}{\sqrt{p(1-p)/n}} \overset{\text{approx}}{\sim} \mathcal{N}(0,1).$$
+
+## Problem Statement
+
+A survey of $n = 400$ adults finds that $132$ of them are strictly taller than 180 cm.
+
+1. Compute the point estimate $\hat{p}$ of the proportion $p$.
+2. Justify that $Z$ above is an (approximate) pivotal statistic, and explain why a *plug-in* step is required to turn it into a usable pivot (hint: what unknown quantity appears under the square root?).
+3. Write the probability interval at level $1-\alpha$ for $Z$, then isolate $p$ and apply the plug-in strategy (replace $p$ by $\hat{p}$ under the square root) to obtain the approximate confidence interval formula.
+4. Apply the formula with $\alpha = 0.05$: give the quantile $u_{1-\alpha/2}$ and compute the numerical 95% confidence interval for $p$.
+5. Give a one-sentence interpretation of the resulting interval.
+6. (Advanced) Sample-size planning. Suppose a new survey must ensure that the *half-width* of a 95% confidence interval does not exceed $0.02$. Using the conservative "worst case" value $p = 1/2$, determine the required sample size $n$. What sample size is suggested if one instead reuses the estimate $\hat{p}$ from this exercise?
+7. (Advanced, exact strategy) The plug-in interval is only an approximation because it replaces $p$ by $\hat{p}$ under the square root. Instead, solve the probability interval **exactly** by squaring both sides to obtain a quadratic inequality in $p$, and derive the roots that bound the exact confidence interval. Compare these exact bounds with the plug-in interval obtained in question 4 — which is wider?
+
+# Solution 2 {#sec-sol2}
+
+::: {.callout-note appearance="simple"}
+Work through these steps after attempting the exercise on your own. Each step corresponds to an instruction in @sec-exe2.
+:::
+
+### Point estimate
+
+$$\hat{p} = \frac{132}{400} = 0.33.$$
+
+### An (approximate) pivotal statistic and the need for plug-in
+
+By the CLT, $Z = \frac{\widehat{P} - p}{\sqrt{p(1-p)/n}}$ is approximately $\mathcal{N}(0,1)$, a distribution that does not depend on $p$. It is therefore an **approximate pivotal statistic**. However, its distribution-free character is not enough to compute bounds numerically: the quantity $\sqrt{p(1-p)/n}$ inside the denominator still depends on the unknown $p$. The plug-in step consists of replacing $p$ by its estimate $\hat{p}$ there, which is legitimate for large $n$ because $\hat{p}\to p$.
+
+### Probability interval and confidence interval
+
+For a standard normal pivot the optimal two-sided probability interval uses the symmetric quantile $u_{1-\alpha/2}$:
+
+$$P\left( -u_{1-\alpha/2} \leq \frac{\widehat{P}-p}{\sqrt{p(1-p)/n}} \leq u_{1-\alpha/2} \right) \approx 1-\alpha.$$
+
+Isolating $p$ gives $p \in \widehat{P} \pm u_{1-\alpha/2}\sqrt{\frac{p(1-p)}{n}}$, and the plug-in strategy replaces $p$ by $\hat{p}$ under the square root:
+
+$$\text{IC}_{1-\alpha}(p) \approx \left[ \widehat{P} - u_{1-\alpha/2}\sqrt{\frac{\widehat{P}(1-\widehat{P})}{n}};\ \widehat{P} + u_{1-\alpha/2}\sqrt{\frac{\widehat{P}(1-\widehat{P})}{n}} \right].$$
+
+### Numerical application
+
+With $\alpha = 0.05$, $u_{0.975} = 1.96$, and
+
+$$\sqrt{\frac{\hat{p}(1-\hat{p})}{n}} = \sqrt{\frac{0.33 \times 0.67}{400}} = \sqrt{0.00055275} \approx 0.0235,$$
+
+the confidence interval is
+
+$$\text{IC}_{0.95}(p) \approx 0.33 \pm 1.96 \times 0.0235 \approx 0.33 \pm 0.046.$$
+
+$$\text{IC}_{0.95}(p) \approx [\,0.284;\ 0.376\,].$$
+
+### Interpretation
+
+We are 95% confident that the true proportion of adults taller than 180 cm in the population lies between about 28% and 38%. Equivalently, if the entire sampling-and-estimation procedure were repeated many times, roughly 95% of such intervals would contain the true $p$.
+
+### Sample-size planning (Advanced)
+
+The half-width of the interval is $u_{1-\alpha/2}\sqrt{\frac{p(1-p)}{n}}$. Imposing it be at most $0.02$ and solving for $n$:
+
+$$n \geq u_{1-\alpha/2}^2\,\frac{p(1-p)}{0.02^2}.$$
+
+The product $p(1-p)$ is maximized at $p = 1/2$ (where $p(1-p)=1/4$), giving the conservative bound
+
+$$n \geq 1.96^2 \times \frac{1/4}{0.0004} = 3.8416 \times 625 = 2401.$$
+
+A conservative design therefore requires about $n \approx 2400$ individuals. Reusing the observed value $\hat{p}=0.33$ gives the (slightly optimistic) requirement
+
+$$n \geq 1.96^2 \times \frac{0.33\times 0.67}{0.0004} \approx 2124.$$
+
+In practice one often plans with $p=1/2$ to be safe, since the true $p$ is unknown before the survey.
+
+### Exact confidence interval via the quadratic equation (Advanced)
+
+Start from the probability interval with a symmetric normal pivot:
+
+$$P\left( \left| \frac{\widehat{P} - p}{\sqrt{p(1-p)/n}} \right| \le u_{1-\alpha/2} \right) \approx 1-\alpha.$$
+
+Squaring both sides (the pivot is always in absolute value, so squaring is valid) gives
+
+$$n(\widehat{P}-p)^2 \le u_{1-\alpha/2}^2\, p(1-p).$$
+
+Expanding and rearranging, this is a quadratic inequality in $p$:
+
+$$(n + u^2) p^2 - (2n\widehat{P} + u^2) p + n\widehat{P}^2 \le 0,$$
+
+where $u = u_{1-\alpha/2}$. The leading coefficient $n+u^2 > 0$ is positive, so the quadratic is negative *between* its two roots, which therefore bound the exact confidence interval:
+
+$$p = \frac{2n\widehat{P} + u^2 \pm u\sqrt{u^2 + 4n\widehat{P}(1-\widehat{P})}}{2(n+u^2)}.$$
+
+Unlike the plug-in interval, this strategy never replaces $p$ by $\hat{p}$ in the variance: the unknown $p$ disappears only after isolating it through the quadratic, so the interval is **exact** (within the normal approximation of the pivot).
+
+**Numerical application.** With $n=400$, $\hat{p}=0.33$ and $u_{0.975}=1.96$:
+
+$$p = \frac{2\times400\times0.33 + 1.96^2 \pm 1.96\sqrt{1.96^2 + 4\times400\times0.33\times0.67}}{2(400+1.96^2)}.$$
+
+Evaluating the two roots gives
+
+$$\text{IC}_{0.95}(p)_{\text{exact}} \approx [\,0.2857;\ 0.3775\,].$$
+
+**Comparison with the plug-in interval.** The plug-in interval computed in question 4 was $[0.2839;\ 0.3761]$. The two are very close (the exact interval has width $0.0918$ versus $0.0922$ for the plug-in): for large $n$ the plug-in step introduces only a negligible error. The exact interval is slightly *shifted* (its centre is pulled toward $\hat{p} = 0.33$ from a weighted average that accounts for the variance being a function of $p$), and is marginally narrower here. The approximation improves as $n$ grows; for small samples the two can differ noticeably.

@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Tests</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Mahendra Mariadassou, INRAE   .small[from original slides by Tristan Mary-Huard]" />
+    <script src="libs/header-attrs-2.31/header-attrs.js"></script>
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/custom_weihai_ss.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+.title[
+# Tests
+]
+.author[
+### Mahendra Mariadassou, INRAE <br> .small[from original slides by Tristan Mary-Huard]
+]
+.date[
+### AIRE Master - 2026-2027
+]
+
+---
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  TeX: {
+    Macros: {
+      P: "{\\mathcal{P}}",
+      B: "{\\mathcal{B}}",
+      L: "{\\mathcal{L}}",
+      F: "{\\mathcal{F}}",
+      N: "{\\mathcal{N}}",
+      M: "{\\mathcal{M}}",
+      D: "{\\mathcal{D}}",
+      LN: "{\\mathcal{LN}}",
+      Rbb: "{\\mathbb{R}}",
+      Nbb: "{\\mathbb{N}}",
+      Sbb: "{\\mathbb{S}}", 
+      bpi: "{\\boldsymbol{\\pi}}",
+      bp: "{\\mathbf{p}}",
+      bg: "{\\mathbf{g}}",
+      bm: "{\\mathbf{m}}",
+      bn: "{\\mathbf{n}}",
+      bo: "{\\mathbf{o}}",
+      bs: "{\\mathbf{s}}",
+      bx: "{\\mathbf{x}}",
+      bA: "{\\mathbf{A}}",
+      bB: "{\\mathbf{B}}",
+      bM: "{\\mathbf{M}}",
+      bS: "{\\mathbf{S}}",
+      bX: "{\\mathbf{X}}",
+      bY: "{\\mathbf{Y}}",
+      bZ: "{\\mathbf{Z}}",
+      balpha: "{\\boldsymbol{\\alpha}}",
+      bbeta: "{\\boldsymbol{\\beta}}",
+      bfeta: "{\\boldsymbol{\\eta}}",
+      bgamma: "{\\boldsymbol{\\gamma}}",
+      bphi: "{\\boldsymbol{\\phi}}",
+      btau: "{\\boldsymbol{\\tau}}", 
+      btheta: "{\\boldsymbol{\\theta}}",
+      bTheta: "{\\boldsymbol{\\Theta}}",
+      bmu: "{\\boldsymbol{\\mu}}",
+      bSigma: "{\\boldsymbol{\\Sigma}}",
+      bOmega: "{\\boldsymbol{\\Omega}}"
+    }
+  }
+});
+</script>
+
+
+
+
+
+---
+
+## Main Idea
+
+Some research directions can be formulated as .blue[questions] with a yes / no answer: 
+
+- Is the expression of gene HER2 large in breast cancer ?
+- Is a new variety of tomato more resistant to mildew than the previous one ?
+- Is food cheaper in China than in France ?
+
+--
+
+You collect .alert[noisy data] about the problem and want to give an *evidence based* .blue[answer] to the question
+
+--
+
+&lt;img src="imgs/what-if-i-told-you-about-statistical-tests.jpg" alt="" width="300px" style="display: block; margin: auto;" /&gt;
+
+---
+
+## When should you use a test ?
+
+* You have a .alert[yes/no] question
+
+* You have .alert[data] related to the question
+
+* The data can be .alert[modeled] as the result of some .alert[random variable]
+
+* The question can be framed in terms of .alert[parameters] of the distribution
+
+--
+
+.pull-left[
+You can either:
+- **reject** the null hypothesis: observed patterns are unexpected under your assumptions
+- **retain** the null hypothesis: observed patterns are expected under your assumptions
+  - .red[**Does not imply that your assumptions are true**]
+]
+
+--
+
+.pull-right[
+.red[**Remember that you don't accept the null hypothesis, you fail to reject it.**]
+]
+
+---
+## Four elements of a test
+
+
+.pull-left-70[
+- **Data:** 
+    * `\(y_1, ..., y_n\)` realisation of r.v. `\(Y_1, ..., Y_n\)`
+- A statistical **model**: 
+
+    * distribution of  `\(Y_1,..., Y_n\)` depending on some parameters `\(\theta\)`
+
+- An **assumption**: 
+
+    * A statement about `\(\theta\)`. 
+    * This is the so called `\(H_0\)` hypothesis that you usually want to reject, `\(H_1\)` being the alternative
+
+- A **decision rule** 
+
+  	* If `\(T=f(Y_1,..., Y_n)\)` is a test statistic
+  	* `\(R\)`  is subset of values for `\(T\)` that is unlikely if `\(H_0\)` is true
+]
+
+---
+## An example with babies
+
+- **Data**: biological sex of children born in 2022 (most recent year available) in France (from [INED and INSEE](https://www.ined.fr/fr/tout-savoir-population/chiffres/france/naissance-fecondite/naissances-sexe/))
+  - 351 296 👦 / 335 268 👧
+
+- **Model**: 
+  - The sex of a newborn is `\(\sim \mathcal{B}(p)\)`, a Bernoulli of parameter `\(p\)` (where 1 stands for girls and 0 for boys)
+  - Sex of all children are i.i.d. (.alert[modeling assumption])
+  
+- **Null Hypothesis**
+  - There is an equal chance of being born a boy or a girl `\(\Rightarrow p = 1/2\)`
+  
+- **Decision rule**
+  - Test statistic: .alert[frequency] `\(\hat{p}\)` of girls among children born in 2022
+  - Reject `\(H_0\)` if `\(\hat{p}\)` is **too far** from `\(1/2\)` 
+  
+--
+
+.center[.alert[The hard work consists in quantifying what is *too far*]]
+
+---
+## Decision errors
+
+The decision is based on .alert[noisy data] and so is .alert[error-prone]
+
+&lt;img src="imgs/typeIandII.jpg" alt="" width="700px" style="display: block; margin: auto;" /&gt;
+
+.footnote[Image from [whatilearned](https://whatilearned.fandom.com/wiki/Hypothesis_Testing)]
+
+---
+### Type I/ Type II error for pregnancy tests
+
+&lt;img src="imgs/Type-I-and-II-errors1-625x468.jpg" alt="" width="700px" style="display: block; margin: auto;" /&gt;
+
+---
+
+### A few remarks
+
+- Strong .alert[asymetry] between `\(H_0\)` and `\(H_1\)`
+
+- You want to accumulate sufficient evidence .alert[against] `\(H_0\)`. 
+
+- Analogy with trials: `\(H_0\)` is on trial, do you have enough proof to convict it? 
+
+.center[
+**Necessary trade-off** between type I and type II errors:
+]
+--
+
+.pull-left-70[
+- .alert[more stringent] criteria : 
+  - less wrongful convictions (type I errors) 
+  - more criminals released (type II errors, lack of power)
+&lt;br&gt;
+&lt;br&gt;
+&lt;br&gt;
+]
+
+.pull-right-30[
+&lt;img src="imgs/im-on-steroids-really-prove-it.jpg" alt="" width="150px" /&gt;
+]
+
+--
+
+.pull-left-70[
+- .alert[less stringent] criteria: 
+  - less criminals released (type II errors)
+  - more wrongful convictions (type I error) 
+]
+
+.pull-right-30[
+&lt;img src="imgs/sakazuki_guilty.jpeg" alt="" width="150px" /&gt;
+]
+
+---
+
+## Construction of a test
+
+.pull-left-70[
+- Start with an .alert[estimator] for the parameter of intercept:
+    - Frequencies `\(F\)` of girls among newborn
+]
+
+--
+
+.pull-left-70[    
+- Derive the .alert[distribution] of `\(F\)` under `\(H_0\)`
+    - For `\(n = 335 268 + 351 296\)`, using the gaussian approximation, we have 
+    `$$F \sim \mathcal{N}(1/2, p(1-p)/n) = \mathcal{N}(1/2, 1/4n) = \mathcal{N}(0.5, 3.6 \times 10^{-7})$$`
+]
+
+.pull-right-30[
+&lt;img src="06_Tests_files/figure-html/unnamed-chunk-6-1.png" alt="" width="700px" /&gt;
+]
+
+--
+
+.pull-left-70[
+- Calibrate the .alert[region of unlikely values] under the null
+    - With probability 0.95, `\(|F - 1/2| \leq 1.96 \times \sqrt{3.6\times 10^{-7}} = 0.0012\)`
+    - `\(F \notin [0.4988, 0.5012]\)` with probability at most 5%
+]
+
+--
+
+.pull-left-70[
+- Compare with the .alert[actual estimation]
+    - Here `\(f = 335 268 / (335 268 + 351 296) = 0.488\)`
+    - Unlikely if `\(p= 1/2\)` `\(\Rightarrow\)` reject `\(H_0\)`
+    
+]
+
+---
+
+## About the p-value
+
+**Idea** Go one step further than **reject / retain** and assess the .alert[significance] of the observed statistic
+
+.pull-left-50[
+- `\(|F - 1/2|\)` .alert[unlikely] to be higher than `\(0.0012\)`
+
+- `\(|f - 1/2|\)` .alert[actually] observed to be `\(0.012\)`
+]
+
+--
+
+.pull-right-50[
+&lt;img src="06_Tests_files/figure-html/unnamed-chunk-7-1.png" alt="" width="700px" /&gt;
+]
+
+--
+
+.pull-left-50[
+- How likely are we to observe such deviations if `\(p=1/2\)`? 
+]
+
+--
+
+.pull-left-50[
+$$
+`\begin{align}
+p &amp;= P_{H_0}(|F - 1/2| &gt; |f - 1/2|) \\
+&amp; = P_{H_0}(|F - 1/2| &gt; 0.012) \\
+&amp; = P_{H_0}(F &lt; 0.488) + P_{H_0}(F &gt; 0.512) \\
+&amp; \simeq 5.5 \times 10^{-89}
+\end{align}`
+$$
+- Not only unlikely but .alert[insanely] unlikely !!!
+]
+
+---
+
+## A less extreme example
+
+The number of men / women aged 0-19 years in the Paris city (data from [INSEE](https://www.insee.fr/fr/statistiques/2011101?geo=DEP-75#figure-1-5)): 
+
+198 110 👦 / 198 905 👧
+
+
+.pull-left[
+Repeating the process, we find 
+
+- `\(F \sim \mathcal{N}(1/2, 6.3\times 10^{-7})\)`
+
+- `\(|F - 1/2|\)` unlikely to be higher than `\(0.15\)`%
+
+- `\(|f - 1/2|\)` actually observed to be `\(0.1\)`%
+
+- How extreme is that deviation ? 
+
+$$
+`\begin{align}
+p &amp;= P_{H_0}(|F - 1/2| &gt; |f - 1//2|) \\
+&amp; = P_{H_0}(|F - 1/2| &gt; 0.001) \\
+&amp; = P_{H_0}(F &lt; 0.499) + P_{H_0}(F &gt; 0.501) \\
+&amp; \simeq 20.76\%
+\end{align}`
+$$
+- Not very extreme, you expect it to observe 1 out of 5 times. 
+]
+
+.pull-right[
+&lt;img src="06_Tests_files/figure-html/unnamed-chunk-8-1.png" alt="" width="700px" /&gt;
+]
+
+
+---
+## Equality of means
+
+.pull-left[
+Let's go back to the `Agro` dataset.
+
+```
+# A tibble: 6 × 5
+  Height Weight   Age Year  Gender
+   &lt;dbl&gt;  &lt;dbl&gt; &lt;int&gt; &lt;chr&gt; &lt;chr&gt; 
+1   165.   58.8    23 3A    F     
+2   173.   56.1    23 3A    F     
+3   170.   53.9    22 3A    F     
+4   169.   66.6    19 1A    F     
+5   183.   64.6    20 2A    M     
+6   177.   60.0    20 1A    M     
+```
+
+Remember that we found different distributions between Male and Female students. 
+]
+
+--
+
+.pull-right[
+
+
+&lt;img src="06_Tests_files/figure-html/unnamed-chunk-11-1.png" alt="" height="400px" /&gt;
+]
+
+
+---
+## What could go wrong ?
+
+.pull-left[
+&lt;img src="imgs/type_1.png" alt="" width="3184" height="400px" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+&lt;img src="imgs/type_2.png" alt="" width="8431" height="400px" style="display: block; margin: auto;" /&gt;
+]
+
+---
+## Two-sample test
+
+- **Data**: Heights from female `\((X_1, \dots, X_{n_1})\)` and male `\((Y_1, \dots, Y_{n_2})\)` students in the agro dataset (with `\(n_1 = 362\)` and `\(n_2 = 369\)`)
+
+- **Model**: 
+  - The height `\(X_i\)` of female student `\(i\)` is `\(X \sim \mathcal{N}(\mu_1, \sigma^2)\)` and the height of male student `\(j\)` is `\(Y_j \sim \mathcal{N}(\mu_2, \sigma^2)\)` (.alert[we assume the same variance in both population])
+  - All heights are independent (.alert[modeling assumption])
+  
+- **Null Hypothesis**
+  - The mean height is the same for both male and female students `\(\Rightarrow  \mu_1 - \mu_2 = 0\)`
+  
+- **Decision rule**
+  - Test statistic: Mean (scaled) height difference `\(t = \frac{\hat{\mu}_1 - \hat{\mu}_2}{\hat{\sigma}}\)`
+  - Reject `\(H_0\)` if `\(t\)` is **too far** from `\(0\)` 
+  
+--
+
+.center[.alert[The hard work consists in quantifying what is *too far*], which requires knowing the distribution of `\(T\)` under `\(H_0\)`.]
+
+--
+
+This is called an .red[equality of means] test.
+
+---
+## Distribution of `\(T\)`
+
+The estimators of `\(\mu_1\)` and `\(\mu_2\)` are the usual suspects `\(\bar{X}\)` and `\(\bar{Y}\)`. 
+
+--
+
+The estimate of `\(\sigma^2\)` is slightly more involved and is a pooled version of the group-wise variance estimator
+
+$$
+S = \sqrt{\frac{(n_1 - 1)S^2_X + (n_2 - 1)S^2_Y}{n_1 + n_2 - 2}}
+$$
+
+where `\(S^2_X = \frac{1}{n_1 - 1} \sum_{i=1}^{n_1} (X_i - \bar{X})^2\)` is the estimator of `\(\sigma^2\)` using only the `\(X_i\)` and likewise for `\(S^2_Y\)`.
+
+--
+
+Under `\(H_0\)`, we can show (with a bit of effort) that `\(T\)` has a student distribution with `\(n_1 + n_2 - 2\)` degrees of freedom. 
+
+$$
+T = \frac{\bar{X} - \bar{Y}}{S\sqrt{\frac{1}{n_1} + \frac{1}{n_2}}} \sim \mathcal{T}
+$$
+
+--
+
+We can now use this distribution to build a rejection region and compute p-values. 
+
+---
+## Distribution and p-value
+
+.pull-left[
+
+```
+
+	Two Sample t-test
+
+data:  Height by Gender
+t = -27.629, df = 729, p-value &lt; 2.2e-16
+alternative hypothesis: true difference in means between group F and group M is not equal to 0
+95 percent confidence interval:
+ -8.780004 -7.615024
+sample estimates:
+mean in group F mean in group M 
+       170.1248        178.3223 
+```
+]
+
+--
+
+.pull-right[
+&lt;img src="06_Tests_files/figure-html/unnamed-chunk-15-1.png" alt="" width="700px" /&gt;
+]
+
+---
+## Permutational p-value
+
+But what if we don't know the distribution of `\(T\)` (or `\(\bar{X} - \bar{Y}\)`) under `\(H_0\)`?
+
+--
+
+.red[Estimate] it using .alert[simulations and resampling] !
+
+--
+
+.pull-left[
+&lt;img src="imgs/distributions.png" alt="" width="6400" style="display: block; margin: auto;" /&gt;
+]
+
+--
+
+.pull-right[
+- Sample under `\(H_0\)`: 
+  - Assign students to male or female randomly by shuffling labels (breaks down any association between height and gender)
+- Compute `\(\Delta_{(1)} = \bar{X}_{(1)} - \bar{X}_{(1)}\)` on the shuffled dataset
+  - Difference expected *just by chance*
+- Repeat many times to get `\(\Delta_{(1)}, \dots, \Delta_{(N)}\)` (with `\(N\)` large).
+  - Typical range of differences expected *just by chance* under `\(H_0\)`
+- Compare `\(\Delta\)` to the distribution of `\(\Delta_{(i)}\)`
+- Compute the p-value as
+$$
+p = \frac{1 + \\\#\\\{i \text{ s.t. } |\Delta_{(i)}| &gt; |\Delta|\\\}}{N+1}
+$$
+]
+
+
+---
+## Permutational p-value (Cont'd)
+
+
+.pull-left[
+![](06_Tests_files/figure-html/unnamed-chunk-17-1.png)&lt;!-- --&gt;
+]
+
+--
+
+.pull-right[
+![](06_Tests_files/figure-html/unnamed-chunk-18-1.png)&lt;!-- --&gt;
+]
+
+---
+
+class: middle, inverse
+
+## Summary
+
+- #### Collect .alert[data] from a .alert[sample]
+
+- #### Build a .alert[model] for your .alert[observations] with .alert[reasonable] assumptions
+
+- #### State the .alert[question] (hypothesis) in terms of model .alert[parameter]
+
+- #### Build a (good) .alert[estimator] for the parameter of interest
+
+- #### Assess the .alert[uncertainty] of the estimator using .alert[confidence interval]
+
+- #### .alert[Reject or retain] your research hypothesis based on the .alert[level] you want to achieve
+
+- #### Assess the .alert[significance] of your result using .alert[p-values]
+
+---
+
+## 谢谢山东大学威海校区 🌊⛱️☀️🥟🍜
+
+&lt;img src="Figures/Weihai2.png" alt="" width="500px" style="display: block; margin: auto;" /&gt;
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="libs/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+  "ratio": "16:9",
+  "slideNumberFormat": "%current%",
+  "highlightStyle": "github",
+  "highlightLines": true,
+  "countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

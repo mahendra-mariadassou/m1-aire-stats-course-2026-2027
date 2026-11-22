@@ -1,0 +1,747 @@
+---
+title: "Bivariate Analysis"
+author: "Mahendra Mariadassou, INRAE <br> .small[from original slides by Tristan Mary-Huard]"
+date: "AIRE Master - 2026-2027"
+output:
+  xaringan::moon_reader:
+    chakra: libs/remark-latest.min.js
+    css: ["css/custom_weihai_ss.css", default]
+    lib_dir: libs
+    nature:
+      ratio: '16:9'
+      slideNumberFormat: '%current%'
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+    includes:
+      before_body: macros.html
+height: 1080
+width: 1920
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,comment=NA,message=FALSE)
+library('tidyverse')
+library('gridExtra')
+library(data.table)
+theme_set(cowplot::theme_cowplot())
+# xaringanExtra::use_scribble()
+```
+
+## The AgroParisTech dataset
+
+<!-- .question[quizz0] -->
+
+```{r}
+set.seed(42)
+n <- 731
+Agro <- tibble(ID = seq(n), 
+               Gender = sample(c("F", "M"), size = n, prob = c(0.7, 0.3), replace = TRUE), 
+               Age    = sample(19:23, size = n, prob = 5:1, replace = TRUE), 
+               Year   = case_when(
+                 Age == 19 ~ "1Y", 
+                 Age >= 22 ~ "3Y",
+                 Age == 20 ~ sample(c("1Y", "2Y"), size = n, replace = TRUE), 
+                 Age == 21 ~ sample(c("2Y", "3Y"), size = n, replace = TRUE), 
+               ),
+               Height = if_else(Gender == "M", rnorm(n = n, mean = 178, sd = 6), rnorm(n = n, mean = 165, sd = 4)), 
+               Weight = (16 + 14 * sample(rbeta(n, 4, 4))) * (Height/100)^2 %>% round(2))
+Agro <- Agro %>% select(all_of(c("ID", 'Height','Weight','Age', 'Year', 'Gender')))
+DT::datatable(Agro, class = "compact stripe", rownames = FALSE) %>% 
+  DT::formatRound(columns = c("Height", "Weight"), digits = 1)
+```
+
+---
+class: middle, inverse, center
+
+# Motivating example
+
+---
+## The AgroParisTech dataset
+
+- 731 individuals
+
+- 2 **qualitative** variables: Gender, Year
+
+- 3 **quantitative** variables: Height, Weight, Age
+
+--
+
+How can we investigate the .blue[joint] distribution of 2 descriptors in a population ?  
+
+--
+
+.blue[3 kinds of joint analysis]:  
+
+.pull-left[
+- qualitative - qualitative   
+- quantitative - qualitative  
+- quantitative - quantitative  
+]
+
+.pull-right[
+- Ex: Gender and Year  
+- Ex: Height and Gender  
+- Ex: Height and Weight  
+]
+
+---
+class: middle, inverse, center
+
+# Qualitative - Qualitative
+
+---
+## Qualitative - Qualitative
+
+The couple (`Gender`,`Year`) is directly described through its joint distribution
+
+$$P\left(G=g\bigcap Y=y \right) = \frac{n_{gy}}{n} \ \ .$$
+
+The contingency table displays exhaustive information: .question[Quizz1]
+
+.pull-left[
+```{r}
+Agro  |>  
+  janitor::tabyl(Year, Gender) |> 
+  janitor::adorn_totals(where = "col")  |> 
+  janitor::adorn_totals(where = "row")
+```
+]
+
+--
+
+.col-right[
+```{r}
+Agro  |>  
+  janitor::tabyl(Year, Gender) |> 
+  janitor::adorn_totals(where = "col")  |> 
+  janitor::adorn_totals(where = "row") |> 
+  janitor::adorn_percentages(denominator = "all") |> 
+  janitor::adorn_rounding(digits = 3)
+```
+]
+
+--
+
+.pull-left[
+```{r}
+Agro  |>  
+  janitor::tabyl(Year, Gender) |> 
+  janitor::adorn_totals(where = "col")  |> 
+  janitor::adorn_percentages(denominator = "row") |> 
+  janitor::adorn_rounding(digits = 3)
+```
+]
+
+--
+
+.col-right[
+```{r}
+Agro  |>  
+  janitor::tabyl(Year, Gender) |> 
+  janitor::adorn_totals(where = "row")  |> 
+  janitor::adorn_percentages(denominator = "col") |> 
+  janitor::adorn_rounding(digits = 3)
+```
+]
+
+---
+#### Graphical representations 
+
+.pull-left[
+- All counts
+```{r, fig.height=3.5}
+ggplot(Agro, aes(x = Gender, fill = Year)) + geom_bar() + scale_fill_viridis_d() + 
+  scale_y_continuous(expand = 0) + 
+  cowplot::theme_cowplot() 
+```
+]
+
+--
+
+.col-right[
+- Percentages proportional to area
+```{r, fig.height=3.5, message=FALSE}
+plotdata <- Agro |> count(Gender, Year) |> group_by(Gender) |> 
+  mutate(width = sum(n), 
+         ymax = cumsum(n)/width, 
+         ymin = cumsum(c(0, head(n, -1)))/width) |> 
+  ungroup()
+x_data <- plotdata %>% distinct(Gender, width) %>% 
+               mutate(xmax = cumsum(width),
+                      xmin = cumsum(c(0, head(width, -1))))
+plotdata <- plotdata %>% inner_join(x_data)
+ggplot(plotdata, aes(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax, fill = Year)) + 
+  geom_rect(color = "gray80", linewidth = 1) + 
+  scale_fill_viridis_d() + 
+  scale_y_continuous(expand = 0, name = "Proportion") + 
+  scale_x_continuous(
+    breaks = x_data %>% mutate(x = (xmax + xmin)/2) %>% pull(x), 
+    labels = with(x_data, paste0(Gender, " (", round(100 * width/n, 1), "%)")), 
+                  name = "Gender", 
+    expand = expansion(0, 0)
+    ) + 
+  cowplot::theme_cowplot()
+# ggplot(Agro, aes(x = Gender, fill = Year)) + scale_fill_viridis_d()
+```
+]
+
+--
+
+.pull-left[
+- Conditional probabilities (by Gender)
+```{r, fig.height=3.5}
+ggplot(Agro, aes(x = Gender, fill = Year)) + geom_bar(position = "fill") + scale_fill_viridis_d() + 
+  cowplot::theme_cowplot() +
+  scale_y_continuous(expand = 0, name = "Proportion")
+```
+]
+
+--
+
+.col-right[
+- Conditional probabilities (by Year)
+```{r, fig.height=3.5}
+ggplot(Agro, aes(x = Year, fill = Gender)) + geom_bar(position = "fill") + coord_flip() +
+  scale_y_continuous(expand = 0, name = "Proportion") +
+  cowplot::theme_cowplot()
+```
+]
+
+---
+class: middle, inverse, center
+
+# Quantitative - Qualitative
+
+---
+## Quantitative - Qualitative
+
+```{r}
+TH <- theme(axis.text=element_text(size=15),
+      axis.title=element_text(size=25),
+      axis.title.y=element_blank(),
+      plot.title=element_text(size=15),
+      strip.text.x = element_text(size = 20),
+      legend.text=element_text(size=20))
+
+Hist1 <- ggplot(Agro, aes(x=Height))+
+  geom_histogram(bins=30,color='black',fill='white')+
+  facet_grid(. ~ Gender, scales = "free_x") +
+  TH
+# ggsave(paste0(Rep,'Slides/Figures/HistHeight1.pdf'))
+Hist2 <- ggplot(Agro, aes(x=Height))+
+  geom_histogram(bins=30,color='black',fill='white')+
+  facet_grid(. ~ Gender) +
+  TH
+# ggsave(paste0(Rep,'Slides/Figures/HistHeight2.pdf'))
+Hist3 <- ggplot(Agro, aes(x=Height, color=Gender, fill=Gender)) +
+  geom_histogram(position="identity", alpha=0.5,bins=30) +
+  TH
+# ggsave(paste0(Rep,'Slides/Figures/HistHeight3.pdf'))
+BP <- ggplot(Agro, aes(x=Gender,y=Height, color = Gender)) +
+  geom_boxplot() + 
+  geom_jitter(width = 0.2, )  +
+  scale_color_discrete(guide = "none") + 
+  TH
+# ggsave(paste0(Rep,'Slides/Figures/BoxPlotHeight.pdf'))
+```
+Each level of variable `Gender` defines a sub-population, in which variable `Height` can be described.
+
+.pull-left[
+```{r, out.height="400px"}
+set.seed(42)
+BP
+```
+]
+.pull-right[
+```{r, out.height="400px"}
+Hist1
+```
+]
+
+- Same graphical tool as for 1 population, but...
+
+---
+## Quantitative - Qualitative
+
+Each level of variable `Gender` defines a sub-population, in which variable `Height` can be described.
+
+.pull-left[
+```{r, out.height="400px"}
+set.seed(42)
+BP
+```
+]
+.pull-right[
+```{r, out.height="400px"}
+Hist2
+```
+]
+
+- Same graphical tool as for 1 population, but .blue[pay attention] to scaling effect...  
+
+---
+## Quantitative - Qualitative
+
+Each level of variable `Gender` defines a sub-population, in which variable `Height` can be described.
+
+.pull-left[
+```{r, out.height="400px"}
+set.seed(42)
+BP
+```
+]
+.pull-right[
+```{r, out.height="400px"}
+Hist3
+```
+]
+
+- Same graphical tool as for 1 population, but .blue[pay attention] to scaling effect or .blue[avoid] them
+
+---
+class: middle, inverse, center
+
+# Quantitative - Quantitative
+
+---
+## Quantitative - Quantitative
+
+As for the univariate case, when dealing with continuous variables the joint distribution cannot be explored exhaustively.
+
+--
+
+**Nevertheless**, graphical representations can be produced:
+
+```{r, fig.height=4, fig.width=6, fig.align='center'}
+TH <- theme(axis.text=element_text(size=7),
+      axis.title=element_text(size=12),
+      plot.title=element_text(size=15),
+      strip.text.x = element_text(size = 20),
+      legend.text=element_text(size=20))
+
+ggplot(Agro, aes(x=Height,y=Weight))+
+  geom_point(size=0.8) +
+  TH
+```
+
+--
+
+The relationship between Height and Weight looks quite linear.
+
+.blue[Question]: How can the linearity of the relationship be quantified ?
+
+---
+## Covariance
+
+.blue[Definition:] The covariance $\sigma_{X,Y} = E\Big[(X - E(X)) (Y - E(Y))\Big]$ between quantitative variables $X$ and $Y$ valued in $\Omega$ is
+
+$$\sigma_{X,Y} = \sum_{x \in \Omega}\sum_{y \in \Omega}\left(x-E(X)\right)\left(y-E(Y)\right)P\left(X=x,Y=y\right)$$
+
+
+for quantitative discrete variables, and
+
+$$\sigma_{X,Y} = \int_{x}\int_{y}\left(x-E(X)\right)\left(y-E(Y)\right)\times f_{X,Y}(x,y)dxdy$$
+
+for continuous variables. .question[Quizz2]
+
+--
+
+.blue[Examples:]
+
+- Covariance between Height and Weight: $\sigma_{H,W} = `r with(Agro, cov(Height, Weight) |> round(3))`$
+- Covariance between Height (in cm)  and Weight: $\sigma_{H,W} = `r with(Agro, cov(100 * Height, Weight) |> round(1))`$
+- Covariance between Weight and Age: $\sigma_{H,A} = `r with(Agro, cov(Weight, Age))`$
+
+--
+
+.blue[Conclusion:]  Scaling makes covariance difficult to interpret.
+
+---
+## Correlation
+
+.blue[Definition:] The correlation $\rho_{X,Y}$ between two quantitative variables $X$ and $Y$ is .question[Quizz3]
+
+$$\rho_{X,Y} = \frac{\sigma_{X,Y}}{\sigma_X \times \sigma_Y} \ \ .$$
+
+--
+
+Division by the standard deviation $\Rightarrow$ get rid of the scaling effect.  
+
+--
+
+.def[Property:]  $\rho_{X,Y} \in [-1,\ 1]$
+
+- $\rho_{X,Y} \approx 1$ $\Rightarrow$ positive linear relationship between $X$ and $Y$,
+- $\rho_{X,Y} \approx -1$ $\Rightarrow$ negative linear relationship between $X$ and $Y$,
+- $\rho_{X,Y} \approx 0$ $\Rightarrow$ no linear relationship between $X$ and $Y$,
+
+--
+
+.blue[Examples:]
+
+- Correlation between Height and Weight: $\rho_{H,W} = `r with(Agro, cor(Height, Weight) |> round(3))`$
+- Correlaion between Height (in cm) and Weight: $\rho_{H,W} = `r with(Agro, cor(100 * Height, Weight) |> round(3))`$
+- Correlation between Height and Age: $\rho_{H,A} = `r with(Agro, cor(Height, Age) |> round(3))`$
+
+---
+## Intuition on the covariance (I)
+
+.question[quizz4]
+
+```{r, fig.align='center', fig.width=12, fig.height=6}
+data(datasaurus_dozen, package = "datasauRus")
+ggplot(datasaurus_dozen %>% filter(dataset %in% c("slant_up", "slant_down", "h_lines", "v_lines", "x_shape")), 
+       aes(x = x, y = y, colour = dataset))+
+  geom_point() +
+  theme_void() +
+  theme(legend.position = "none", strip.text = element_text(size = 20)) +
+  facet_wrap(~dataset, ncol = 3)
+```
+
+---
+## Intuition on the covariance (II)
+
+.alert[All] dataset have the same summary statistics (and the same correlation $\rho = -0.06$) !!
+
+```{r, fig.align='center', fig.width=12, fig.height=6}
+data(datasaurus_dozen, package = "datasauRus")
+ggplot(datasaurus_dozen %>% filter(dataset %in% c("slant_up", "slant_down", "h_lines", "v_lines", "x_shape", "dino")), 
+       aes(x = x, y = y, colour = dataset))+
+  geom_point() +
+  theme_void() +
+  theme(legend.position = "none", strip.text = element_text(size = 20)) +
+  facet_wrap(~dataset, ncol = 3)
+```
+
+---
+## About interpretation...
+
+```{r,fig.height=5,fig.width=10,warning=FALSE, fig.align='center'}
+set.seed(42)
+PointSize=3
+TH <- theme(axis.text=element_text(size=12),
+      axis.title=element_text(size=15),
+      plot.title=element_text(size=15),
+      strip.text.x = element_text(size = 20),
+      legend.text=element_blank())
+
+TV <- c(13,20,23,25,27,31,36,46,55,63,70,76,81,85)
+Nb <- c(8,8,9,10,11,11,12,16,18,19,20,21,22,23)
+DF <- data.frame(TV,Nb)
+GG1 <- ggplot(DF,aes(x=TV,y=Nb)) +
+  geom_point(size=PointSize) +
+  xlab('TV sold') +
+  ylab('Nb autism cases') +
+  annotate("text", x = 20, y=22, label = paste('Cor=',round(cor(TV,Nb),2)),
+           color='red',size=5) +
+  ggtitle('TV and mental disease') +
+  TH
+
+X_out <- rnorm(20,m=2,sd=2)
+Y_out <- 5 -0.7*X_out + rnorm(20,m=0,sd=0.7)
+qui <- which.max(X_out)
+Y_out[qui] = 25
+GG2 <- ggplot(data.frame(X_out,Y_out),aes(x=X_out,y=Y_out)) +
+  geom_point(size=PointSize) +
+  annotate("text", x = -0.2, y=24, label = paste('Cor=',round(cor(X_out,Y_out),2)),
+           color='red',size=5) +
+  labs(x = "X", y = "Y") + 
+  xlim(c(min(-1,min(X_out)),max(6,max(X_out)))) +
+  ylim(c(min(-0,min(Y_out)),max(25,max(Y_out)))) +
+  ggtitle('Outlier') +
+  TH
+
+X <- rnorm(40,m=0,sd=1)
+Y <- rnorm(40,m=0,sd=1)
+Z <- c(rep(0,20),rep(1,20))
+X[Z==1] = X[Z==1] + 5
+Y[Z==1] = Y[Z==1] + 3
+GG3 <- ggplot(data.frame(X,Y),aes(x=X,y=Y,color=Z)) +
+  geom_point(size=PointSize, show.legend = FALSE) +
+  annotate("text", x = -1, y=4, label = paste('Cor=',round(cor(X,Y),2)),
+           color='red',size=5) +
+  xlim(c(min(-2,min(X)),max(7,max(X)))) +
+  ylim(c(min(-2,min(Y)),max(5,max(Y)))) +
+  ggtitle("Batch effect") +
+  TH
+
+X <- runif(40,-3,3)
+Y <- 5 -0.7*X^2 + rnorm(20,m=0,sd=0.4)
+GG4 <- ggplot(data.frame(X,Y),aes(x=X,y=Y)) +
+  geom_point(size=PointSize, show.legend = FALSE) +
+  xlim(c(min(-3,min(X)),max(3,max(X)))) +
+  ylim(c(min(-2,min(Y)),max(6,max(Y)))) +
+  annotate("text", x = -2, y=5, label = paste('Cor=',round(cor(X,Y),2)),
+           color='red',size=5) +
+  ggtitle("Non linear relationship") +
+  TH
+
+gridExtra::grid.arrange(grobs=list(GG1,GG2,GG3,GG4) ,nrow = 2, as.table = FALSE)
+```
+
+.blue[Conclusion:]
+
+- Correlation does not mean causality,
+
+- Correlation .alert[does not replace] graphical representation.
+
+---
+## About the effect of the outlier 
+
+```{r, fig.align='center', fig.width=12, fig.height=6}
+GG2 <- GG2 + ggtitle("With outlier")
+
+GG2_bis <- ggplot(tibble(X_out = X_out[-qui],Y_out = Y_out[-qui]),aes(x=X_out,y=Y_out)) +
+  geom_point(size=PointSize) +
+  annotate("text", x = -0.2, y=24, label = paste('Cor=',round(cor(X_out[-qui],Y_out[-qui]),2)),
+           color='red',size=5) +
+  labs(x = "X", y = "Y") + 
+  xlim(c(min(-1,min(X_out[-qui])),max(6,max(X_out[-qui])))) +
+  ylim(c(min(-0,min(Y_out[-qui])),max(25,max(Y_out[-qui])))) +
+  ggtitle('Without outlier') +
+  TH
+
+gridExtra::grid.arrange(grobs=list(GG2, GG2_bis), nrow = 1, as.table = FALSE)
+```
+
+---
+class: middle, inverse, center
+
+# Data transformation
+
+---
+## Data transformation
+
+- .blue[What?]: Transform the data in your dataset prior to analyses. 
+
+--
+
+- .blue[Why?]: 
+  - Improve interpretability
+  - Meet assumptions of statistical methods (*e.g.* normality)
+  - Enhance performance in modeling (*e.g.* make relationships linear)
+
+--
+
+- .blue[Common transformations]: 
+  - **Log transformation:** Reduces skewness ($\simeq$ asymmetry in the density distribution) and deals with multiplicative relationships. Frequently used for values spanning multiple orders of magnitude (e.g. income data, cell counts in microbiology, etc)
+  - **Square Root Transformation:** Stabilizes variance and makes data less skewed. Frequently used for values in [0, 1] (proportions such as voting intentions, poll results, antibiotic resistance rates, etc)
+  - **Z-score Transformation:** Adjusts data to a common scale, usually to have a mean of zero and standard deviation of one. Frequently done in machine learning algorithms. 
+
+
+---
+## Data transformation: An example
+
+We want to study whether there are more overweight (as defined by the WHO) students in one gender or another. We use small multiple plot (or data stratification) to explore the data
+
+--
+
+```{r fig.width=8, fig.height=4, fig.align='center', out.width="90%", fig.dpi=150}
+Agro |> ggplot(aes(x = Height/100)) + 
+  geom_point(aes(y = Weight, color = Gender)) + 
+  geom_ribbon(data = tibble(Height = seq(150, 200), Over = 25 * (Height/100)^2, Under = 18 * (Height/100)^2), 
+              aes(ymin = Under, ymax = Over), 
+              fill = "transparent", 
+              color = "grey") + 
+  geom_text(data = tibble(Height = c(160, 190), Weight = c(90, 50), Status = c("Overweight", "Underweight")), 
+            aes(y = Weight, label = Status)) + 
+  facet_wrap(~Gender) + 
+  labs(x = "Height (m)", y = "Weight (kg)") + 
+  theme_bw() + theme(legend.position = "none")
+```
+
+---
+## Data transformation: An example
+
+Looking at both Weight and Height is cumbersome. We rely instead on the Body Mass Index (BMI) defined as:
+$$
+\text{BMI} = \frac{\text{Weight}}{\text{Height}^2}
+$$
+
+--
+
+```{r}
+DT::datatable(Agro |> mutate(BMI = Weight / (Height/100)^2), 
+              class = "compact stripe", rownames = FALSE) %>% 
+  DT::formatRound(columns = c("Height", "Weight"), digits = 1) |> 
+  DT::formatRound(columns = c("BMI"), digits = 2)
+```
+
+---
+## Data transformation: An example
+
+```{r fig.width=8, fig.height=4, fig.align='center', out.width="90%", fig.dpi=150}
+Agro |> mutate(BMI = Weight / (Height/100)^2) |> 
+  ggplot(aes(x = BMI)) + 
+  geom_histogram(aes(fill = Gender, y = after_stat(density)), binwidth = 0.5, boundary = 18) +
+  geom_vline(xintercept = c(18, 25), color = "grey") + 
+  geom_text(data = tibble(BMI = c(18, 25), Status = c("Underweight", "Overweight"), hjust = c(0.65, 0)), 
+            aes(label = Status, hjust = hjust), 
+            size = 5, 
+            y = Inf, vjust = 1.1) + 
+  facet_wrap(~Gender) + 
+  scale_x_continuous(breaks = c(16, 18, 20, 22, 24, 26, 28), limits = c(15.5, NA)) + 
+  # scale_fill_viridis_d(option = "D") +
+  labs(x = "BMI", y = "Prop. of students") + 
+  theme(legend.position = "none")
+```
+
+--
+
+In this example, data transformation allows you to work with (somehow) normally distributed data. 
+---
+class: middle, inverse, center
+
+# Missing data
+
+---
+## Missing data
+
+- .blue[What?]: Missing data refers to the **absence of data points or values** in a dataset. This can occur due to various reasons such as survey non-responses, equipment failure, detection limit, data corruption, etc. 
+
+--
+
+- .blue[Why is it important?]: Missing data can lead to **biased estimates or incorrect conclusions**. Understanding the nature of missing data helps decide how to handle it during analysis.
+
+--
+
+- .blue[An example]: Imagine that in a bacterial growth experiment, we **systematically** fail to record the size of smaller colonies (because they're harder to spot). If we're interested in the mean colony size (to extrapolate growth rate), we'll likely overestimate growth rates. 
+
+---
+## Missing data: coding 
+
+Most modern softwares use `NA` (for Not Available) or empty cells to represent missing values.
+
+```{r}
+x <- Agro
+x[1, "Age"] <- NA
+x[3, "Weight"] <- NA
+x[5, "Height"] <- NA
+x[7, "Gender"] <- NA
+x[1:8, ]
+```
+
+--
+
+But other values are sometimes used: `-9`, `-999`. It is good practice to check if a placeholder has been used and replace it with an empty cell or a `NA`. 
+
+--
+
+`r emo::ji("warning")`: Don't confuse `NA` (the special character for missing values) and `"NA"` (the character chain "NA"). 
+
+---
+## Type of missing values
+
+We usually distinguish **3 types** of missing values
+
+- **Missing Completely at Random (MCAR):** Missingness unrelated to any observed or unobserved data. 
+  - Example: the measurement equipment fails with a fixed rate
+  - Best-case scenario: many statistical / learning apply without too much work.
+
+--
+
+- **Missing at Random (MAR):** Missingness related to observed data, but not to the missing data itself.
+  - Example: You're tasked with measuring the Weight and Height of students but you forget the measure the Weight for some students, especially the tallest one. The missingness is determined by the Height, but not by the Weight itself. 
+  - Mixed-case scenario: some statistical techniques still apply (with some adaptations) but not all. 
+
+--
+
+- **Missing at Random (MNAR):** Missingness related to the value of the data that is missing.
+  - Example: You're tasked with measuring the Weight and Height of students but you forget the measure the Height for some students, especially the tallest one. The missingness (of the Height) is determined by the Height itself. 
+  - Worst-case scenario: many statistical techniques don't apply at all. 
+
+---
+## Example: missing data for Weight
+
+```{r}
+set.seed(42)
+p_base <- Agro |> ggplot(aes(x = Height/100, y = Weight)) + 
+  geom_point(color = "grey") + 
+  labs(x = "Height (m)", y = "Weight (kg)") + 
+  theme_bw() + theme(legend.position = "none")
+miss_mcar <- Agro |> slice_sample(n = 37)
+miss_mar <- Agro |> filter(Height > 175) |> slice_sample(n = 37)
+miss_mnar <- Agro |> filter(Weight > 80) |> slice_sample(n = 37)
+p1 <- p_base + 
+  geom_point(data = miss_mcar, 
+             color = "red") + 
+  labs(title = "MCAR", subtitle = "Missingness depends on nothing")
+p2 <- p_base + 
+  geom_point(data = miss_mar, 
+             color = "red") + 
+  labs(title = "MAR", subtitle = "Missingness depends only on Height")
+p3 <- p_base + 
+  geom_point(data = miss_mnar, 
+             color = "red") + 
+  labs(title = "MNAR", subtitle = "Missingness depends on Weight")
+```
+
+```{r fig.width=12, fig.height=4, fig.align='center', out.width="100%", fig.dpi=150}
+library(patchwork)
+p1 + p2 + p3
+```
+
+---
+## What to do with missing data ?
+
+Hope that your data is missing (completely) at random. 
+
+- **Listwise Deletion:** Remove any row with missing data.
+  - Simplest solution 
+  - Reduces sample size
+  - Wasteful for large datasets (with many variables) as almost all individuals will miss some observations
+  
+--
+
+- **Mean/Median Imputation:** Fill in missing data with the mean / median / most frequent value of the variable across the dataset / subpopulation
+  - Assumes that the mean / median is a good descriptor for the whole population
+  - Reduces the variability of the variable in the population
+  
+--
+
+- **Predictive Modeling:** Use regression or machine learning techniques to predict missing values from observed values
+  - Works well if missingness concentrated in a few variables, highly correlated to the others. 
+  - Reduces the variability of the variable in the population (to a lesser extent that mean imputation)
+
+--
+
+- **Multiple Imputation:** Generate multiple datasets with imputed values (using some randomness) and combine results.
+  - Best solution to preserve variability of the data
+  - Computationnally costly
+
+---
+## Impact of imputation method
+
+```{r, warning=FALSE}
+Agro_miss <- Agro |>  
+  mutate(missing = if_else(ID %in% miss_mcar$ID, "missing", "observed")) |> 
+  mutate(Weight_mean = mean(Weight), .by = missing) %>% 
+  mutate(Weight_predicted = predict(lm(Weight ~ Height + I(Height)^2, data = ., subset = missing == "observed"), 
+                               newdata = .))
+impute_data <- Agro_miss |> filter(missing == "missing") |> 
+  mutate(Weight_observed = Weight, 
+         Weight_deletion = NA_real_) |> 
+  rename(true_weight = Weight) |> 
+  pivot_longer(cols = starts_with("Weight_"), 
+               names_to = "Method", names_prefix = "Weight_",
+               values_to = "Weight")
+```
+
+```{r, warning=FALSE, fig.width=12, fig.height=3, fig.align='center', out.width="100%", fig.dpi=150}
+ggplot(impute_data |> mutate(Method = fct_relevel(Method, "observed", "deletion", "mean", "predicted")), 
+       aes(x = Height, y = Weight)) + 
+  geom_point(data = Agro_miss |> anti_join(impute_data, by = "ID"), 
+             color = "gray") + 
+  ## change 
+  geom_segment(mapping = aes(x = Height, y = true_weight, yend = Weight), color = "salmon") + 
+  ## Imputed value
+  geom_point(color = "red") + 
+  ## original values
+  geom_point(data = ~ . |> filter(Method != "deletion"),
+             aes(y = true_weight), color = "salmon") + 
+  facet_wrap(~Method, nrow = 1) + 
+  theme_bw() + 
+  theme(strip.text = element_text(size = 12))
+```
+
+

@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Mahendra Mariadassou">
+<meta name="dcterms.date" content="2026-11-16">
+
+<title>Hypothesis Testing Exercises</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="03_hypothesis_tests_exercises_files/libs/clipboard/clipboard.min.js"></script>
+<script src="03_hypothesis_tests_exercises_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="03_hypothesis_tests_exercises_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="03_hypothesis_tests_exercises_files/libs/quarto-html/popper.min.js"></script>
+<script src="03_hypothesis_tests_exercises_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="03_hypothesis_tests_exercises_files/libs/quarto-html/anchor.min.js"></script>
+<link href="03_hypothesis_tests_exercises_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="03_hypothesis_tests_exercises_files/libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="03_hypothesis_tests_exercises_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="03_hypothesis_tests_exercises_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="03_hypothesis_tests_exercises_files/libs/bootstrap/bootstrap-d777dc4a7385a713376289f4dd1eab9f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#sec-exe1" id="toc-sec-exe1" class="nav-link active" data-scroll-target="#sec-exe1">Exercise 1: One-Sided and Two-Sided Tests</a></li>
+  <li><a href="#sec-sol1" id="toc-sec-sol1" class="nav-link" data-scroll-target="#sec-sol1">Solution 1</a>
+  <ul class="collapse">
+  <li><a href="#observed-statistic" id="toc-observed-statistic" class="nav-link" data-scroll-target="#observed-statistic">Observed statistic</a></li>
+  <li><a href="#two-sided-test" id="toc-two-sided-test" class="nav-link" data-scroll-target="#two-sided-test">Two-sided test</a></li>
+  <li><a href="#one-sided-test" id="toc-one-sided-test" class="nav-link" data-scroll-target="#one-sided-test">One-sided test</a></li>
+  <li><a href="#p-values" id="toc-p-values" class="nav-link" data-scroll-target="#p-values">p-values</a></li>
+  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion">Discussion</a></li>
+  <li><a href="#wrong-direction-advanced" id="toc-wrong-direction-advanced" class="nav-link" data-scroll-target="#wrong-direction-advanced">Wrong direction (Advanced)</a></li>
+  <li><a href="#general-relation-and-borderline-counts-advanced" id="toc-general-relation-and-borderline-counts-advanced" class="nav-link" data-scroll-target="#general-relation-and-borderline-counts-advanced">General relation and borderline counts (Advanced)</a></li>
+  </ul></li>
+  <li><a href="#sec-exe2" id="toc-sec-exe2" class="nav-link" data-scroll-target="#sec-exe2">Exercise 2: Power of a Proportion Test</a></li>
+  <li><a href="#sec-sol2" id="toc-sec-sol2" class="nav-link" data-scroll-target="#sec-sol2">Solution 2</a>
+  <ul class="collapse">
+  <li><a href="#rejection-regions-on-the-hatp-scale" id="toc-rejection-regions-on-the-hatp-scale" class="nav-link" data-scroll-target="#rejection-regions-on-the-hatp-scale">Rejection regions on the <span class="math inline">\(\hat{p}\)</span> scale</a></li>
+  <li><a href="#power-at-p_1-0.53" id="toc-power-at-p_1-0.53" class="nav-link" data-scroll-target="#power-at-p_1-0.53">Power at <span class="math inline">\(p_1 = 0.53\)</span></a></li>
+  <li><a href="#power-curve" id="toc-power-curve" class="nav-link" data-scroll-target="#power-curve">Power curve</a></li>
+  <li><a href="#sample-size-planning-advanced" id="toc-sample-size-planning-advanced" class="nav-link" data-scroll-target="#sample-size-planning-advanced">Sample-size planning (Advanced)</a></li>
+  <li><a href="#effect-of-the-level-alpha-advanced" id="toc-effect-of-the-level-alpha-advanced" class="nav-link" data-scroll-target="#effect-of-the-level-alpha-advanced">Effect of the level <span class="math inline">\(\alpha\)</span> (Advanced)</a></li>
+  </ul></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="../03_hypothesis_tests_exercises.pdf"><i class="bi bi-file-pdf"></i>Typst</a></li></ul></div></nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Hypothesis Testing Exercises</h1>
+<p class="subtitle lead">One-Sided and Two-Sided Tests, Power</p>
+</div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author">Mahendra Mariadassou <a href="mailto:mahendra.mariadassou@inrae.fr" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> <a href="https://orcid.org/0000-0003-2986-354X" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            INRAE - MaIAGE
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">November 16, 2026</p>
+    </div>
+  </div>
+  
+    <div>
+    <div class="quarto-title-meta-heading">Modified</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">November 16, 2026</p>
+    </div>
+  </div>
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="callout callout-style-simple callout-tip callout-titled" title="Computing normal quantiles and CDFs">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Computing normal quantiles and CDFs
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>Both exercises require the quantiles of the standard normal <span class="math inline">\(\mathcal{N}(0,1)\)</span> (e.g.&nbsp;<span class="math inline">\(u_{0.95} = 1.645\)</span>, <span class="math inline">\(u_{0.975} = 1.960\)</span>) and its cumulative distribution function. The upper <span class="math inline">\(\alpha\)</span>-quantile <span class="math inline">\(u_\alpha\)</span> (the value such that <span class="math inline">\(P(Z \le u_\alpha) = \alpha\)</span> for <span class="math inline">\(Z \sim \mathcal{N}(0,1)\)</span>) is obtained as follows, and you can also evaluate the CDF at any point.</p>
+<p><strong>In R</strong></p>
+<ul>
+<li>Normal quantile: <code>qnorm(0.975)</code> and CDF: <code>pnorm(1.897)</code></li>
+<li>Power of a test: <code>1 - pnorm(c, mean = p1, sd = sqrt(p1*(1-p1)/n))</code></li>
+</ul>
+<p><strong>In Python</strong> (<code>from scipy.stats import norm</code>)</p>
+<ul>
+<li>Normal quantile: <code>norm.ppf(0.975)</code> and CDF: <code>norm.cdf(1.897)</code></li>
+<li>Power of a test: <code>1 - norm.cdf(c, loc = p1, scale = sqrt(p1*(1-p1)/n))</code></li>
+</ul>
+<p>You can check that <code>qnorm(0.975)</code> = <code>norm.ppf(0.975)</code> = <span class="math inline">\(1.960\)</span> and that <code>qnorm(0.95)</code> = <code>norm.ppf(0.95)</code> = <span class="math inline">\(1.645\)</span>; the CDF at the observed <span class="math inline">\(z\)</span> of Exercise 1 gives the p-values of that exercise.</p>
+</div>
+</div>
+</div>
+<section id="sec-exe1" class="level1">
+<h1>Exercise 1: One-Sided and Two-Sided Tests</h1>
+<p>A survey company polls a sample of <span class="math inline">\(n = 1000\)</span> voters and asks them a simple yes/no question. In the sample, <span class="math inline">\(530\)</span> voters answer “yes”, so the observed proportion is <span class="math inline">\(\hat{p} = 530/1000 = 0.53\)</span>. We model the answers as</p>
+<p><span class="math display">\[X_1, \dots, X_n \sim \mathcal{B}(p) \quad \text{i.i.d.},\]</span></p>
+<p>so that <span class="math inline">\(E[X_i] = p\)</span>, <span class="math inline">\(V[X_i] = p(1-p)\)</span>, and <span class="math inline">\(\widehat{P} = \frac{1}{n}\sum_i X_i\)</span> is the sample proportion. We want to test whether the population proportion <span class="math inline">\(p\)</span> differs from <span class="math inline">\(1/2\)</span>. Under the null hypothesis <span class="math inline">\(H_0: p = 1/2\)</span>, the CLT gives the approximate distribution of the test statistic</p>
+<p><span class="math display">\[Z = \frac{\widehat{P} - 1/2}{\sqrt{1/(4n)}} \overset{\text{approx}}{\sim} \mathcal{N}(0,1),\]</span></p>
+<p>because under <span class="math inline">\(H_0\)</span> the variance of <span class="math inline">\(\widehat{P}\)</span> is exactly <span class="math inline">\(V[\widehat{P}] = p_0(1-p_0)/n = (1/2)(1/2)/n = 1/(4n)\)</span>, with no plug-in needed. With <span class="math inline">\(n = 1000\)</span> the standard deviation of <span class="math inline">\(\widehat{P}\)</span> under <span class="math inline">\(H_0\)</span> is <span class="math inline">\(\sqrt{1/(4n)} \approx 0.01581\)</span>.</p>
+<ol type="1">
+<li><strong>Two-sided test.</strong> Set up the test of <span class="math inline">\(H_0: p = 1/2\)</span> against <span class="math inline">\(H_1: p \ne 1/2\)</span> at level <span class="math inline">\(\alpha = 0.05\)</span>. Recall the rejection region in terms of the statistic <span class="math inline">\(Z\)</span> and the critical value <span class="math inline">\(u_{0.975}\)</span>; apply it to the observed value <span class="math inline">\(z\)</span> and conclude.</li>
+<li><strong>One-sided test.</strong> Set up the test of <span class="math inline">\(H_0: p = 1/2\)</span> against <span class="math inline">\(H_1: p &gt; 1/2\)</span> at level <span class="math inline">\(\alpha = 0.05\)</span>. Give the (different) rejection region and the critical value <span class="math inline">\(u_{0.95}\)</span>; apply it to the same <span class="math inline">\(z\)</span> and conclude.</li>
+<li><strong>p-values.</strong> Compute the p-values of the one-sided test (<span class="math inline">\(H_1: p &gt; 1/2\)</span>) and of the two-sided test, and compare them. In particular, verify the approximate relation <span class="math inline">\(p_{\text{two}} \approx 2\, p_{\text{one}}\)</span>.</li>
+<li><strong>Discussion.</strong> The data are identical in questions 1 and 2, yet the two tests do not agree. Explain in words why the one-sided test is “easier” here: where does the level <span class="math inline">\(\alpha\)</span> go in each case, and what becomes of the critical value and of the p-value?</li>
+<li><strong>(Advanced) Wrong direction.</strong> Repeat the one-sided calculation for the <em>other</em> one-sided problem <span class="math inline">\(H_1: p &lt; 1/2\)</span>. Compute the corresponding p-value and conclude. What does this illustrate about the blindness of a one-sided test in the wrong direction, and about the danger of choosing the direction <em>after</em> looking at the data (p-hacking)?</li>
+<li><strong>(Advanced) General relation.</strong> Show that for a normal statistic the two-sided p-value is <span class="math inline">\(p_{\text{two}} = 2\min(p_{\text{one}}, 1 - p_{\text{one}})\)</span>, where <span class="math inline">\(p_{\text{one}}\)</span> is the p-value of the “right” one-sided test. Deduce the observed counts <span class="math inline">\(x\)</span> (number of “yes” answers out of <span class="math inline">\(n = 1000\)</span>) for which the two-sided test rejects while the one-sided <em>right</em> test (<span class="math inline">\(H_1: p &gt; 1/2\)</span>) does not, i.e.&nbsp;the counts such that <span class="math inline">\(|z| &gt; 1.96\)</span> while <span class="math inline">\(z &lt; 1.645\)</span>. Which side of the boundary separates the two tests?</li>
+</ol>
+</section>
+<section id="sec-sol1" class="level1">
+<h1>Solution 1</h1>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>Work through these steps after attempting the exercise on your own. Each step corresponds to an instruction in <a href="#sec-exe1" class="quarto-xref">Section&nbsp;1</a>.</p>
+</div>
+</div>
+</div>
+<section id="observed-statistic" class="level3">
+<h3 class="anchored" data-anchor-id="observed-statistic">Observed statistic</h3>
+<p>The observed proportion is <span class="math inline">\(\hat{p} = 0.53\)</span> and the standard deviation under <span class="math inline">\(H_0\)</span> is <span class="math inline">\(\sqrt{1/(4n)} = \sqrt{0.00025} \approx 0.01581\)</span>, hence the observed value of the test statistic is</p>
+<p><span class="math display">\[z = \frac{\hat{p} - 1/2}{\sqrt{1/(4n)}} = \frac{0.03}{0.01581} \approx 1.897.\]</span></p>
+</section>
+<section id="two-sided-test" class="level3">
+<h3 class="anchored" data-anchor-id="two-sided-test">Two-sided test</h3>
+<p>We test <span class="math inline">\(H_0: p = 1/2\)</span> against <span class="math inline">\(H_1: p \ne 1/2\)</span> at level <span class="math inline">\(\alpha = 0.05\)</span>. Rejecting when the standardized distance from <span class="math inline">\(1/2\)</span> is large, the rejection region is</p>
+<p><span class="math display">\[\mathcal{R} = \left\{ |Z| &gt; u_{0.975} \right\}, \qquad u_{0.975} = 1.960.\]</span></p>
+<p>The observed value <span class="math inline">\(|z| = 1.897\)</span> is smaller than <span class="math inline">\(1.960\)</span>, so <strong>we do not reject</strong> <span class="math inline">\(H_0\)</span> at level 5%: the data are compatible with a population proportion of <span class="math inline">\(1/2\)</span>.</p>
+</section>
+<section id="one-sided-test" class="level3">
+<h3 class="anchored" data-anchor-id="one-sided-test">One-sided test</h3>
+<p>We test <span class="math inline">\(H_0: p = 1/2\)</span> against <span class="math inline">\(H_1: p &gt; 1/2\)</span>. Now only large positive deviations count as evidence against <span class="math inline">\(H_0\)</span>, so all the level <span class="math inline">\(\alpha\)</span> is spent on the right tail and the critical value is the <strong>smaller</strong> quantile <span class="math inline">\(u_{0.95}\)</span>:</p>
+<p><span class="math display">\[\mathcal{R} = \left\{ Z &gt; u_{0.95} \right\}, \qquad u_{0.95} = 1.645.\]</span></p>
+<p>The observed value <span class="math inline">\(z = 1.897\)</span> exceeds <span class="math inline">\(1.645\)</span>, so <strong>we reject</strong> <span class="math inline">\(H_0\)</span> at level 5% and conclude that the proportion of “yes” answers is significantly larger than <span class="math inline">\(1/2\)</span>.</p>
+</section>
+<section id="p-values" class="level3">
+<h3 class="anchored" data-anchor-id="p-values">p-values</h3>
+<p>With <span class="math inline">\(Z \approx \mathcal{N}(0,1)\)</span> under <span class="math inline">\(H_0\)</span>:</p>
+<p><span class="math display">\[p_{\text{one}} = P(Z \ge z) = 1 - \Phi(z) \approx 1 - \Phi(1.897) \approx 0.029,\]</span></p>
+<p><span class="math display">\[p_{\text{two}} = 2\,P(Z \ge |z|) = 2\,(1 - \Phi(|z|)) \approx 2 \times 0.029 \approx 0.058.\]</span></p>
+<p>As announced <span class="math inline">\(p_{\text{two}} \approx 2\, p_{\text{one}}\)</span>: the two-sided test must count both tails, so its p-value is (approximately) twice the one-sided one. The verdicts match the rejection regions: <span class="math inline">\(p_{\text{one}} = 0.029 &lt; 0.05\)</span> rejects, <span class="math inline">\(p_{\text{two}} = 0.058 &gt; 0.05\)</span> retains.</p>
+</section>
+<section id="discussion" class="level3">
+<h3 class="anchored" data-anchor-id="discussion">Discussion</h3>
+<p>The data are identical but the tests answer different questions, and this changes where the level <span class="math inline">\(\alpha = 0.05\)</span> is spent:</p>
+<ul>
+<li>the <strong>two-sided</strong> test splits the level between the two tails (<span class="math inline">\(\alpha/2 = 0.025\)</span> on each side), so its critical value is <span class="math inline">\(u_{0.975} = 1.96\)</span>;</li>
+<li>the <strong>one-sided</strong> test spends all of <span class="math inline">\(\alpha\)</span> on the single tail that matches the direction of <span class="math inline">\(H_1\)</span>, so its critical value is smaller, <span class="math inline">\(u_{0.95} = 1.645\)</span>.</li>
+</ul>
+<p>Equivalently, for the same data the one-sided p-value is half the two-sided one. The observed <span class="math inline">\(z \approx 1.897\)</span> falls between the two critical values, so it is significant for the one-sided question but not for the two-sided one. This is the pedagogical core of the exercise: at the boundary of significance, the <em>direction</em> of the alternative decides the verdict. The direction must therefore be fixed <strong>before</strong> looking at the data.</p>
+</section>
+<section id="wrong-direction-advanced" class="level3">
+<h3 class="anchored" data-anchor-id="wrong-direction-advanced">Wrong direction (Advanced)</h3>
+<p>For the problem <span class="math inline">\(H_1: p &lt; 1/2\)</span>, the rejection region is <span class="math inline">\(\{Z &lt; -\,u_{0.95}\}\)</span> and the p-value counts only the left tail:</p>
+<p><span class="math display">\[p_{\text{wrong}} = P(Z \le z) = \Phi(z) \approx \Phi(1.897) \approx 0.97.\]</span></p>
+<p>The p-value is <span class="math inline">\(\approx 0.97\)</span>, essentially 1: <strong>one can never reject</strong> with this test, no matter how far above <span class="math inline">\(1/2\)</span> the observed proportion lies. This is the mirror image of the blindness described in the lectures: a one-sided test is completely blind to evidence pointing in the <em>opposite</em> direction of <span class="math inline">\(H_1\)</span>. Since <span class="math inline">\(\Phi(z) \to 1\)</span> when <span class="math inline">\(z \to +\infty\)</span>, the p-value even <em>increases</em> as the evidence against <span class="math inline">\(H_0\)</span> (in the other direction) grows stronger. Choosing the direction after seeing the data — and then reporting the smaller of the two one-sided p-values — is a form of p-hacking: it inflates the type I error rate far beyond the nominal <span class="math inline">\(\alpha\)</span>, because under <span class="math inline">\(H_0\)</span> the minimum of the two one-sided p-values is <span class="math inline">\(\mathcal{U}(0, 1/2)\)</span> by symmetry (below the usual uniform).</p>
+</section>
+<section id="general-relation-and-borderline-counts-advanced" class="level3">
+<h3 class="anchored" data-anchor-id="general-relation-and-borderline-counts-advanced">General relation and borderline counts (Advanced)</h3>
+<p>For a normal statistic with observed value <span class="math inline">\(z\)</span>, call <span class="math inline">\(p_{\text{one}} = 1 - \Phi(z)\)</span> the p-value of the right-tail test <span class="math inline">\(H_1: p &gt; 1/2\)</span>. If <span class="math inline">\(z \ge 0\)</span> then the left-tail p-value is <span class="math inline">\(1 - p_{\text{one}}\)</span> and the two-sided p-value is <span class="math inline">\(2(1 - \Phi(z)) = 2 p_{\text{one}} = 2 \min(p_{\text{one}}, 1 - p_{\text{one}})\)</span>. If instead <span class="math inline">\(z &lt; 0\)</span>, the roles are exchanged: <span class="math inline">\(p_{\text{one}} = 1 - \Phi(z) &gt; 1/2\)</span>, the relevant tail is the left one with p-value <span class="math inline">\(\Phi(z) = 1 - p_{\text{one}}\)</span>, and <span class="math inline">\(p_{\text{two}} = 2(1 - p_{\text{one}})\)</span>. Hence in all cases</p>
+<p><span class="math display">\[p_{\text{two}} = 2 \min(p_{\text{one}},\ 1 - p_{\text{one}}).\]</span></p>
+<p>For the borderline counts, the two-sided test rejects iff <span class="math inline">\(|z| &gt; 1.96\)</span>, <em>i.e.</em> <span class="math inline">\(\hat{p} = x/1000 &lt; 0.4690\)</span> or <span class="math inline">\(x/1000 &gt; 0.5310\)</span>; the right one-sided test rejects iff <span class="math inline">\(x/1000 &gt; 0.5260\)</span>. The counts where the two-sided test rejects <strong>while the right one-sided test retains</strong> are therefore the low ones, <span class="math inline">\(x/1000 \le 0.4690\)</span>, <em>i.e.</em> <span class="math inline">\(x \le 469\)</span> (on the high side, <span class="math inline">\(x \ge 531\)</span> both tests reject). Check the boundary:</p>
+<p><span class="math display">\[x = 469:\quad z = \frac{0.469 - 0.5}{0.01581} \approx -1.961,\qquad |z| = 1.961 &gt; 1.96,\quad z &lt; 1.645,\]</span></p>
+<p>so the two-sided test rejects and the (right) one-sided test does not; for <span class="math inline">\(x = 470\)</span>, <span class="math inline">\(|z| \approx 1.897 &lt; 1.96\)</span> and both tests retain. Symmetrically, for <span class="math inline">\(531 \le x \le 1000\)</span> the two-sided test rejects <em>and</em> the right one-sided test rejects — only the low announcements <span class="math inline">\(x \le 469\)</span> separate the two tests.</p>
+</section>
+</section>
+<section id="sec-exe2" class="level1">
+<h1>Exercise 2: Power of a Proportion Test</h1>
+<p>We reuse the same setting as Exercise 1: <span class="math inline">\(n = 1000\)</span> independent Bernoulli answers with proportion of “yes” <span class="math inline">\(p\)</span>, and we test <span class="math inline">\(H_0: p = 1/2\)</span> at level <span class="math inline">\(\alpha = 0.05\)</span> using the CLT approximation</p>
+<p><span class="math display">\[Z = \frac{\widehat{P} - 1/2}{\sqrt{1/(4n)}} \overset{\text{approx}}{\sim} \mathcal{N}(0,1) \quad \text{under } H_0.\]</span></p>
+<p>The type II error <span class="math inline">\(\beta\)</span> is the probability of <em>not rejecting</em> <span class="math inline">\(H_0\)</span> when it is false, and the <strong>power</strong> of the test is <span class="math inline">\(1 - \beta = P(\text{reject } H_0 \mid H_1)\)</span>. Under the alternative with true proportion <span class="math inline">\(p_1 \ne 1/2\)</span>, the CLT gives <span class="math inline">\(\widehat{P} \overset{\text{approx}}{\sim} \mathcal{N}(p_1,\ p_1(1-p_1)/n)\)</span>, so the power can be computed with the normal CDF. Throughout, <span class="math inline">\(u_{0.975} = 1.960\)</span> and <span class="math inline">\(u_{0.95} = 1.645\)</span>.</p>
+<ol type="1">
+<li><strong>Rejection regions on the <span class="math inline">\(\hat{p}\)</span> scale.</strong> Translate the critical values of Exercise 1 back to the scale of the estimated proportion: give the threshold <span class="math inline">\(c\)</span> such that the one-sided test rejects when <span class="math inline">\(\widehat{P} &gt; c\)</span>, and the interval <span class="math inline">\([c_1; c_2]\)</span> such that the two-sided test rejects when <span class="math inline">\(\widehat{P} \notin [c_1; c_2]\)</span>, for <span class="math inline">\(\alpha = 0.05\)</span>.</li>
+<li><strong>Power at <span class="math inline">\(p_1 = 0.53\)</span>.</strong> Assume the true proportion is <span class="math inline">\(p_1 = 0.53\)</span>. Compute the power of the one-sided and of the two-sided tests, using <code>1 - norm.cdf(c, loc = p1, scale = sqrt(p1*(1-p1)/n))</code> (and the symmetric two-tail formula). Compare the two powers and interpret.</li>
+<li><strong>Power curve.</strong> Write the commands that evaluate the power of both tests over a grid of values of <span class="math inline">\(p_1\)</span> between, say, 0.40 and 0.60, to produce a power curve. Describe what the curve looks like: behaviour as <span class="math inline">\(p_1 \to 1/2\)</span>, monotonicity, and effect of <span class="math inline">\(n\)</span>.</li>
+<li><strong>(Advanced) Sample-size planning.</strong> To design a survey with power <span class="math inline">\(1 - \beta = 0.80\)</span> at <span class="math inline">\(p_1 = 0.53\)</span>, derive from the normal approximation the required sample size</li>
+</ol>
+<p><span class="math display">\[n \approx \frac{\left( u_{1-\alpha}\sqrt{p_0(1-p_0)} + u_{1-\beta}\sqrt{p_1(1-p_1)} \right)^2}{(p_1 - p_0)^2}\]</span></p>
+<p>for the one-sided test (and the analogous formula with <span class="math inline">\(u_{1-\alpha/2}\)</span> for the two-sided test), then compute <span class="math inline">\(n\)</span> in both cases. Which test needs fewer observations, and why?</p>
+<ol start="5" type="1">
+<li><strong>(Advanced) Effect of <span class="math inline">\(\alpha\)</span>.</strong> Recompute the power at <span class="math inline">\(p_1 = 0.53\)</span> when the level is <span class="math inline">\(\alpha = 0.01\)</span> instead of <span class="math inline">\(0.05\)</span>, for both tests. What happens, and what does this reveal about the trade-off between type I and type II errors?</li>
+</ol>
+</section>
+<section id="sec-sol2" class="level1">
+<h1>Solution 2</h1>
+<div class="callout callout-style-simple callout-note">
+<div class="callout-body d-flex">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-body-container">
+<p>Work through these steps after attempting the exercise on your own. Each step corresponds to an instruction in <a href="#sec-exe2" class="quarto-xref">Section&nbsp;3</a>.</p>
+</div>
+</div>
+</div>
+<section id="rejection-regions-on-the-hatp-scale" class="level3">
+<h3 class="anchored" data-anchor-id="rejection-regions-on-the-hatp-scale">Rejection regions on the <span class="math inline">\(\hat{p}\)</span> scale</h3>
+<p>Under <span class="math inline">\(H_0\)</span>, <span class="math inline">\(\widehat{P} \approx \mathcal{N}(1/2,\ 1/(4n))\)</span> with <span class="math inline">\(\sqrt{1/(4n)} \approx 0.01581\)</span>, so</p>
+<ul>
+<li><em>one-sided test</em> (<span class="math inline">\(H_1: p &gt; 1/2\)</span>): rejects when</li>
+</ul>
+<p><span class="math display">\[c = \frac{1}{2} + u_{0.95}\sqrt{\frac{1}{4n}} = 0.5 + 1.645 \times 0.01581 \approx 0.5260,\]</span></p>
+<blockquote class="blockquote">
+<p><em>i.e.</em> when <span class="math inline">\(\widehat{P} &gt; 0.5260\)</span>;</p>
+</blockquote>
+<ul>
+<li><em>two-sided test</em>: rejects when <span class="math inline">\(\widehat{P}\)</span> falls outside</li>
+</ul>
+<p><span class="math display">\[\left[ \frac{1}{2} - u_{0.975}\sqrt{\frac{1}{4n}};\ \frac{1}{2} + u_{0.975}\sqrt{\frac{1}{4n}} \right] \approx [\,0.4690;\ 0.5310\,].\]</span></p>
+</section>
+<section id="power-at-p_1-0.53" class="level3">
+<h3 class="anchored" data-anchor-id="power-at-p_1-0.53">Power at <span class="math inline">\(p_1 = 0.53\)</span></h3>
+<p>Under <span class="math inline">\(H_1\)</span> with <span class="math inline">\(p_1 = 0.53\)</span>,</p>
+<p><span class="math display">\[\widehat{P} \overset{\text{approx}}{\sim} \mathcal{N}\left(0.53,\ \frac{0.53\times 0.47}{1000}\right), \qquad \sqrt{\frac{0.53\times 0.47}{1000}} \approx 0.01578.\]</span></p>
+<p><strong>One-sided.</strong> The test rejects when <span class="math inline">\(\widehat{P} &gt; c = 0.5260\)</span>, hence</p>
+<p><span class="math display">\[1 - \beta_{\text{one}} = P(\widehat{P} &gt; 0.5260) = 1 - \Phi\left(\frac{0.5260 - 0.53}{0.01578}\right) = 1 - \Phi(-0.253) \approx 0.60.\]</span></p>
+<p><strong>Two-sided.</strong> The test rejects when <span class="math inline">\(\widehat{P} \notin [0.4690;\ 0.5310]\)</span>, hence</p>
+<p><span class="math display">\[1 - \beta_{\text{two}} = 1 - \Phi\left(\frac{0.5310 - 0.53}{0.01578}\right) + \Phi\left(\frac{0.4690 - 0.53}{0.01578}\right) \approx 1 - \Phi(0.063) + \Phi(-3.867) \approx 0.475.\]</span></p>
+<p>The one-sided test (power <span class="math inline">\(\approx 0.60\)</span>) is noticeably more powerful than the two-sided test (power <span class="math inline">\(\approx 0.47\)</span>) at the same alternative <span class="math inline">\(p_1 = 0.53\)</span> in its declared direction. This is the quantitative counterpart of Exercise 1: the one-sided test spends <em>all</em> of <span class="math inline">\(\alpha\)</span> on the interesting side, lowering the threshold from <span class="math inline">\(0.5310\)</span> to <span class="math inline">\(0.5260\)</span>; the two-sided test must spend half of its level on the tail that contradicts <span class="math inline">\(H_1\)</span> and is therefore almost never used. The price of one-sidedness is blindness in the opposite direction: the same test has power <span class="math inline">\(\to 0\)</span> when <span class="math inline">\(p_1 &lt; 1/2\)</span>.</p>
+</section>
+<section id="power-curve" class="level3">
+<h3 class="anchored" data-anchor-id="power-curve">Power curve</h3>
+<p>The commands below evaluate the power of the two tests over a grid of true proportions (Python syntax, <code>norm</code> imported as in the callout above):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> scipy.stats <span class="im">import</span> norm</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>n <span class="op">=</span> <span class="dv">1000</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>p1_grid <span class="op">=</span> np.linspace(<span class="fl">0.40</span>, <span class="fl">0.60</span>, <span class="dv">201</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>sd0 <span class="op">=</span> np.sqrt(<span class="dv">1</span><span class="op">/</span>(<span class="dv">4</span><span class="op">*</span>n))</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>sd1 <span class="op">=</span> np.sqrt(p1_grid<span class="op">*</span>(<span class="dv">1</span><span class="op">-</span>p1_grid)<span class="op">/</span>n)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># one-sided: reject when Phat &gt; c</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>pow_one <span class="op">=</span> <span class="dv">1</span> <span class="op">-</span> norm.cdf(<span class="fl">0.5</span> <span class="op">+</span> norm.ppf(<span class="fl">0.95</span>)<span class="op">*</span>sd0, loc <span class="op">=</span> p1_grid, scale <span class="op">=</span> sd1)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="co"># two-sided: reject outside [c1, c2]</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>pow_two <span class="op">=</span> (<span class="dv">1</span> <span class="op">-</span> norm.cdf(<span class="fl">0.5</span> <span class="op">+</span> norm.ppf(<span class="fl">0.975</span>)<span class="op">*</span>sd0, loc <span class="op">=</span> p1_grid, scale <span class="op">=</span> sd1)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>           <span class="op">+</span> norm.cdf(<span class="fl">0.5</span> <span class="op">-</span> norm.ppf(<span class="fl">0.975</span>)<span class="op">*</span>sd0, loc <span class="op">=</span> p1_grid, scale <span class="op">=</span> sd1))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The curve has the following qualitative features:</p>
+<ul>
+<li>as <span class="math inline">\(p_1 \to p_0 = 1/2\)</span> the power tends to the level <span class="math inline">\(\alpha = 0.05\)</span> (when there is nothing to detect, the rejection probability is just the type I error rate);</li>
+<li>the power increases monotonically as <span class="math inline">\(|p_1 - p_0|\)</span> grows, approaching 1 for far-away alternatives;</li>
+<li>for a fixed alternative, the power increases with <span class="math inline">\(n\)</span>: larger samples shrink the standard deviation <span class="math inline">\(\sqrt{p_1(1-p_1)/n}\)</span>, pushing the alternative distribution further into the rejection region;</li>
+<li>the one-sided curve lies above the two-sided one on the right half (its declared direction) and, symmetrically, well below it on the left half — the two-sided test is more powerful for alternatives in the <em>opposite</em> direction.</li>
+</ul>
+</section>
+<section id="sample-size-planning-advanced" class="level3">
+<h3 class="anchored" data-anchor-id="sample-size-planning-advanced">Sample-size planning (Advanced)</h3>
+<p>Write <span class="math inline">\(p_0 = 1/2\)</span> and let <span class="math inline">\(u_{1-\alpha}\)</span>, <span class="math inline">\(u_{1-\beta}\)</span> denote the normal quantiles of the levels <span class="math inline">\(\alpha\)</span> (of the test) and <span class="math inline">\(\beta\)</span> (of the power). Repeating the reasoning of Exercise 2 with a generic sample size <span class="math inline">\(n\)</span>, the one-sided test rejects when <span class="math inline">\(\widehat{P} &gt; p_0 + u_{1-\alpha}\sqrt{p_0(1-p_0)/n}\)</span>, and the power at <span class="math inline">\(p_1\)</span> is</p>
+<p><span class="math display">\[1 - \beta = P\left( \widehat{P} &gt; p_0 + u_{1-\alpha}\sqrt{\frac{p_0(1-p_0)}{n}} \right)
+= 1 - \Phi\left( \frac{p_0 - p_1 + u_{1-\alpha}\sqrt{p_0(1-p_0)/n}}{\sqrt{p_1(1-p_1)/n}} \right).\]</span></p>
+<p>Setting this equal to <span class="math inline">\(1 - \beta\)</span> gives <span class="math inline">\(\Phi^{-1}(1-\beta) = u_{1-\beta}\)</span> and</p>
+<p><span class="math display">\[p_1 - p_0 = u_{1-\alpha}\sqrt{\frac{p_0(1-p_0)}{n}} + u_{1-\beta}\sqrt{\frac{p_1(1-p_1)}{n}},\]</span></p>
+<p>hence, solving for <span class="math inline">\(n\)</span>,</p>
+<p><span class="math display">\[n \approx \frac{\left( u_{1-\alpha}\sqrt{p_0(1-p_0)} + u_{1-\beta}\sqrt{p_1(1-p_1)} \right)^2}{(p_1 - p_0)^2}.\]</span></p>
+<p>The two-sided test uses <span class="math inline">\(u_{1-\alpha/2}\)</span> instead of <span class="math inline">\(u_{1-\alpha}\)</span> in the numerator (and the formula is then approximate, valid when the far-tail term is negligible). With <span class="math inline">\(p_0 = 1/2\)</span>, <span class="math inline">\(p_1 = 0.53\)</span>, <span class="math inline">\(1 - \beta = 0.80\)</span> (so <span class="math inline">\(\beta = 0.20\)</span> and <span class="math inline">\(u_{0.80} = 0.842\)</span>), <span class="math inline">\(\alpha = 0.05\)</span> (<span class="math inline">\(u_{0.95} = 1.645\)</span>, <span class="math inline">\(u_{0.975} = 1.960\)</span>), and <span class="math inline">\(\sqrt{p_1(1-p_1)} = \sqrt{0.2491} \approx 0.499\)</span>:</p>
+<blockquote class="blockquote">
+<ul>
+<li>one-sided: <span class="math inline">\(n \approx \left( 1.645 \times 0.5 + 0.842 \times 0.499 \right)^2 / 0.03^2 \approx (0.822 + 0.420)^2 / 0.0009 \approx (1.242)^2/0.0009 \approx 1714\)</span>;</li>
+<li>two-sided: <span class="math inline">\(n \approx \left( 1.960 \times 0.5 + 0.842 \times 0.499 \right)^2 / 0.03^2 \approx (0.980 + 0.420)^2 / 0.0009 \approx (1.400)^2/0.0009 \approx 2178\)</span>.</li>
+</ul>
+</blockquote>
+<p>The one-sided test needs about <span class="math inline">\(n \approx 1700\)</span> observations versus about <span class="math inline">\(n \approx 2200\)</span> for the two-sided test: for the same power, the test that is allowed to look in both directions must be larger. Conversely, at the same sample size the one-sided test reaches a given power the two-sided test can only match with a larger sample. (The exact normal computation gives <span class="math inline">\(1715\)</span> and <span class="math inline">\(2178\)</span> respectively.)</p>
+</section>
+<section id="effect-of-the-level-alpha-advanced" class="level3">
+<h3 class="anchored" data-anchor-id="effect-of-the-level-alpha-advanced">Effect of the level <span class="math inline">\(\alpha\)</span> (Advanced)</h3>
+<p>Repeating the power computation with <span class="math inline">\(\alpha = 0.01\)</span> (so <span class="math inline">\(u_{0.99} = 2.326\)</span> and <span class="math inline">\(u_{0.995} = 2.576\)</span>) at <span class="math inline">\(p_1 = 0.53\)</span>:</p>
+<ul>
+<li>the one-sided threshold moves from <span class="math inline">\(c = 0.5260\)</span> to <span class="math inline">\(c' = 0.5 + 2.326 \times 0.01581 \approx 0.5368\)</span>, and the power drops from <span class="math inline">\(\approx 0.60\)</span> to <span class="math inline">\(1 - \Phi\left(\frac{0.5368 - 0.53}{0.01578}\right) = 1 - \Phi(0.430) \approx 0.33\)</span>;</li>
+<li>the two-sided thresholds move to <span class="math inline">\([\,0.4593;\ 0.5407\,]\)</span>, and the power drops from <span class="math inline">\(\approx 0.47\)</span> to <span class="math inline">\(1 - \Phi(0.680) + \Phi(-4.48) \approx 0.25\)</span>.</li>
+</ul>
+<p>Demanding a smaller type I error rate (stricter “false alarm” control) moves the rejection threshold away from <span class="math inline">\(1/2\)</span>, making it harder to reject — the power falls by roughly a factor of two in both cases. This is the quantitative form of the type I / type II trade-off: <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span> cannot both be made arbitrarily small at a fixed <span class="math inline">\(n\)</span>; decreasing <span class="math inline">\(\alpha\)</span> at fixed <span class="math inline">\(n\)</span> increases <span class="math inline">\(\beta\)</span> (decreases power).</p>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>

@@ -1,0 +1,435 @@
+---
+title: "Exploratory Data Analysis with Palmer Penguins"
+subtitle: "Homework I - Improved Correction"
+from: markdown+emoji
+author:
+  - name: Mahendra Mariadassou
+    orcid: 0000-0003-2986-354X
+    email: mahendra.mariadassou@inrae.fr
+    affiliations:
+      - name: INRAE - MaIAGE
+        adress: Domaine de Vilvert
+        city: Jouy-en-Josas
+        state: France
+date: "2026-07-14"
+date-modified: today
+lightbox: true
+format: 
+  html:
+    toc: true
+    code-fold: show
+jupyter: python3
+---
+
+## 1. Overview
+
+This document provides a correction for Homework I, which focuses on exploratory data analysis using the Palmer Penguins dataset. The analysis covers data loading (@sec-data-loading), summary statistics (@sec-data-summary), missing data handling (@sec-missing-data), visualization (@sec-visualization), relationships between variables (@sec-relationships), sampling and confidence intervals (@sec-confidence-intervals), and species comparison (@sec-species-comparison).
+
+## 2. Data Loading and Initial Exploration {#sec-data-loading}
+
+We begin by loading the Palmer Penguins dataset from seaborn and examining its structure; the first few rows are shown in @tbl-data-head.
+
+```{python}
+#| label: tbl-data-head
+#| tbl-cap: "First five rows of the Palmer Penguins dataset."
+# Import required libraries
+import seaborn as sns
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from scipy import stats
+import seaborn as sns
+
+# Load the dataset
+data = sns.load_dataset("penguins")
+
+# Display the first few rows of the dataset
+data.head()
+```
+
+### Variable Types
+
+Let's examine the data types of each column to understand what kind of variables we're dealing with.
+
+```{python}
+#| label: data-info
+# Get information about the dataset structure
+data.info()
+```
+
+**Interpretation:**
+
+- Columns `species`, `island`, and `sex` are categorical variables
+- Columns `bill_length_mm`, `bill_depth_mm`, `flipper_length_mm`, `body_mass_g`, and `year` are numerical variables
+- Understanding variable types is crucial as it determines the appropriate statistical methods and visualizations to use
+
+## 3. Data Summary and Basic Exploration {#sec-data-summary}
+
+### Descriptive Statistics for All Variables
+
+Let's calculate key descriptive statistics for the numerical variables (@tbl-summary-stats).
+
+```{python}
+#| label: tbl-summary-stats
+#| tbl-cap: "Mean, median and standard deviation of the numerical variables (whole dataset)."
+# Calculate mean, median, and standard deviation for all numerical variables
+data.describe().loc[['mean', '50%', 'std']]
+```
+
+**Interpretation:**
+
+- **Bill Length** and **Flipper Length** have relatively higher means than **Bill Depth**, indicating penguins tend to have longer bills and flippers
+- The **variance** (measured through `std`) is highest in **Body Mass**, suggesting a broader range of body mass among penguins
+- **Median** values are close to means for all variables (except for **Body Mass**), indicating near-normal distributions
+- The difference observed for body mass suggests its distribution is right-skewed, with an excess of large values
+
+::: callout-note
+Observing several outliers in `body_mass_g` indicates individual penguins with much higher or lower mass. These could be biologically significant or measurement errors. Outliers should be noted but not necessarily removed, as they might reflect natural diversity among penguins.
+:::
+
+### Descriptive Statistics by Species
+
+Now let's calculate these statistics separately for each species (@tbl-summary-stats-species) to see how they differ.
+
+```{python}
+#| label: tbl-summary-stats-species
+#| tbl-cap: "Mean, median and standard deviation of the numerical variables by species."
+# Compute mean, median, and standard deviation for each species
+# Using agg() method for cleaner presentation
+data.groupby("species").agg({
+    "bill_length_mm": ["mean", "median", "std"],
+    "bill_depth_mm": ["mean", "median", "std"],
+    "flipper_length_mm": ["mean", "median", "std"],
+    "body_mass_g": ["mean", "median", "std"]
+})
+```
+
+**Interpretation:**
+
+- The species-level standard deviations (and standard deviation to mean ratios) decrease in all species compared to the whole population
+- There are differences in the mean bill length, bill depth, flipper length, and body mass across species
+
+::: callout-note
+The whole dataset standard deviations (as opposed to species-level ones) compound two sources of variation:
+- Differences between the species (visible in the different species-level means)
+- Biological variations within each species
+:::
+
+## 4. Missing Data Handling {#sec-missing-data}
+
+Let's check for missing values in the dataset.
+
+```{python}
+#| label: tbl-missing-values
+#| tbl-cap: "Number of missing values per column in the original dataset."
+# Check for missing values in each column
+data.isnull().sum()
+```
+
+**Interpretation:**
+
+- As shown in @tbl-missing-values, we see 11 missing values in the `sex` variable and 2 in each of the numerical variables
+- Approach: Drop rows with missing `sex` data and use mean imputation for numerical variables
+
+```{python}
+#| label: clean-data
+# Handle missing data: drop rows with missing sex and impute missing numerical values
+data_clean = data.dropna(subset=['sex']).copy()
+
+# Use mean imputation for the 4 numeric variables
+for column in ['bill_length_mm', 'bill_depth_mm', 'flipper_length_mm', 'body_mass_g']:
+    column_mean = data_clean[column].mean()
+    data_clean[column].fillna(column_mean, inplace=True)
+
+# Verify no missing values remain
+data_clean.isnull().sum()
+```
+
+::: callout-note
+It turns out that once we've dropped the rows with missing `sex`, there are no missing values anymore as the two penguins for which bill length, bill depths, etc are missing are also missing the sex information. The second part of the imputation instructions is therefore unnecessary.
+:::
+
+## 5. Data Visualization {#sec-visualization}
+
+### Distribution Analysis
+
+Let's visualize the distributions of numerical variables (@fig-distributions) to understand their spread and central tendency.
+
+```{python}
+#| label: fig-distributions
+#| fig-cap: "Distributions of the four numerical variables (histograms with KDE overlay)."
+#| layout-ncol: 2
+# Plot distributions for all numerical variables
+for column in ['bill_length_mm', 'bill_depth_mm', 'flipper_length_mm', 'body_mass_g']:
+    plt.figure(figsize=(8, 4))
+    sns.histplot(data_clean[column], kde=True)
+    plt.title(f"Distribution of {column}")
+    plt.xlabel(column)
+    plt.ylabel("Frequency")
+```
+
+**Interpretation:**
+
+- **Bill Length** and **Flipper Length** distributions appear roughly normal, but the existence of two peaks suggests they might be a mixture of two or more distributions (could be related to sex or other factors)
+- **Body Mass** shows some skew, suggesting larger penguins might be more common in the sample than expected under a Gaussian distribution
+
+### Outlier Detection
+
+Let's examine potential outliers using boxplots and the IQR method (@fig-boxplot-outliers).
+
+```{python}
+#| label: fig-boxplot-outliers
+#| fig-cap: "Boxplots of the numerical variables, highlighting potential outliers."
+# Create horizontal boxplots to visualize outliers
+plt.figure(figsize=(10, 6))
+sns.boxplot(data=data_clean, orient="h")
+plt.title("Boxplot of Numerical Variables")
+plt.xlabel("Values")
+```
+
+```{python}
+#| label: iqr-outliers
+def count_iqr_outliers(df, columns):
+    """
+    Count outliers in specified columns using the IQR method.
+    
+    Parameters:
+    df (pd.DataFrame): The DataFrame to process
+    columns: List of column names to check for outliers
+    
+    Returns:
+    Number of observations flagged as outliers for each column
+    """
+    for column in columns:
+        # Calculate quartiles and interquartile range
+        Q1 = df[column].quantile(0.25)
+        Q3 = df[column].quantile(0.75)
+        IQR = Q3 - Q1
+        
+        # Calculate outlier bounds
+        lower_bound = Q1 - 1.5 * IQR
+        upper_bound = Q3 + 1.5 * IQR
+        
+        # Count outliers
+        n_outliers = ((df[column] < lower_bound) | (df[column] > upper_bound)).sum()
+        
+        # Print results
+        print(f'Number of outliers in {column}: {n_outliers}')
+
+# Apply outlier detection to numerical variables
+count_iqr_outliers(data_clean, ['bill_length_mm', 'bill_depth_mm', 'flipper_length_mm', 'body_mass_g'])
+```
+
+**Interpretation:**
+
+- Although the skew of the `body_mass_g` distribution indicates individual penguins with much higher or lower mass, the IQR method doesn't identify any outliers for this variable
+- This suggests that the large distribution range reflects natural diversity among penguins rather than extreme outliers
+- The body mass variable is much more variable than other physical features
+
+## 6. Exploring Relationships between Variables {#sec-relationships}
+
+### Scatter Plots and Correlations
+
+Let's investigate relationships between pairs of variables (@fig-relationships).
+
+```{python}
+#| label: fig-relationships
+#| fig-cap: "Pairwise relationships between penguin measurements, colored by species, and body mass by species."
+# Create subplots for relationship analysis
+fig, axes = plt.subplots(1, 3, figsize=(15, 5)) 
+
+# Bill length vs bill depth, colored by species
+sns.scatterplot(y="bill_length_mm", x="bill_depth_mm", data=data_clean, hue="species", ax=axes[0])
+axes[0].set_title('Bill Length vs Bill Depth')
+axes[0].set_xlabel('Bill Depth (mm)')
+axes[0].set_ylabel('Bill Length (mm)')
+
+# Body mass vs flipper length, colored by species
+sns.scatterplot(y="body_mass_g", x="flipper_length_mm", data=data_clean, hue="species", ax=axes[1])
+axes[1].set_title('Body Mass vs Flipper Length')
+axes[1].set_xlabel('Flipper Length (mm)')
+axes[1].set_ylabel('Body Mass (g)')
+
+# Body mass by species using a boxplot
+sns.boxplot(y="body_mass_g", x="species", data=data_clean, ax=axes[2])
+axes[2].set_title('Body Mass by Species')
+axes[2].set_xlabel('Species')
+axes[2].set_ylabel('Body Mass (g)')
+
+# Adjust layout
+plt.tight_layout()
+```
+
+```{python}
+#| label: correlations
+# Calculate correlation coefficients
+# Between bill length and bill depth
+correlation_bl_bd = data_clean['bill_length_mm'].corr(data_clean['bill_depth_mm'])
+
+# Between body mass and flipper length  
+correlation_bm_fl = data_clean['body_mass_g'].corr(data_clean['flipper_length_mm'])
+
+# Print the correlation coefficients
+print(f'Correlation between Bill Length and Bill Depth: {correlation_bl_bd:.2f}')
+print(f'Correlation between Body Mass and Flipper Length: {correlation_bm_fl:.2f}')
+```
+
+**Interpretation:**
+
+- **Bill Length vs. Bill Depth**: Positive correlation, especially within species, suggesting species-level consistency in bill proportions
+- **Body Mass vs. Flipper Length**: Penguins with larger flipper lengths tend to have higher body mass, potentially due to size and ecological niche
+- **Body Mass vs. Species**: Marked differences between species with Gentoo penguins being much heavier than Chinstrap and Adelie counterparts
+
+::: callout-important
+This is a typical example where accounting for sample stratification is important. The linear relationship between body mass and flipper length is positive and consistent across species, hence the high correlation coefficient (0.87). However, we get a negative value (-0.23) for the correlation coefficient between bill length and bill depth because the linear relationship holds only within each species but not at the dataset level. When computing within-species correlation coefficients, we get positive (and quite high) values, as discussed in @sec-species-comparison.
+:::
+
+## 7. Random Sampling and Confidence Intervals {#sec-confidence-intervals}
+
+### Sampling and Confidence Interval for Bill Length
+
+Let's take a random sample and calculate confidence intervals.
+
+```{python}
+#| label: random-sample
+# Set sample size
+n = 30
+
+# Take a random sample with fixed seed for reproducibility
+sample_data = data_clean.sample(n, random_state=42)
+
+# Calculate sample and population means
+sample_mean = sample_data["bill_length_mm"].mean()
+population_mean = data_clean["bill_length_mm"].mean()
+
+print(f"Sample mean bill length: {sample_mean:.2f}")
+print(f"Population mean bill length: {population_mean:.2f}")
+```
+
+**Interpretation:**
+
+- The sample mean bill length is close to the population mean, demonstrating that even small samples can be useful for estimating population parameters
+
+Now let's calculate a 95% confidence interval for the sample mean.
+
+```{python}
+#| label: confidence-interval
+# Calculate standard deviation of the sample
+sample_std = sample_data["bill_length_mm"].std()
+
+# Calculate 95% confidence interval
+ci_lower = sample_mean - 1.96 * sample_std / np.sqrt(n)
+ci_upper = sample_mean + 1.96 * sample_std / np.sqrt(n)
+
+print(f"95% Confidence Interval: [{ci_lower:.2f}, {ci_upper:.2f}]")
+print(f"Population mean: {population_mean:.2f}")
+
+# Check if population mean is within confidence interval
+if ci_lower <= population_mean <= ci_upper:
+    print("The population mean is contained within the confidence interval")
+else:
+    print("The population mean is NOT contained within the confidence interval")
+```
+
+### Simulation: Confidence Intervals Over Many Samples
+
+Let's simulate the process 100 times to see how often the confidence intervals contain the population mean.
+
+```{python}
+#| label: coverage-simulation
+# Parameters for the simulation
+num_samples = 100
+
+# Initialize counter for intervals containing population mean
+count_within_ci = 0
+
+# Loop to generate samples and compute confidence intervals
+for i in range(num_samples):
+    # Generate random sample (no fixed seed for different samples)
+    sample = data_clean['bill_length_mm'].sample(n, random_state=None)
+    sample_mean = sample.mean()
+    sample_std = sample.std()  # Sample standard deviation
+    
+    # Calculate confidence interval
+    ci_lower = sample_mean - 1.96 * sample_std / np.sqrt(n)
+    ci_upper = sample_mean + 1.96 * sample_std / np.sqrt(n)
+    
+    # Check if population mean falls within confidence interval
+    if ci_lower <= population_mean <= ci_upper:
+        count_within_ci += 1
+
+# Output results
+print(f'Population mean: {population_mean:.2f}')
+print(f'Number of confidence intervals containing the population mean: {count_within_ci}')
+print(f'Proportion of confidence intervals containing the population mean: {count_within_ci / num_samples:.2%}')
+```
+
+**Interpretation:**
+
+- The population mean should fall within the confidence interval approximately 95% of the time
+- This demonstrates that confidence intervals have good coverage properties when properly constructed
+
+::: callout-important
+Remember that here the population mean is **fixed** and the confidence interval is **random**. In general, we don't have access to the population mean, that's why we need to ensure that confidence intervals have good properties (on average).
+:::
+
+## 8. Comparing Species Groups {#sec-species-comparison}
+
+We now repeat the reasoning of @sec-confidence-intervals, but instead of pooling all penguins we compare the three species. We first summarize flipper length by species, then build confidence intervals for the species means.
+
+### Species-Level Analysis of Flipper Length
+
+Let's analyze flipper length differences between species (@tbl-flipper-species).
+
+```{python}
+#| label: tbl-flipper-species
+#| tbl-cap: "Mean and standard deviation of flipper length by species."
+# Group by species and calculate mean and standard deviation of flipper length
+species_summary = data_clean.groupby("species")["flipper_length_mm"].agg(["mean", "std"])
+species_summary
+```
+
+**Interpretation:**
+
+- **Adelie** penguins have shorter flipper lengths, while **Gentoo** penguins have the longest
+- The difference between **Adelie** and **Gentoo** (~27 mm) is much larger than the standard deviation, suggesting that the difference reflects adaptations to different ecological roles rather than just biological variability
+
+### Confidence Intervals for Each Species
+
+Following the approach of @sec-confidence-intervals, let's compute 90% confidence intervals for flipper length within each species.
+
+```{python}
+#| label: confidence-interval-by-species
+# Calculate 90% confidence intervals for each species
+for species in data_clean["species"].unique():
+    species_data = data_clean[data_clean["species"] == species]
+    mean_flipper = species_data["flipper_length_mm"].mean()
+    std_flipper = species_data["flipper_length_mm"].std()
+    n = len(species_data)
+    
+    # Calculate 90% confidence interval
+    ci = stats.norm.interval(0.90, loc=mean_flipper, scale=std_flipper/np.sqrt(n))
+    
+    print(f"{species}: 90% CI for flipper length = ({ci[0]:.2f}, {ci[1]:.2f})")
+```
+
+**Interpretation:**
+
+- The confidence intervals for flipper length do not overlap between some species, suggesting significant species-level differences in this trait
+- These differences likely reflect different environmental adaptations
+
+## 9. Summary and Further Questions {#sec-summary}
+
+### Summary of Findings
+
+- The **Palmer Penguins** dataset reveals distinct differences in body structure among penguin species, likely due to their different environments and behaviors
+- **Distributions** are near-normal for most variables, though body mass shows some skew, possibly indicating a larger spread in penguin sizes
+- **Outliers** in body mass and bill length highlight individual variations that could be due to age, health, or measurement
+- **Confidence intervals** reinforce that samples can reliably estimate population parameters, and distinct CIs across species suggest real differences in physical traits
+
+### Further Questions for Exploration
+
+If extending this analysis, we could investigate:
+- Differences in body mass across years
+- Impact of sex on size differences 
+- Comparisons of penguin measurements across different islands (a factor we completely left out in our analyses)

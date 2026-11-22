@@ -1,0 +1,637 @@
+---
+title: "Hypothesis Testing"
+subtitle: "From a Research Question to a Decision"
+from: markdown+emoji
+author:
+  - name: Mahendra Mariadassou
+    orcid: 0000-0003-2986-354X
+    email: mahendra.mariadassou@inrae.fr
+    affiliations:
+      - name: INRAE - MaIAGE
+        adress: Domaine de Vilvert
+        city: Jouy-en-Josas
+        state: France
+date: "2026-11-09"
+date-modified: today
+lightbox: true
+format: 
+  html:
+    toc: true
+    code-fold: show
+    theme: cosmo
+jupyter: python3
+---
+
+## Preamble
+
+Many research directions can be formulated as .blue[questions] with a .alert[yes / no] answer:
+
+- Is a new variety of tomato more resistant to mildew than the previous one ?
+- Is the expression of gene HER2 large in breast cancer ?
+- Is food cheaper in China than in France ?
+
+You collect .alert[noisy data] about the problem and want to give an *evidence based* answer to the question. A **statistical test** (or hypothesis test) is the framework that lets you do so in a principled way --- quantifying what it means for the data to support a "yes" rather than a "no".
+
+This tutorial follows the lecture (§ Tests) and makes its ideas *concrete* through simulation. It is structured along the four elements of a test (data, model, null hypothesis, decision rule), then walks through a running example (the sex ratio of births in France), before contrasting *two* ways to decide whether to reject the null: the parametric approach (relying on a known distribution of the test statistic under $H_0$) and the **permutational / resampling** approach (estimating that distribution by shuffling the data).
+
+::: {.callout-tip appearance="simple" title="Computing normal and Student quantiles and CDFs" collapse="true"}
+
+The tests in this tutorial require quantiles and CDFs of the standard normal $\mathcal{N}(0,1)$ (e.g. $u_{0.975} = 1.960$) and of the Student distribution with $k$ degrees of freedom (e.g. $t_{9,0.975} = 2.262$). In Python (`from scipy.stats import norm, t`):
+
+- Normal quantile: `norm.ppf(0.975)` and CDF: `norm.cdf(1.96)`
+- Student quantile with $k$ df: `t.ppf(0.975, df=k)` and CDF: `t.cdf(1.96, df=k)`
+
+Remember that the upper $\alpha$-quantile $q_\alpha$ is the value such that $P(X \le q_\alpha) = \alpha$.
+:::
+
+### Learning objectives
+
+By the end of this tutorial, you should be able to:
+
+- Identify the **four elements of a test**: the data, the statistical model, the null hypothesis $H_0$ (with its alternative $H_1$), and the decision rule.
+- Explain the two **decision errors** — Type I (rejecting a true $H_0$) and Type II (retaining a false $H_0$) — and the necessary trade-off between them.
+- Build a test statistic and calibrate a **rejection region** from the distribution of the statistic under $H_0$.
+- Interpret a **p-value** as the probability, under $H_0$, of observing a statistic at least as extreme as the one observed.
+- Run and interpret a **two-sample equality-of-means test** (Student $t$-test, with pooled variance), in both **two-sided** and **one-sided** form.
+- Derive the **power** of a test **analytically** (noncentral Student), and use it to compare one-sided and two-sided decision rules and to size an experiment.
+- Estimate the null distribution **non-parametrically** using a **permutation test**, and compare its p-value with the parametric one.
+
+## Setting Up the Environment
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** import the libraries needed for the numerical work and set a reproducible plotting style.
+
+-   **Instructions:**
+
+    -   Use `numpy` for the simulations and the normal/Student quantiles, `pandas` to assemble tabular results, and `matplotlib` + `seaborn` for the figures.
+    -   Set a plotting style and a "global" figure size.
+    -   Set a random seed so every run of this notebook gives the same numbers.
+
+#### Solution
+
+```{python}
+#| label: importLibraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from scipy.stats import norm, t
+import warnings
+warnings.filterwarnings('ignore')
+
+# Cosmetic
+sns.set_style("whitegrid")
+plt.rcParams['figure.figsize'] = (10, 6)
+
+# Reproducibility
+np.random.seed(2026)
+```
+
+:::
+
+Throughout the notebook we rely on a single concrete, simulated problem, mirroring the lecture: the sex ratio of newborns *and* the heights of Agro students. We set up the Agro-like dataset once at the start, because it will be reused when we discuss the two-sample (equality of means) test.
+
+## Section 1 — The Four Elements of a Test
+
+Every statistical test rests on the same four ingredients (lecture § Four elements of a test):
+
+- **Data:** $y_1, \dots, y_n$, a realisation of the random variables $Y_1, \dots, Y_n$;
+- a statistical **model:** the distribution of $Y_1, \dots, Y_n$, depending on some parameters $\theta$;
+- an **assumption:** a statement about $\theta$. This is the **null hypothesis** $H_0$ that you usually want to reject, $H_1$ being the alternative;
+- a **decision rule:** if $T = f(Y_1, \dots, Y_n)$ is a test statistic, then $R$ is a subset of values of $T$ that is *unlikely* when $H_0$ is true. You **reject** $H_0$ when $T$ falls in $R$.
+
+Let us make these abstract elements concrete on a running example that we will come back to throughout the notebook: the heights of agroengineering students.
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** simulate the `Agro` dataset of the lecture (heights of female and male students) and explore it, so that we have a concrete object on which to build tests.
+
+-   **Instructions:**
+
+    -   Simulate $n = 731$ students with a random gender ("F" or "M"), and draw heights from $\mathcal{N}(170, 4^2)$ for females and $\mathcal{N}(178, 4^2)$ for males.
+    -   Assemble the result into a `pandas` DataFrame `Agro` with columns `Height` and `Gender`.
+    -   Report the number of students of each gender, the mean height of each group, and plot the height distributions side by side.
+
+#### Solution
+
+```{python}
+#| label: simulateAgro
+set_seed = 42
+rng = np.random.default_rng(set_seed)
+n = 731
+n_male = int(np.round(n * 369 / (362 + 369)))   # ~369 male, rest female
+gender = np.array(["M"] * n_male + ["F"] * (n - n_male))
+rng.shuffle(gender)
+
+height = np.where(
+    gender == "M",
+    rng.normal(178, 4, size=n),
+    rng.normal(170, 4, size=n),
+)
+
+Agro = pd.DataFrame({"Height": height, "Gender": gender})
+Agro["Gender"] = Agro["Gender"].astype("category")
+
+print(Agro["Gender"].value_counts())
+print("\nMean height per gender:")
+print(Agro.groupby("Gender", observed=True)["Height"].mean())
+
+plt.figure()
+sns.histplot(data=Agro, x="Height", hue="Gender", element="step", alpha=0.6, bins=30)
+plt.title("Height distributions of female and male students (Agro)")
+plt.show()
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+The question we will ultimately test is whether the *mean height* differs between female and male students. Fitting this to the four elements:
+
+- **Data:** the heights $(X_1, \dots, X_{n_1})$ of the $n_1$ female students and $(Y_1, \dots, Y_{n_2})$ of the $n_2$ male students;
+- **Model:** $X_i \sim \mathcal{N}(\mu_1, \sigma^2)$ and $Y_j \sim \mathcal{N}(\mu_2, \sigma^2)$, with the *same variance* in both populations, and all heights independent;
+- **Null hypothesis:** the mean height is the same, $\mu_1 - \mu_2 = 0$;
+- **Decision rule:** compare the (scaled) mean difference to its distribution under $H_0$.
+
+The hard work, as the lecture stresses, consists in quantifying what "too far" from $0$ means — which requires knowing (or estimating) the distribution of the test statistic under $H_0$.
+:::
+
+## Section 2 — Decision Errors: Type I and Type II
+
+Because the decision is based on *noisy* data, it is inherently **error-prone**. Two mistakes can be made:
+
+- **Type I error** (false positive): we **reject** $H_0$ when it is in fact *true*. The probability of this is the **significance level** $\alpha$.
+- **Type II error** (false negative): we **retain** (fail to reject) $H_0$ when it is in fact *false*. Its probability is $\beta$, and $1-\beta$ is the **power** of the test.
+
+There is a *necessary trade-off* between the two: a more stringent criterion lowers the chance of wrongly rejecting $H_0$ (fewer Type I errors) but increases the chance of missing a real effect (more Type II errors, less power); a looser criterion does the reverse. The analogy of the lecture is a trial: $H_0$ is the accused, and you only accumulate evidence *against* it — you never "accept" the null, you only **fail to reject** it.
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** make the two error probabilities concrete by simulating a coin-flipping decision rule and varying the rejection threshold.
+
+-   **Instructions:**
+
+    -   Consider a Bernoulli proportion $p$ (e.g. the probability a newborn is a girl). Under $H_0: p = 1/2$, simulate $S = 5000$ repetitions of $n = 100$ Bernoulli trials, and compute the empirical frequency $\hat p$ of each.
+    -   For a two-sided decision rule that rejects $H_0$ when $|\hat p - 1/2|$ is large, plot the histogram of $\hat p$ under $H_0$.
+    -   Mark the rejection boundaries at $1/2 \pm u_{0.975}\sqrt{1/4n}$. The area outside the boundaries is the Type I error rate $\alpha$. Verify it is about 5%.
+    -   Then, keeping the *same* boundaries, simulate from $p = 0.55$ (so $H_0$ is false) and estimate the **power** $1-\beta$ (the fraction of repetitions that fall outside the boundaries).
+
+#### Solution
+
+```{python}
+#| label: decisionErrors
+n = 100
+R = 5000
+u = norm.ppf(0.975)                      # two-sided boundary multiplier
+boundary = u * np.sqrt(1 / (4 * n))      # sd of p-hat under H0 is sqrt(1/(4n))
+lo, hi = 0.5 - boundary, 0.5 + boundary
+
+# Under H0: p = 1/2
+p_hat_H0 = np.random.default_rng(3).binomial(n, 0.5, R) / n
+# Under H1: p = 0.55 (null is false)
+p_hat_H1 = np.random.default_rng(4).binomial(n, 0.55, R) / n
+
+alpha = np.mean((p_hat_H0 < lo) | (p_hat_H0 > hi))   # Type I error rate
+power = np.mean((p_hat_H1 < lo) | (p_hat_H1 > hi))   # 1 - beta
+
+plt.figure()
+sns.histplot(p_hat_H0, bins=40, stat="density", alpha=0.6, color="skyblue", label=r"under H0: p=0.5")
+sns.histplot(p_hat_H1, bins=40, stat="density", alpha=0.5, color="salmon", label=r"under H1: p=0.55")
+plt.axvline(lo, color="black", linestyle="--"); plt.axvline(hi, color="black", linestyle="--")
+plt.xlabel(r"observed frequency  $\hat p$"); plt.ylabel("density")
+plt.title("Two possible worlds: H0 true vs H0 false")
+plt.legend()
+plt.show()
+
+print(f"Rejection boundaries        : [{lo:.3f}, {hi:.3f}]")
+print(f"Type I error rate (alpha)   : {alpha:.3f}   (nominal 0.05)")
+print(f"Power (1 - beta) at p=0.55  : {power:.3f}")
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+The histogram under $H_0$ shows exactly where the 5% rejection region lives: it is the tail of the null distribution that we declare "too far from $1/2$". When $H_0$ is true, a point lands there about 5% of the time (the Type I error). When $H_0$ is false, more of the distribution shifts outside the boundaries, and the fraction that lands there is the **power** — how often the test *correctly* says "reject". Increasing $n$ (or moving $p$ further from $1/2$) pushes the $H_1$ distribution further out and raises the power.
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question"}
+- Raise the sample size to $n = 400$ and re-run. The Type I rate stays near 5%, but the **power** at $p=0.55$ should rise close to 1: with more data it becomes much easier to detect that $H_0$ is false.
+- Make the test more stringent by rejecting only when $|\hat p - 1/2|$ exceeds $u_{0.995}\sqrt{1/4n}$ (a 1% level). The Type I error drops to ~1% — but the power also drops. Confirm this trade-off.
+:::
+
+## Section 3 — Constructing a Test, Step by Step
+
+We now build a *complete* test following the lecture's baby example. In France in 2022 there were 351 296 boys and 335 268 girls born (data from INED and INSEE). Is the probability $p$ of a girl *really* $1/2$? The four elements are:
+
+- **Model:** sex of a newborn $\sim \mathcal{B}(p)$ (a Bernoulli, $1$ = girl), all children i.i.d.;
+- **Null hypothesis:** $H_0: p = 1/2$ (equal chance of boy or girl);
+- **Data:** $\hat p = 335268/(335268+351296)$;
+- **Decision rule:** reject $H_0$ if $\hat p$ is *too far* from $1/2$;
+
+The construction proceeds in three steps: derive a **test statistic**, work out its **distribution under $H_0$** (here via the Gaussian approximation to the binomial), and calibrate the **region of unlikely values**. The hard work consists in quantifying what *too far* means.
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** reproduce the lecture's construction of the baby-sex test: compute the statistic, its null distribution, the rejection region, and conclude.
+
+-   **Instructions:**
+
+    -   With $n = 335268 + 351296$, note that under $H_0$ the Gaussian approximation gives $F \sim \mathcal{N}(1/2, 1/(4n))$.
+    -   Compute the observed frequency of girls $\hat p$ and its distance from $1/2$.
+    -   Calibrate the region: with probability 0.95, $|F - 1/2| \le 1.96\sqrt{1/(4n)}$; report those two bounds and check whether $\hat p$ falls outside them.
+    -   Conclude: reject or retain $H_0$?
+
+#### Solution
+
+```{python}
+#| label: babySexTest
+n_boys = 351296
+n_girls = 335268
+n = n_boys + n_girls
+
+p_hat = n_girls / n                       # observed frequency of girls
+sd_H0 = np.sqrt(1 / (4 * n))              # sd of F under H0 (p = 1/2)
+a = 0.05
+u = norm.ppf(1 - a/2)                     # 1.96
+lo, hi = 0.5 - u * sd_H0, 0.5 + u * sd_H0  # 95% region under H0
+
+print(f"n              = {n}")
+print(f"observed f     = {p_hat:.6f}")
+print(f"sd under H0    = {sd_H0:.2e}")
+print(f"95% region     = [{lo:.6f}, {hi:.6f}]")
+print(f"|f - 1/2|      = {abs(p_hat - 0.5):.6f}   (max allowed {u*sd_H0:.6f})")
+print(f"Reject H0?     -> {not (lo <= p_hat <= hi)}")
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+The observed $\hat p = 0.488$ is far outside the narrow 95% interval $[0.4988, 0.5012]$: under $H_0$ such a deviation is essentially impossible. So we **reject** $H_0$: there is overwhelming evidence that the probability of a girl is not $1/2$. Note that we have *not* proven $p \ne 1/2$ — we have simply shown the data are very unlikely if $H_0$ were true, which is the correct logical arrow of a significance test.
+:::
+
+## Section 4 — The p-value
+
+The previous test gives a binary **reject / retain** verdict. The **p-value** goes one step further and assesses the *significance* of the observed statistic: it is the probability, **under $H_0$**, of observing a statistic at least as extreme as the one actually observed:
+
+$$
+p = P_{H_0}\left( |F - 1/2| > |f - 1/2| \right) .
+$$
+
+A small p-value means the observed data would be very surprising if $H_0$ were true — evidence against $H_0$. A large p-value means the data are quite compatible with $H_0$.
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** compute the p-value for the baby example and for a less extreme example (the youth of Paris), to see the scale of evidence.
+
+-   **Instructions:**
+
+    -   For the babies, use the Gaussian approximation $F \sim \mathcal{N}(1/2, 1/(4n))$ and compute
+    $$p = P_{H_0}(F < f) + P_{H_0}(F > 1 - f),$$
+    the probability of being at least as far from $1/2$ as the observed $f$ (in either direction).
+    -   Repeat for the Paris youth example: 198 110 boys and 198 905 girls.
+    -   Compare the two p-values and comment on how *extreme* each observed deviation is.
+
+#### Solution
+
+```{python}
+#| label: pvalues
+def two_sided_pvalue(n_girls, n_boys):
+    n = n_girls + n_boys
+    f = n_girls / n
+    sd = np.sqrt(1 / (4 * n))
+    # P(F < f) + P(F > 2*0.5 - f)  =  P(F < f) + P(F > 1 - f)
+    return norm.cdf(f, 0.5, sd) + (1 - norm.cdf(1 - f, 0.5, sd))
+
+# Babies (France 2022)
+p_babies = two_sided_pvalue(335268, 351296)
+f_babies = 335268 / (335268 + 351296)
+
+# Paris youth (0-19)
+p_paris = two_sided_pvalue(198905, 198110)
+f_paris = 198905 / (198110 + 198905)
+
+print(f"France (babies) : f = {f_babies:.4f}  ->  p-value ~ {p_babies:.2e}")
+print(f"Paris (youth)   : f = {f_paris:.4f}  ->  p-value ~ {p_paris:.3f}")
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+The two examples illustrate the *scale* of the p-value. For the babies, $f = 0.488$ is a huge departure from $1/2$ given the enormous $n$ ($\approx 700\,000$), so the p-value is astronomically small ($\approx 5 \times 10^{-89}$) — not merely *unlikely* but insanely unlikely under $H_0$. For the Paris youth, $f = 0.501$ is a tiny relative deviation, so the p-value is about 21% — a value you would expect to observe roughly once out of every five repetitions even when $H_0$ is true. A large p-value is **not** evidence for $H_0$; it only says the data do not contradict it.
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question"}
+- Small p-values are easy to obtain when $n$ is enormous, even for a *tiny* effect. Holding the observed $f = 0.501$ fixed, how does the p-value change as $n$ shrinks? Confirm that with a smaller $n$ the same deviation is no longer surprising — the p-value grows. This is the practical lesson that statistical significance is not the same as practical importance.
+:::
+
+## Section 5 — Equality of Means: the Two-Sample $t$-Test
+
+We now return to the `Agro` heights and ask whether the mean height differs between female and male students. Using the four elements:
+
+- **Data:** heights $(X_1, \dots, X_{n_1})$ of $n_1$ female and $(Y_1, \dots, Y_{n_2})$ of $n_2$ male students;
+- **Model:** $X_i \sim \mathcal{N}(\mu_1, \sigma^2)$ and $Y_j \sim \mathcal{N}(\mu_2, \sigma^2)$ with the *same* variance $\sigma^2$, all independent;
+- **Null hypothesis:** $\mu_1 - \mu_2 = 0$ (same mean height);
+- **Decision rule:** reject if the (scaled) mean difference $|T|$ is *too far* from $0$.
+
+The crux is the distribution of $T$ under $H_0$. The natural statistic is the difference of the sample means, standardized by its standard error. Because the variance is unknown and assumed equal between groups, we use the **pooled** estimator
+
+$$
+S = \sqrt{\frac{(n_1 - 1)S^2_X + (n_2 - 1)S^2_Y}{n_1 + n_2 - 2}},
+$$
+
+and under $H_0$
+
+$$
+T = \frac{\bar{X} - \bar{Y}}{S\sqrt{\frac{1}{n_1} + \frac{1}{n_2}}} \sim \mathcal{T}(n_1 + n_2 - 2),
+$$
+
+a Student distribution with $n_1 + n_2 - 2$ degrees of freedom. This distribution is what lets us build the rejection region and compute p-values.
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** run a two-sample equality-of-means test on the `Agro` heights, both from scratch (using the formula) and with `scipy.stats.ttest_ind` with `equal_var=True`.
+
+-   **Instructions:**
+
+    -   For each gender, compute the sample means, sample variances, and group sizes.
+    -   Compute the pooled standard deviation $S$, the statistic $t$, and reject $H_0$ at level 5% if $|t| > t_{n_1+n_2-2, 0.975}$.
+    -   Compute the two-sided p-value $2\,(1 - F_{\mathcal{T}}(|t|))$.
+    -   Cross-check with `scipy.stats.ttest_ind(..., equal_var=True)`.
+
+#### Solution
+
+```{python}
+#| label: twoSampleT
+X = Agro.loc[Agro["Gender"] == "F", "Height"].to_numpy()
+Y = Agro.loc[Agro["Gender"] == "M", "Height"].to_numpy()
+n1, n2 = len(X), len(Y)
+
+xbar, ybar = X.mean(), Y.mean()
+S2_X, S2_Y = X.var(ddof=1), Y.var(ddof=1)
+
+S2_pooled = ((n1 - 1) * S2_X + (n2 - 1) * S2_Y) / (n1 + n2 - 2)
+S_pooled = np.sqrt(S2_pooled)
+
+t_obs = (xbar - ybar) / (S_pooled * np.sqrt(1 / n1 + 1 / n2))
+df = n1 + n2 - 2
+t_crit = t.ppf(0.975, df=df)
+p_value = 2 * (1 - t.cdf(abs(t_obs), df=df))
+
+print(f"n1 = {n1}, n2 = {n2}          mean F = {xbar:.2f}, mean M = {ybar:.2f}")
+print(f"pooled S          : {S_pooled:.3f}")
+print(f"t statistic       : {t_obs:.3f}")
+print(f"critical |t| (5%) : {t_crit:.3f}   (df = {df})")
+print(f"p-value           : {p_value:.3e}")
+print(f"Reject H0 (equal means)? -> {abs(t_obs) > t_crit}")
+
+# Cross-check with scipy
+from scipy.stats import ttest_ind
+res = ttest_ind(X, Y, equal_var=True)
+print(f"\nscipy ttest_ind   : stat = {res.statistic:.3f}, p = {res.pvalue:.3e}")
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+Here the two groups differ by about $8$ cm (the means we built into the simulation), which is huge relative to the standard error of a few fractions of a centimetre. Unsurprisingly, $|t|$ is enormous, the p-value is far below $0.05$, and we reject equal means. The cross-check with `scipy.stats.ttest_ind(..., equal_var=True)` matches the by-hand computation exactly — the pooled-variance Student test is `scipy`'s default when `equal_var=True`. What you should retain is *why* it works: knowing the distribution of $T$ under $H_0$ turns "how far is too far?" into an arithmetic question about the Student quantile.
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question"}
+- What changes if you *drop* the equal-variance assumption, i.e. use `equal_var=False` (Welch's test)? The degrees of freedom become fractional and the test is adapted to unequal variances. Compare the p-value with the pooled version — here they should agree closely because the two groups have the same variance by construction.
+:::
+
+## Section 6 — One-Sided Test for the Comparison of Means
+
+In Section 5 the alternative was *two-sided*: we rejected equal means for *any* large deviation, whether $\bar X_F < \bar X_M$ or the reverse. Here we consider the natural **one-sided** question prompted by the data: are men, on average, *taller* than women? In symbols
+
+$$
+H_0: \mu_M - \mu_F \le 0 \quad \text{vs} \quad H_1: \mu_M - \mu_F > 0 .
+$$
+
+The statistic $T$ is the same as in Section 5, but the *direction* of the evidence changes both the decision rule and the p-value:
+
+- **Decision rule:** reject $H_0$ only when $T$ is *large and positive*, i.e. $T > t_{n_1+n_2-2,\, 0.95}$ — the upper $5\%$ quantile, *not* the upper $2.5\%$ one used for the two-sided test;
+- **p-value:** now a *one-sided* tail probability
+$$
+p = P_{H_0}(T > t_{\text{obs}}) = 1 - F_{\mathcal{T}}(t_{\text{obs}}),
+$$
+rather than the sum of the two tails.
+
+Intuition: if we have committed to the question *"are men taller?"*, only a large **positive** $T$ is evidence against $H_0$. A large negative $T$ (men *shorter*) is completely irrelevant to that question, so it contributes nothing to the p-value and lies inside the rejection region's complement — such a result can never lead to rejecting this particular $H_0$.
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** run a one-sided test that men are taller than women, and contrast it with the two-sided test of Section 5.
+
+-   **Instructions:**
+
+    -   Define the statistic in the *men minus women* direction, $T = (\bar X_M - \bar X_F) / (S\sqrt{1/n_1 + 1/n_2})$, using the pooled $S$ of Section 5.
+    -   Reject $H_0$ at level 5% if $T > t_{n_1+n_2-2,\, 0.95}$.
+    -   Compute the one-sided p-value $1 - F_{\mathcal{T}}(T)$ and compare it with the two-sided p-value of Section 5.
+
+#### Solution
+
+```{python}
+#| label: oneSidedTest
+# Statistic in the "men - women" direction (vs women - men in Section 5)
+T = (Y.mean() - X.mean()) / (S_pooled * np.sqrt(1 / n1 + 1 / n2))
+
+t_crit_one = t.ppf(0.95, df=df)             # upper 5% quantile (one-sided)
+t_crit_two = t.ppf(0.975, df=df)            # upper 2.5% quantile (two-sided)
+p_one = 1 - t.cdf(T, df=df)                 # one-sided p-value
+
+print(f"T (men - women)         : {T:.3f}")
+print(f"critical T (one-sided)  : {t_crit_one:.3f}   (two-sided: {t_crit_two:.3f})")
+print(f"Reject H0 (one-sided)   -> {T > t_crit_one}")
+print(f"p-value (one-sided)     : {p_one:.3e}")
+print(f"p-value (two-sided)     : {p_value:.3e}   (≈ 2 × one-sided)")
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+Because the evidence against this $H_0$ lives in a single tail, the one-sided p-value is (to within a factor of 2) *half* the two-sided one, and the rejection threshold $t_{0.95}$ is smaller than $t_{0.975}$. With the Agro data both are astronomically small, but the essential point is general: **committing to a direction before seeing the data makes the test more powerful** (it needs a smaller deviation to reject), at the price of being unable to detect an effect in the opposite direction. The direction must therefore be chosen from the research question *in advance*, not from the data — choosing the side that suits an observed result inflates the Type I error and is a form of p-hacking. Narrowing the alternative to one side is legitimate only when the opposite direction is genuinely uninteresting or impossible.
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question"}
+- Reverse the question and test $H_0: \mu_F - \mu_M \le 0$ (women taller). Now the critical value is $-t_{0.95}$ and you reject for $T < -t_{0.95}$. Because the observed $T$ here is hugely *positive*, this one-sided test can never reject — its p-value is essentially 1. This makes the trade-off concrete: a one-sided test in the *wrong* direction is completely blind to the effect, which is why choosing the direction from the data is so dangerous.
+- Confirm that the one-sided p-value you computed equals (close to) half of the two-sided p-value $p_{\text{two}} = 2(1 - F_{\mathcal{T}}(|t_{\text{obs}}|))$.
+:::
+
+## Section 7 — The Power of a Test
+
+Section 2 introduced power as $1-\beta$: the probability of **rejecting** $H_0$ when it is in fact **false** — i.e. the test *correctly* detecting the effect it is designed to find. A test with good power is what lets you trust a "failure to reject" as informative (the effect really is small/absent) rather than as mere lack of evidence. Here we make the concept precise and *analytic* — no simulation — and use it to compare one-sided and two-sided decision rules.
+
+For a fixed test and significance level $\alpha$, the power depends on four things:
+
+- **Effect size** — the true distance between the parameter and $H_0$, i.e. the true value of $\delta = \mu_M - \mu_F$;
+- **Sample size** $n_1, n_2$ — more data shrinks the standard error, concentrating the statistic around its true value;
+- **Significance level** $\alpha$ — a stricter level moves the rejection boundary out, *lowering* power;
+- **Direction of the alternative** — one-sided vs two-sided, which changes where the rejection region lies.
+
+**Deriving power analytically.** Under $H_0$ the statistic satisfies $T \sim \mathcal{T}(n_1 + n_2 - 2)$. When $H_0$ is *false*, with a true difference $\delta = \mu_M - \mu_F$, the statistic is no longer centred at $0$: it follows a **noncentral Student** distribution
+$$
+T \sim \mathcal{T}_{n_1+n_2-2}(\lambda) \qquad \text{with noncentrality} \quad
+\lambda = \frac{\delta}{\sigma\sqrt{1/n_1 + 1/n_2}},
+$$
+where $\sigma$ is the common within-group standard deviation. The power is simply the probability that this shifted statistic lands in the rejection region:
+
+- **two-sided** ($H_1: \delta \ne 0$), rejecting when $|T| > t_{n_1+n_2-2,\, 0.975}$:
+$$
+\text{power} = P\big( T < -t_{.975} \big) + P\big( T > t_{.975} \big),
+$$
+evaluated under $\mathcal{T}_{df}(\lambda)$;
+- **one-sided** ($H_1: \delta > 0$), rejecting when $T > t_{n_1+n_2-2,\, 0.95}$:
+$$
+\text{power} = P\big( T > t_{.95} \big)
+$$
+under the same noncentral Student.
+
+With the noncentral $t$ distribution available (e.g. `scipy.stats.nct`), both powers can be computed exactly for any effect size.
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** compare the power of the one-sided and two-sided tests *analytically*, as a function of the effect size, for the Agro-like comparison.
+
+-   **Instructions:**
+
+    -   Fix the sample sizes and pooled variance of the `Agro` data, and a grid of true mean differences $\delta \in [0, 2]$ cm (larger differences are easy to detect with both versions due the large sample size)
+    -   For each $\delta$ (and $\sigma$), form the noncentrality $\lambda = \delta / (\sigma\sqrt{1/n_1 + 1/n_2})$.
+    -   Compute the power of the two-sided and one-sided tests using the noncentral Student CDF (`scipy.stats.nct`).
+    -   Plot the two power curves against $\delta$, and report an example effect size at which the one-sided advantage is visible.
+
+#### Solution
+
+```{python}
+#| label: powerCurve
+from scipy.stats import nct
+
+sigma = S_pooled             # pooled within-group sd (Section 5)
+df = n1 + n2 - 2
+t_one = t.ppf(0.95, df=df)   # one-sided boundary
+t_two = t.ppf(0.975, df=df)  # two-sided boundary
+
+deltas = np.linspace(0, 2, 100)
+lam = deltas / (sigma * np.sqrt(1 / n1 + 1 / n2))
+
+power_two = nct.cdf(-t_two, df, lam) + (1 - nct.cdf(t_two, df, lam))
+power_one = 1 - nct.cdf(t_one, df, lam)
+
+plt.figure()
+plt.plot(deltas, power_one, label="one-sided", color="salmon")
+plt.plot(deltas, power_two, label="two-sided", color="steelblue")
+plt.axhline(0.05, color="black", linestyle=":", label="α = 0.05 (Type I error)")
+plt.xlabel(r"true mean difference  $\delta = \mu_M - \mu_F$  (cm)")
+plt.ylabel("power")
+plt.title("Analytic power of the one-sided vs two-sided mean test")
+plt.legend()
+plt.show()
+
+# Effect size at which the two-sided test reaches 80% power
+idx = np.searchsorted(power_two, 0.8)
+print(f"sigma                    : {sigma:.3f}")
+print(f"two-sided power at δ=0.5 : {nct.cdf(-t_two, df, 0.5/(sigma*np.sqrt(1/n1+1/n2))) + (1 - nct.cdf(t_two, df, 0.5/(sigma*np.sqrt(1/n1+1/n2)))):.3f}")
+print(f"one-sided power at δ=0.5 : {1 - nct.cdf(t_one, df, 0.5/(sigma*np.sqrt(1/n1+1/n2))):.3f}")
+print(f"δ for 80% power          : two-sided ≈ {deltas[idx]:.2f} cm, "
+      f"one-sided ≈ {deltas[np.searchsorted(power_one, 0.8)]:.2f} cm")
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+The two curves make the trade-offs of Section 6 quantitative. For any $\delta > 0$, the **one-sided test has higher power** than the two-sided one at the same $\alpha$: it concentrates its entire 5% rejection mass on one side, so it needs a *smaller* true difference to reach any given power (and correspondingly reaches 80% power at a smaller $\delta$ in the plot above). The price is blindness in the opposite direction, as the "wrong-direction" follow-up in Section 6 showed. Power also grows with $n$ and $\delta$, and shrinks as $\alpha$ or $\sigma$ grow — check this by re-running with a different `sigma` or `n`. Note also that at $\delta = 0$ (no effect) both "powers" collapse to the Type I error rate $\alpha = 0.05$: this is the sanity check that the derivation integrates correctly.
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question"}
+- The noncentrality $\lambda = \delta/(\sigma\sqrt{1/n_1 + 1/n_2})$ shows power depends on $\delta$ and $n$ only through the *ratio* $\delta / \sigma$ and the *combination* $1/n_1 + 1/n_2$: equivalently, on the **standardized effect size** $d = (\mu_M - \mu_F)/\sigma$ and on the sample sizes. Re-derive the curves in terms of $d$ alone on the $x$-axis and verify they coincide — power is scale-free in that sense.
+- Use the same analytic formulas to find the **sample size** needed to reach 80% power at a given $\delta$ and $\sigma$: it is the smallest $n$ such that the two-sided power equals $0.8$. This is the *a priori power analysis* behind planning experiments.
+:::
+
+## Section 8 — Permutational p-value
+
+The $t$-test above relies on knowing the distribution of $T$ (or of $\bar X - \bar Y$) under $H_0$. But *what if we don't know that distribution?* The lecture's answer: **estimate it** using simulations and resampling — a **permutation test**.
+
+The idea is simple. Under $H_0$ (no association between height and gender), the gender *labels* carry no information about height. So we can sample the null distribution by repeatedly **shuffling** the gender labels, recomputing the statistic $\Delta = \bar X - \bar Y$ on each shuffled dataset, and collecting the resulting values $\Delta_{(1)}, \dots, \Delta_{(N)}$. These are the differences we would expect *just by chance* under $H_0$. We then compare the actually observed $\Delta$ to this distribution and compute the p-value as
+
+$$
+p = \frac{1 + \#\{i \text{ s.t. } |\Delta_{(i)}| > |\Delta|\}}{N + 1}.
+$$
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** estimate the null distribution of the height difference by permutation and compute a permutational p-value.
+
+-   **Instructions:**
+
+    -   Compute the observed difference $\Delta = \bar X_F - \bar X_M$ on the real data.
+    -   Repeat $N = 9999$ times: shuffle the `Gender` labels, recompute the mean difference on the shuffled data.
+    -   Plot a histogram of the $N$ permuted differences, with the observed $\Delta$ marked as a vertical line.
+    -   Compute the two-sided permutational p-value and compare it with the parametric one from the previous section.
+
+#### Solution
+
+```{python}
+#| label: permutationTest
+delta = X.mean() - Y.mean()
+
+N = 9999
+heights = Agro["Height"].to_numpy()
+genders = Agro["Gender"].to_numpy()
+
+rng = np.random.default_rng(2026)
+H0_diffs = np.empty(N)
+for i in range(N):
+    shuffled = rng.permutation(genders)
+    H0_diffs[i] = heights[shuffled == "F"].mean() - heights[shuffled == "M"].mean()
+
+p_perm = (1 + np.sum(np.abs(H0_diffs) > abs(delta))) / (N + 1)
+
+plt.figure()
+sns.histplot(H0_diffs, bins=50, stat="density", alpha=0.6, color="skyblue")
+plt.axvline(delta, color="red", linewidth=2, label=f"observed diff = {delta:.2f}")
+plt.xlabel(r"permuted mean difference  $\bar X_F - \bar X_M$"); plt.ylabel("density")
+plt.title(f"Permutational null distribution of the mean difference (N = {N})")
+plt.legend()
+plt.show()
+
+print(f"Observed difference       : {delta:.2f}")
+print(f"Permutational p-value     : {p_perm:.4f}   (p = 1/{N+1} if never exceeded)")
+```
+
+:::
+
+::: {.callout-important appearance="simple"}
+The permutational p-value estimates the same quantity as the parametric $t$-test, but *without* assuming a Gaussian model or a Student distribution: it only uses the data and the shuffling to construct the null. Here the two approaches agree (both tiny), because the Gaussian model is appropriate. Where they differ is when the parametric assumption is suspect or when the statistic is awkward to study analytically (medians, correlations, etc.) — the permutation test always works, at the cost of being approximate/conditional on the observed data.
+:::
+
+::: {.callout-tip appearance="simple" title="Follow-up question"}
+- Swap the test statistic to the **median** difference instead of the mean, and re-run the permutation test on the same data. The distribution is spikier but the conclusion is unchanged — the permutation approach adapts to any statistic with no new theory.
+- Reduce the effect size by simulating male heights from $\mathcal{N}(172, 4^2)$ instead of $\mathcal{N}(178, 4^2)$. The p-value should grow; estimate how often the test *fails* to reject when the effect is small (a rough proxy for the power).
+:::
+
+## Summary and Key Takeaways
+
+This tutorial illustrated the *principle* of hypothesis testing through simulation and worked examples. The key points:
+
+1. **A test has four elements.** Data, a statistical model, a null hypothesis $H_0$ stated in terms of model parameters, and a decision rule built from a test statistic. The whole craft lies in quantifying what values of the statistic are *too far* from $H_0$.
+
+2. **Decisions are error-prone.** A Type I error rejects a true $H_0$ (probability $\alpha$); a Type II error retains a false $H_0$ (probability $\beta$, with power $1-\beta$). There is a necessary trade-off between them, controlled by the significance level, the sample size, and the effect size. You never *accept* the null — you only **fail to reject** it.
+
+3. **The rejection region comes from the null distribution.** Once you know (or estimate) the distribution of the test statistic under $H_0$, the rejection region is a tail of that distribution. Whether that distribution is derived analytically (Gaussian approximation, Student $t$) or estimated by simulation (permutation), the logic is identical.
+
+4. **The p-value measures the extremity of the data under $H_0$.** It is the probability, under $H_0$, of observing a statistic at least as extreme as the one observed. A very small p-value is evidence against $H_0$; a large one only says the data do not contradict it. And with huge $n$, *any* tiny effect becomes "significant" — statistical significance is not practical importance. For a **one-sided** alternative the p-value is a single tail and (to within a factor of 2) half the two-sided one; committing to a direction before seeing the data is more powerful but must be decided *a priori*, never from the data.
+
+5. **Power is the probability of correctly rejecting a false $H_0$.** It can be computed **analytically** from the noncentral Student distribution of the statistic under $H_1$, as a function of the effect size, sample size, level $\alpha$, and direction of the alternative. The one-sided test is more powerful than the two-sided one for any effect in its declared direction (it needs a smaller $\delta$ to reach a given power), at the price of blindness in the opposite direction. The same formulas drive **sample-size planning** for experiments.
+
+6. **Two roads to the same destination.** The two-sample $t$-test calibrates the scaled mean difference against a Student distribution (a parametric assumption); the permutation test calibrates the same difference against its empirical distribution obtained by shuffling labels. When the parametric model holds they agree; the permutation test is the safer default when it does not.
+
+The reusable takeaway is the *logic* of a test: frame the question as a hypothesis about a parameter, build a statistic that is sensitive to it, calibrate its distribution under $H_0$, and report how extreme the observed data are. If you haven't already, work through the **follow-up questions** — the power-versus-$n$ simulation and the permutation/parametric comparison are the ones that most directly test whether the reasoning has landed. 

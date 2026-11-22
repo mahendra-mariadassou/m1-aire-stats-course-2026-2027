@@ -1,0 +1,163 @@
+---
+title: "Maximum Likelihood Estimation Exercises"
+subtitle: "Two Practice Problems"
+from: markdown+emoji
+author:
+  - name: Mahendra Mariadassou
+    orcid: 0000-0003-2986-354X
+    email: mahendra.mariadassou@inrae.fr
+    affiliations:
+      - name: INRAE - MaIAGE
+        adress: Domaine de Vilvert
+        city: Jouy-en-Josas
+        state: France
+date: "2026-10-20"
+date-modified: today
+lightbox: true
+format:
+  html:
+    toc: true
+    code-fold: show
+    theme: cosmo
+  typst:
+    number-sections: true
+---
+
+# Exercise 1: Geometric Distribution {#sec-exercise1}
+
+The geometric distribution MLE is straightforward: the estimate is a simple function of the sample mean. It is a good first exercise to practice the MLE recipe.
+
+## Context
+
+Consider a sequence of independent Bernoulli trials with success probability $p$. Let $X$ be the number of trials until the first success (including the successful trial). Then $X$ follows a geometric distribution with probability mass function:
+
+$$P(X = k) = p(1-p)^{k-1}, \quad k = 1, 2, 3, \ldots$$ {#eq-geom-pmf}
+
+## Problem Statement
+
+Suppose we observe the following data from an i.i.d. sample of a geometric distribution: $x_1 = 3, x_2 = 1, x_3 = 4, x_4 = 2, x_5 = 5$. Find the maximum likelihood estimator (MLE) $P$ of the parameter $p$ and compute its MSE. 
+
+## Instructions
+
+1. Write down the likelihood function $L(p)$ for the observed data.
+2. Find the log-likelihood function $\ell(p)$.
+3. Derive the MLE $\widehat{p}$ by taking the derivative and setting it to zero.
+4. Verify your result numerically.
+5. Express the estimate as a function of the observations $x_i$ and deduce the MLE (Maximum Likelihood Estimator) $P$.
+6. (Advanced) Compute the MSE of $P$. You need to do a first order Taylor expansion of the $P$ around $E[X]$ (e.g. write $P = g(\bar{X})$ for some non-linear function $g$ and do a Taylor expansion of $g(\bar{X})$ around the value $E[X]$). 
+
+# Solution 1 {#sec-sol1}
+
+::: {.callout-note appearance="simple"}
+Work through these steps after attempting the exercise on your own. Each step corresponds to an instruction in @sec-exercise1.
+:::
+
+The likelihood is:
+$$L(p) = \prod_{i=1}^{5} p(1-p)^{x_i-1} = p^5 (1-p)^{\sum_{i=1}^{5}(x_i-1)} = p^5 (1-p)^{10}$$ {#eq-geom-lik}
+
+The log-likelihood is:
+$$\ell(p) = \log L(p) = 5\log(p) + 10\log(1-p)$$
+
+Taking the derivative and setting it to zero:
+$$\frac{d\ell}{dp} = \frac{5}{p} - \frac{10}{1-p} = 0$$
+
+Solving for $p$:
+$$\frac{5}{p} = \frac{10}{1-p} \Rightarrow 5(1-p) = 10p \Rightarrow 5 = 15p \Rightarrow p = \frac{1}{3}$$
+
+Therefore, the maximum likelihood estimate (for the observed data) is $\widehat{p} = \frac{1}{3}$.
+
+### From the estimate to the estimator
+
+More generally, for a sample of size $n$ with $\sum_i x_i = T$, the same derivation gives $\widehat{p} = \frac{n}{T}$, since $\frac{d\ell}{dp} = \frac{n}{p} - \frac{T-n}{1-p} = 0$ implies $p = n/T$. Replacing the observed values $x_i$ by the random variables $X_i$, the estimator is:
+
+$$P = \frac{n}{\sum_{i=1}^{n} X_i} = \frac{1}{\bar{X}}$$ {#eq-geom-mle}
+
+For our data, $\sum_i x_i = 3+1+4+2+5 = 15$, so $\widehat{p} = 5/15 = 1/3$, as found above.
+
+### MSE of the estimator $P$
+
+The estimator $P = 1/\bar{X}$ is a *nonlinear* function of the sample mean, so its expectation and variance cannot be computed in closed form exactly. We use a first-order Taylor (delta-method) approximation around the population mean $E[X] = 1/p$. With $g(x) = 1/x$:
+
+$$g(\bar{X}) \approx g\!\left(\frac{1}{p}\right) + g'\!\left(\frac{1}{p}\right)\left(\bar{X} - \frac{1}{p}\right) = p - p^2\left(\bar{X} - \frac{1}{p}\right)$$
+
+Recall that for the geometric distribution, $E[X] = 1/p$ and $V[X] = (1-p)/p^2$, so $V[\bar{X}] = (1-p)/(np^2)$.
+
+**Bias (approximately 0):**
+$$E[P] \approx p - p^2\,E[\bar{X} - 1/p] = p - 0 = p \implies \text{Bias} \approx 0$$
+
+**Variance:**
+$$V[P] \approx p^4 \, V[\bar{X}] = p^4 \cdot \frac{1-p}{np^2} = \frac{p^2(1-p)}{n}$$
+
+**MSE:**
+
+$$\mathrm{MSE}(P) = V[P] + \mathrm{Bias}(P)^2 \approx \frac{p^2(1-p)}{n}$$
+
+The estimator is essentially unbiased and its MSE decays like $1/n$. For our sample ($n = 5$), the approximation $\bar{X} \approx E[X]$ is probably not very good but we apply it nevertheless (the results shown here are asymptotic). 
+
+# Exercise 2: Pareto Distribution with Known Minimum {#sec-exercise2}
+
+Unlike Exercise 1, the MLE here is *not* a simple function of the sample mean: it depends on the geometric mean of the data. This makes it a more involved problem.
+
+## Context
+
+The Pareto distribution is commonly used to model wealth, income, and other heavy-tailed quantities. It has the probability density function:
+
+$$f(x; \alpha) = \frac{\alpha x_m^\alpha}{x^{\alpha+1}}, \quad x \geq x_m$$ {#eq-pareto-pdf}
+
+where $x_m > 0$ is the *minimum* possible value of $X$ and $\alpha > 0$ is the shape (or tail) parameter. Here we take $x_m$ to be **known** and seek to estimate $\alpha$.
+
+## Problem Statement
+
+A researcher records the yearly incomes (in units of $10^4$ euros) of 5 households, assuming a Pareto distribution with known minimum $x_m = 1$ (i.e. income at least $10^4$ euros). The observed sample is $x_1 = 1.5, x_2 = 2.0, x_3 = 3.0, x_4 = 1.2, x_5 = 4.5$. Find the maximum likelihood estimator (MLE) $A$ of the shape parameter $\alpha$ and compare it to what a naive mean-based approach would suggest.
+
+## Instructions
+
+1. Write down the likelihood function $L(\alpha)$ for the observed data.
+2. Find the log-likelihood function $\ell(\alpha)$.
+3. Derive the maximum likelihood estimate $\widehat{\alpha}$ by taking the derivative and setting it to zero.
+4. Verify your result numerically.
+5. Express the estimate as a function of the observations $x_i$ and deduce the MLE (Maximum Likelihood Estimator) $A$.
+6. Contrast $A$ with a function of the sample mean: compute $\bar{x}$ and argue why $\widehat{\alpha}$ is *not* a simple function of $\bar{x}$ (hint: which summary statistic of the data does it involve?).
+
+# Solution 2 {#sec-sol2}
+
+::: {.callout-note appearance="simple"}
+Work through these steps after attempting the exercise on your own. Each step corresponds to an instruction in @sec-exercise2.
+:::
+
+The likelihood is:
+$$L(\alpha) = \prod_{i=1}^{5} \frac{\alpha x_m^\alpha}{x_i^{\alpha+1}} = \alpha^5 x_m^{5\alpha} \prod_{i=1}^{5} x_i^{-(\alpha+1)}$$ {#eq-pareto-lik}
+
+The log-likelihood is:
+$$\ell(\alpha) = 5\log(\alpha) + 5\alpha\log(x_m) - (\alpha+1)\sum_{i=1}^{5}\log(x_i)$$
+
+Taking the derivative and setting it to zero:
+$$\frac{d\ell}{d\alpha} = \frac{5}{\alpha} + 5\log(x_m) - \sum_{i=1}^{5}\log(x_i) = 0$$
+
+Solving for $\alpha$, using $x_m = 1$ (so $\log(x_m) = 0$):
+$$\frac{5}{\alpha} = \sum_{i=1}^{5}\log(x_i) \Rightarrow \alpha = \frac{5}{\sum_{i=1}^{5}\log(x_i)}$$
+
+With the data, $\sum_{i=1}^{5}\log(x_i) = \log(1.5) + \log(2.0) + \log(3.0) + \log(1.2) + \log(4.5) \approx 0.405 + 0.693 + 1.099 + 0.182 + 1.504 = 3.883$.
+
+Therefore, $\widehat{\alpha} = \frac{5}{3.883} \approx 1.288$.
+
+### From the estimate to the estimator
+
+More generally, for a sample of size $n$, the same derivation gives $\widehat{\alpha} = \frac{n}{\sum_i \log(x_i/x_m)}$. Replacing the observed values $x_i$ by the random variables $X_i$, the estimator is:
+
+$$A = \frac{n}{\sum_{i=1}^{n} \log(X_i/x_m)} = \frac{1}{\log(\widehat{GM})}$$ {#eq-pareto-mle}
+
+where $\widehat{GM} = \left(\prod_i X_i\right)^{1/n}$ is the sample **geometric mean**.
+
+### Why this is not a simple function of the sample mean
+
+The estimate depends on the data only through the *geometric mean* (a sum of logarithms), not through the arithmetic mean $\bar{x}$. Indeed, for our data:
+
+$$\bar{x} = \frac{1.5 + 2.0 + 3.0 + 1.2 + 4.5}{5} = \frac{12.2}{5} = 2.44$$
+
+A naive mean-based guess such as $\widehat{\alpha} = 1/\bar{x}$ (mimicking the exponential case) would give $1/2.44 \approx 0.410$ — very far from the MLE $\widehat{\alpha} \approx 1.288$. The MLE involves $\sum_i \log(x_i/x_m)$, a different summary of the sample, so it is explicitly **not** a simple transform of $\bar{x}$.
+
+This example is more involved than Exercise 1:
+1. The MLE is not a simple transform of the sample mean — it involves the geometric mean.
+2. It requires taking the log of a product density (heavy-tailed Pareto).
+3. The algebra mixes power-law terms ($x^{-(\alpha+1)}$) and logs, which requires higher mathematical proficiency.

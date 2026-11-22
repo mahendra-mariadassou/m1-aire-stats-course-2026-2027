@@ -1,0 +1,98 @@
+ID,Name,Location_ID,Location_name,Setup_date,GPS_coordinates,District
+100003096-SC,97 avenue Denfert Rochereau SO-NE,100003096,97 avenue Denfert Rochereau SO-NE,2012-02-22,"48.83511,2.33338",14
+100003097-SC,105 rue La Fayette E-O,100003097,105 rue La Fayette E-O,2012-02-13,"48.877667,2.350556",10
+100003098-SC,106 avenue Denfert Rochereau NE-SO,100003098,106 avenue Denfert Rochereau NE-SO,2012-02-22,"48.83521,2.33307",14
+100003099-SC,100 rue La Fayette O-E,100003099,100 rue La Fayette O-E,2012-02-22,"48.87746,2.35008",10
+100006300-SC,135 avenue Daumesnil SE-NO,100006300,135 avenue Daumesnil SE-NO,2013-01-19,"48.843435,2.383378",12
+100007049-101007049,28 boulevard Diderot O-E,100007049,28 boulevard Diderot,2013-01-18,"48.846028,2.375429",12
+100007049-102007049,28 boulevard Diderot E-O,100007049,28 boulevard Diderot,2013-01-18,"48.846028,2.375429",12
+100036718-103036718,39 quai François Mauriac SE-NO,100036718,39 quai François Mauriac,2017-07-12,"48.83436,2.377",13
+100036718-104036718,39 quai François Mauriac NO-SE,100036718,39 quai François Mauriac,2017-07-12,"48.83436,2.377",13
+100036719-103036719,18 quai de l'hotel de ville SE-NO,100036719,18 quai de l'hotel de ville,2017-07-12,"48.85372,2.35702",4
+100036719-104036719,18 quai de l'hotel de ville NO-SE,100036719,18 quai de l'hotel de ville,2017-07-12,"48.85372,2.35702",4
+100041488-SC,27 boulevard Diderot E-O,100041488,27 boulevard Diderot E-O,2013-01-17,"48.846099,2.375456",12
+100042374-109042374,Voie Georges Pompidou SO-NE,100042374,Voie Georges Pompidou,2017-12-15,"48.8484,2.27586",16
+100042374-110042374,Voie Georges Pompidou NE-SO,100042374,Voie Georges Pompidou,2017-12-15,"48.8484,2.27586",16
+100044493-SC,67 boulevard Voltaire SE-NO,100044493,67 boulevard Voltaire SE-NO,2018-06-27,"48.86149,2.37376",11
+100044494-SC,10 avenue de la Grande Armée SE-NO,100044494,10 avenue de la Grande Armée SE-NO,2018-07-27,"48.874716,2.292439",17
+100044495-SC,7 avenue de la Grande Armée NO-SE,100044495,7 avenue de la Grande Armée NO-SE,2018-07-27,"48.87451,2.29215",16
+100044506-SC,72 boulevard Voltaire NO-SE,100044506,72 boulevard Voltaire NO-SE,2018-06-27,"48.86155,2.37407",11
+100047533-SC,89 boulevard de Magenta NO-SE,100047533,89 boulevard de Magenta NO-SE,2018-11-28,"48.877686,2.354471",10
+100047534-SC,16 avenue de la Porte des Ternes E-O,100047534,16 avenue de la Porte des Ternes E-O,2018-11-29,"48.88181,2.281546",17
+100047535-SC,Pont du Garigliano NO-SE,100047535,Pont du Garigliano NO-SE,2018-11-28,"48.84015,2.26733",16
+100047536-SC,102 boulevard de Magenta SE-NO,100047536,102 boulevard de Magenta SE-NO,2018-11-29,"48.877726,2.354926",10
+100047537-SC,26 boulevard de Ménilmontant SE-NO,100047537,26 boulevard de Ménilmontant SE-NO,2018-11-30,"48.86057,2.38886",20
+100047538-SC,Face au 16 avenue de la  Porte des Ternes O-E,100047538,Face au 16 avenue de la  Porte des Ternes O-E,2018-11-28,"48.881626,2.281203",17
+100047539-SC,21 boulevard Auguste Blanqui SO-NE,100047539,21 boulevard Auguste Blanqui SO-NE,2018-12-05,"48.830449,2.353199",13
+100047540-SC,72 boulevard Richard Lenoir  S-N,100047540,72 boulevard Richard Lenoir  S-N,2018-12-05,"48.86077,2.37305",11
+100047541-SC,Pont National SO-NE,100047541,Pont National SO-NE,2018-12-05,"48.82658,2.38409",13
+100047542-103047542,Face au 48 quai de la marne NE-SO,100047542,Face au 48 quai de la marne,2018-11-29,"48.891215,2.38573",19
+100047542-104047542,Face au 48 quai de la marne SO-NE,100047542,Face au 48 quai de la marne,2018-11-29,"48.891215,2.38573",19
+100047544-SC,77 boulevard Richard Lenoir N-S,100047544,77 boulevard Richard Lenoir N-S,2018-12-05,"48.860852,2.372279",11
+100047545-103047545,Face 104 rue d'Aubervilliers N-S,100047545,Face 104 rue d'Aubervilliers,2018-11-29,"48.890457,2.368852",19
+100047545-104047545,Face 104 rue d'Aubervilliers S-N,100047545,Face 104 rue d'Aubervilliers,2018-11-29,"48.890457,2.368852",19
+100047546-103047546,Face au 70 quai de Bercy S-N,100047546,Face au 70 quai de Bercy,2018-11-30,"48.829523,2.38699",12
+100047546-104047546,Face au 70 quai de Bercy N-S,100047546,Face au 70 quai de Bercy,2018-11-30,"48.829523,2.38699",12
+100047547-103047547,6 rue Julia Bartet SO-NE,100047547,6 rue Julia Bartet,2018-11-28,"48.82636,2.30303",14
+100047547-104047547,6 rue Julia Bartet NE-SO,100047547,6 rue Julia Bartet,2018-11-28,"48.82636,2.30303",14
+100047548-103047548,Face au 25 quai de l'Oise NE-SO,100047548,Face au 25 quai de l'Oise,2018-11-28,"48.891415,2.384954",19
+100047548-104047548,Face au 25 quai de l'Oise SO-NE,100047548,Face au 25 quai de l'Oise,2018-11-28,"48.891415,2.384954",19
+100047549-SC,Pont National  NE-SO,100047549,Pont National  NE-SO,2018-12-05,"48.82682,2.38465",13
+100047550-SC,35 boulevard de Menilmontant NO-SE,100047550,35 boulevard de Menilmontant NO-SE,2018-11-30,"48.860528,2.388364",11
+100047551-102047551,Pont du Garigliano SE-NO SE-NO,100047551,Pont du Garigliano SE-NO,2018-12-01,"48.83992,2.26694",16
+100049407-101049407,152 boulevard du Montparnasse O-E,100049407,152 boulevard du Montparnasse,2018-12-07,"48.840801,2.333233",6
+100049407-102049407,152 boulevard du Montparnasse E-O,100049407,152 boulevard du Montparnasse,2018-12-07,"48.840801,2.333233",6
+100049408-SC,10 boulevard Auguste Blanqui NE-SO,100049408,10 boulevard Auguste Blanqui NE-SO,2018-12-06,"48.83068,2.35348",13
+100050132-SC,243 boulevard Saint Germain NO-SE,100050132,243 boulevard Saint Germain NO-SE,2018-12-13,"48.86179,2.32014",7
+100050876-103050876,Totem 64 Rue de Rivoli E-O,100050876,Totem 64 Rue de Rivoli,2019-09-04,"48.85735,2.35211",4
+100050876-104050876,Totem 64 Rue de Rivoli O-E,100050876,Totem 64 Rue de Rivoli,2019-09-04,"48.85735,2.35211",4
+100056032-SC,87 avenue de Flandre NE-SO,100056032,87 avenue de Flandre NE-SO,2019-11-05,"48.88926,2.37472",19
+100056034-SC,72 avenue de Flandre SO-NE,100056034,72 avenue de Flandre SO-NE,2019-11-13,"48.889046,2.374872",19
+100056036-SC,2 avenue de la Porte de Bagnolet O-E,100056036,2 avenue de la Porte de Bagnolet O-E,2019-11-14,"48.86451,2.40932",20
+100056038-SC,44 avenue des Champs Elysées SE-NO,100056038,44 avenue des Champs Elysées SE-NO,2019-10-30,"48.869873,2.307419",8
+100056039-SC,180 avenue d'Italie N-S,100056039,180 avenue d'Italie N-S,2019-12-11,"48.82024,2.35902",13
+100056040-SC,129 rue Lecourbe SO-NE,100056040,129 rue Lecourbe SO-NE,2019-10-30,"48.842091,2.301",15
+100056041-SC,147 avenue d'Italie S-N,100056041,147 avenue d'Italie S-N,2019-12-10,"48.82026,2.3592",13
+100056042-SC,33 avenue des Champs Elysées NO-SE,100056042,33 avenue des Champs Elysées NO-SE,2019-10-30,"48.869831,2.307076",8
+100056044-SC,132 rue Lecourbe NE-SO,100056044,132 rue Lecourbe NE-SO,2019-10-30,"48.84216,2.30115",15
+100056045-SC,Pont de la Concorde N-S,100056045,Pont de la Concorde N-S,2019-11-08,"48.86392,2.31988",8
+100056046-SC,Pont des Invalides S-N,100056046,Pont des Invalides S-N,2019-11-06,"48.86282,2.31061",7
+100056047-SC,Pont de la Concorde S-N,100056047,Pont de la Concorde S-N,2019-11-08,"48.86378,2.32003",8
+100056223-SC,Pont des Invalides N-S,100056223,Pont des Invalides N-S,2019-11-07,"48.86284,2.310345",7
+100056225-SC,3 avenue de la Porte D'Orléans S-N,100056225,3 avenue de la Porte D'Orléans S-N,2019-11-06,"48.82108,2.32537",14
+100056226-103056226,Face au 8 avenue de la porte de Charenton SE-NO,100056226,Face au 8 avenue de la porte de Charenton,2019-11-01,"48.830331,2.400551",12
+100056226-104056226,Face au 8 avenue de la porte de Charenton NO-SE,100056226,Face au 8 avenue de la porte de Charenton,2019-11-01,"48.830331,2.400551",12
+100056326-103056326,72 rue de la Chapelle N-S,100056326,72 rue de la Chapelle,2019-11-04,"48.89594,2.35953",18
+100056326-104056326,72 rue de la Chapelle S-N,100056326,72 rue de la Chapelle,2019-11-04,"48.89594,2.35953",18
+100056327-103056327,Face au 4 avenue de la porte de Bagnolet E-O,100056327,Face au 4 avenue de la porte de Bagnolet,2019-11-06,"48.86461,2.40969",20
+100056327-104056327,Face au 4 avenue de la porte de Bagnolet O-E,100056327,Face au 4 avenue de la porte de Bagnolet,2019-11-06,"48.86461,2.40969",20
+100056329-103056329,Pont Charles De Gaulle SO-NE,100056329,Pont Charles De Gaulle,2019-12-12,"48.84223,2.36811",13
+100056329-104056329,Pont Charles De Gaulle NE-SO,100056329,Pont Charles De Gaulle,2019-12-12,"48.84223,2.36811",13
+100056330-103056330,36 quai de Grenelle SO-NE,100056330,36 quai de Grenelle,2019-11-14,"48.85209,2.28508",15
+100056330-104056330,36 quai de Grenelle NE-SO,100056330,36 quai de Grenelle,2019-11-14,"48.85209,2.28508",15
+100056331-103056331,Face au 40 quai D'Issy SO-NE,100056331,Face au 40 quai D'Issy,2019-11-05,"48.83421,2.26542",NA
+100056331-104056331,Face au 40 quai D'Issy NE-SO,100056331,Face au 40 quai D'Issy,2019-11-05,"48.83421,2.26542",NA
+100056332-103056332,Pont de Bercy NE-SO,100056332,Pont de Bercy,2019-12-11,"48.83848,2.37587",12
+100056332-104056332,Pont de Bercy SO-NE,100056332,Pont de Bercy,2019-12-11,"48.83848,2.37587",12
+100056334-103056334,38 rue Turbigo NE-SO,100056334,38 rue Turbigo,2019-12-10,"48.86521,2.35358",3
+100056334-104056334,38 rue Turbigo SO-NE,100056334,38 rue Turbigo,2019-12-10,"48.86521,2.35358",3
+100056335-103056335,Quai d'Orsay O-E,100056335,Quai d'Orsay,2019-11-07,"48.86288,2.31179",7
+100056335-104056335,Quai d'Orsay E-O,100056335,Quai d'Orsay,2019-11-07,"48.86288,2.31179",7
+100056336-105056336,27 quai de la Tournelle SE-NO,100056336,27 quai de la Tournelle,2019-11-14,"48.85013,2.35423",5
+100056336-106056336,27 quai de la Tournelle NO-SE,100056336,27 quai de la Tournelle,2019-11-14,"48.85013,2.35423",5
+100057329-103057329,Totem 85 quai d'Austerlitz SE-NO,100057329,Totem 85 quai d'Austerlitz,2020-02-18,"48.84201,2.36729",13
+100057329-104057329,Totem 85 quai d'Austerlitz NO-SE,100057329,Totem 85 quai d'Austerlitz,2020-02-18,"48.84201,2.36729",13
+100057380-103057380,Totem Cours la Reine O-E,100057380,Totem Cours la Reine,2020-02-11,"48.86462,2.31444",8
+100057380-104057380,Totem Cours la Reine E-O,100057380,Totem Cours la Reine,2020-02-11,"48.86462,2.31444",8
+100057445-103057445,Totem 73 boulevard de Sébastopol N-S,100057445,Totem 73 boulevard de Sébastopol,2020-02-11,"48.86377,2.35096",2
+100057445-104057445,Totem 73 boulevard de Sébastopol S-N,100057445,Totem 73 boulevard de Sébastopol,2020-02-11,"48.86377,2.35096",2
+100060174-SC,21 boulevard Saint Michel S-N,100060174,21 boulevard Saint Michel S-N,2020-05-20,"48.851525,2.343298",5
+100060175-SC,30 rue Saint Jacques N-S,100060175,30 rue Saint Jacques N-S,2020-05-20,"48.851131,2.345678",5
+100060178-101060178,90 Rue De Sèvres SO-NE,100060178,90 Rue De Sèvres,2020-07-22,"48.84638,2.31529",15
+100060178-102060178,90 Rue De Sèvres NE-SO,100060178,90 Rue De Sèvres,2020-07-22,"48.84638,2.31529",15
+100063173-SC,74 Boulevard Ornano S-N,100063173,74 Boulevard Ornano S-N,2020-07-22,"48.896825,2.345648",18
+100063174-SC,69 Boulevard Ornano N-S,100063174,69 Boulevard Ornano N-S,2020-07-22,"48.89696,2.34538",18
+100063175-101063175,20 Avenue de Clichy NO-SE,100063175,20 Avenue de Clichy,2020-07-22,"48.88529,2.32666",18
+100063175-102063175,20 Avenue de Clichy SE-NO,100063175,20 Avenue de Clichy,2020-07-22,"48.88529,2.32666",18
+NA,90 Rue De Sèvres 90 Rue De Sèvres  Vélos NE-SO,NA,NA,NA,NA,NA
+NA,90 Rue De Sèvres 90 Rue De Sèvres  Vélos SO-NE,NA,NA,NA,NA,NA

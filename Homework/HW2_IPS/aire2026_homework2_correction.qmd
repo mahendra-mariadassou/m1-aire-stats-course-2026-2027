@@ -1,0 +1,644 @@
+---
+title: "AIRE 2026 - IPS and Affelnet"
+subtitle: "Homework II - Correction"
+from: markdown+emoji
+author:
+  - name: Mahendra Mariadassou
+    orcid: 0000-0003-2986-354X
+    email: mahendra.mariadassou@inrae.fr
+    affiliations:
+      - name: INRAE - MaIAGE
+        adress: Domaine de Vilvert
+        city: Jouy-en-Josas
+        state: France
+date: "2026-07-14"
+date-modified: today
+lightbox: true
+format: 
+  html:
+    toc: true
+    code-fold: show
+---
+
+# Background
+
+In this homework assignment, we will examine the Social Position Index (IPS, for *Indice de Positionnement Social*, its French name). This is a synthetic index that helps to understand the social status of students based on the professions and social categories (PCS) of their parents. For each PCS, the numerical value of the IPS represents a quantitative summary of a set of socio-economic and cultural attributes related to academic success. The social level of a school is assessed by calculating the average IPS of the students enrolled there.
+
+The social heterogeneity index of a school corresponds to the standard deviation of the IPS of its students. The higher it is, the more diverse the social profile of the students. This index has been calculated since the 2019 school year, only for secondary education institutions.
+
+The data come from the open data platform of Education, Sports, and Youth and were retrieved [here](https://data.education.gouv.fr/api/explore/v2.1/catalog/datasets/fr-en-ips_lycees/exports/csv?lang=fr&timezone=Europe%2FBerlin&use_labels=true&delimiter=%3B) in CSV format.
+
+We will start by describing the data using some descriptive statistics before addressing two questions:
+
+- Is the IPS higher in certain regions?
+- Has the Affelnet reform in Paris had an impact on the IPS of high schools?
+
+# Session Setup (1 pt)
+
+```{r}
+#| label: setup
+#| include: false
+## Do not edit this chunck
+knitr::opts_chunk$set(echo = TRUE, include = TRUE)
+```
+
+**Start your analysis by loading useful packages** (intended to be the tidyverse ensemble of packages).
+
+```{r}
+#| label: eval
+#| message: false
+library(tidyverse)
+```
+
+# Import the data (1 pt)
+
+The data are stored in two flat tsv files located files located on moodle. **Use one of the `read_*()` from the *readr* pacakge to import them as `ips_data` and `academy_data`.** Each dataset consists of tabular data with several colums.
+
+```{r}
+#| label: import
+#| message: false
+ips_data <- readr::read_tsv("data/ips_data.tsv")
+academy_data <- readr::read_tsv("data/academy_data.tsv")
+```
+
+`academy` has 6 variables:
+
+-   `Academy`: academy (administrative division for higher education) of the high school
+-   `Dept`: departement (medium scale administrative division) of the high school
+-   `Dept_code`: departement number
+-   `Institution`: institution name
+-   `Institution_ID`: high school unique ID
+-   `Sector`: whether the school is *public* or *privé sous contrat*
+-   `City`: city name
+
+`ips_data` has 7 variables:
+
+-   `Academic_Year`: academic year
+-   `Institution_ID`: high school unique ID
+-   `IPS`: mean IPS for students in both *Voie Générale et Technologique* (hereafter GT) and *Voie Professionnelle* (hereafter PRO)
+-   `IPS_gt`: mean IPS for GT students
+-   `IPS_pro`: mean IPS for PRO students
+-   `IPS_sd_gt`: standard deviation of the IPS for GT students
+-   `IPS_sd_pro`: standard deviation of the IPS for PRO students
+
+# Missing data (2 = 1+1 pt)
+
+**Inspect the data to find missing values. How many high school(s) have any missing value for the `IPS` value ? And for the `IPS_gt` and `IPS_pro` values ?**
+
+In order to answer the first question, we:
+
+-   select the records where the `IPS` value is missing
+-   extract and count all distinct high schools in this subset (based on their `Institution_ID`)
+
+```{r}
+#| label: missing-ips
+## IPS score
+ips_data |> 
+  ## extract records with missing IPS 
+  filter(is.na(IPS)) |> 
+  ## extract high schools in the subset
+  pull(Institution_ID) |> 
+  ## count the number of distinct high schools
+  n_distinct()
+```
+
+No school is missing any IPS value (as expected).
+
+We then repeat the operation for `IPS_gt` and `IPS_pro` (using slightly different codes, that perform the same task).
+
+```{r}
+#| label: missing-gt-pro
+## IPS gt score
+ips_data |> filter(is.na(IPS_gt)) |> distinct(Institution_ID) |> nrow()
+## IPS pro score
+ips_data |> filter(is.na(IPS_pro)) |> distinct(Institution_ID) |> nrow()
+```
+
+We find 1229 (resp. 1614) high school with missing `IPS_gt` (resp. `IPS_pro`) values at some point.
+
+
+A sanity check also shows that each school has either an `IPS_gt` or `IPS_pro` value. 
+
+```{r}
+#| label: sanity-check
+ips_data |> filter(is.na(IPS_gt) & is.na(IPS_pro))
+```
+
+
+**Count the fraction of missing values for `IPS_sd_gt` (and then for `IPS_sd_pro`) for each academic year. Comment the results.**
+
+To perfom this computation, we
+
+-   group the data by year
+-   compute the fraction of missing value for `IPS_sd_gt` and `IPS_sd_pro` by transforming `NA` to 1 and other values to 0 computing the mean.
+
+```{r}
+#| label: tbl-frac-missing
+#| tbl-cap: "Fraction of missing values for `IPS_sd_gt` and `IPS_sd_pro` by academic year."
+ips_data |> 
+  ## Group the data by year
+  group_by(Academic_Year) |> 
+  ## Compute the fraction of missing values
+  summarize(frac_na_sd_gt = mean(is.na(IPS_sd_gt)), 
+            frac_na_sd_pro = mean(is.na(IPS_sd_pro)))
+```
+
+As visible in @tbl-frac-missing, 100% of values were missing before the year 2019-2020. This is expected as this metric was not collected before 2019. Afterwards, we have roughly 31% of missing values for `IPS_sd_gt` and 42% for `IPS_sd_pro`. This corresponds, for the former, to the fraction of high schools with no *Voie Professionnelle* and, for the latter, with no *Voie Générale et Technologique*. The remaining 27% are high schools offering both *Voies*.
+
+The same result is more easily visualised in @fig-frac-missing, which also makes it clear that this fraction is very stable from 2019 onward. It never reaches zero: some high schools systematically report no standard deviation for one of the two *Voies*, either because they only host students from one *Voie* or because the figure is simply not published.
+
+```{r}
+#| label: fig-frac-missing
+#| fig-cap: "Fraction of high schools with a missing `IPS_sd_gt` / `IPS_sd_pro` value by academic year."
+#| fig-width: 8
+#| fig-height: 4
+ips_data |> 
+  ## pivot the two sd columns into a single long variable
+  pivot_longer(cols = c(IPS_sd_gt, IPS_sd_pro), 
+               names_to = "metric", values_to = "value") |> 
+  ## fraction of missing values per year and metric
+  summarize(frac_missing = mean(is.na(value)), .by = c(Academic_Year, metric)) |> 
+  ## label the metrics more clearly
+  mutate(metric = recode(metric, IPS_sd_gt = "GT students", IPS_sd_pro = "PRO students")) |> 
+  ggplot(aes(x = Academic_Year, y = frac_missing, fill = metric)) + 
+  geom_col(position = position_dodge()) + 
+  scale_fill_brewer(name = "Voie", palette = "Set2") + 
+  scale_y_continuous(labels = scales::percent) + 
+  labs(x = "Academic year", y = "Fraction of missing values") + 
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+# Manipulate the data (3 = 0.5+1+1+0.5 pt)
+
+Some high schools can change name (but not their unique ID). **How many high schools have one more than one names ?**
+
+To identify those, we must
+
+-   group records by high schools (`Institution_ID`)
+-   count the number of distinct names for each high schools
+-   filter only high schools with more than one name
+
+```{r}
+#| label: count-names
+academy_data |> 
+  ## Group records by high schools
+  group_by(Institution_ID) |> 
+  ## Count number of different names for each school
+  summarize(n_names = n_distinct(Institution)) |> 
+  ## Keep only high schools with more than one name
+  filter(n_names > 1) |> 
+  ## Count the number of high schools
+  nrow()
+```
+
+We find 743 high schools that changed name over the period.
+
+A naive approach (which turns out to be mistaken here) consists in counting the number of **records** for each high schools and keep all highschools with more than 1 records.
+
+```{r}
+#| label: naive-records
+academy_data |> 
+  ## Number of records for each high school
+  count(Institution_ID, name = "n_records") |> 
+  filter(n_records > 1) |> 
+  nrow()
+```
+
+The two results differ (743 versus 936) because of high schools like this one, where the academy changed name (and thus there are more than one records for the same high school) but not the high school, as shown in @tbl-school-name.
+
+```{r}
+#| label: tbl-school-name
+#| tbl-cap: "Multiple records for the same high school (ID 0140004D) due to an academy name change."
+academy_data |> filter(Institution_ID == "0140004D") |> 
+  knitr::kable()
+```
+
+**Clean `academy_data` by removing the duplicates. If a high-school has multiple names, keep only the first that appears in the dataset.**
+
+To select only the first instance of a high school, we can use `duplicated()` on the high school ID (which returns `FALSE` for the first occurence of any ID and `TRUE` for the latter ones).
+
+```{r}
+#| eval: false
+academy_data <- academy_data |> 
+  filter(!duplicated(Institution_ID))
+```
+
+To keep in line with the tidyverse, I'm going to do it differently:
+
+-   group the data by high school
+-   select the first record in each group using `slice()`
+
+```{r}
+#| label: dedup
+academy_data <- academy_data |> 
+  group_by(Institution_ID) |> 
+  ## select the first record (in each group)
+  slice(1)
+```
+
+The two approaches are equivalent here but the second is more flexible if you want to accomplish more complex tasks.
+
+**Join the two datasets (`ips_data` and `academy_data`) in a single dataset called `data` and order the record by year, department and high school name.**
+
+This is a simple example of a join, followed by sorting. The only column shared between the two datasets is `Institution_ID` and will serve as join key.
+
+```{r}
+#| label: join
+data <- inner_join(ips_data, academy_data, by = "Institution_ID") |> 
+  arrange(Academic_Year, Dept, Institution)
+```
+
+**Which records (row number) correspond to the Parisian high school "Henri IV"?**
+
+To keep track of the row numbers, we must add them to the data frame before searching for Henri IV (identified in the data by `"LYCEE GENERAL HENRI IV"`). Just out of caution, we filter for record in the Paris department (in case there are other high schools called Henri IV outside of Paris).
+
+We end up with 6 records: 2491, 6145, 9786, 13407, 17025 and 20633 which correspond to the six years of the study, as reported in @tbl-henri-iv.
+
+```{r}
+#| label: tbl-henri-iv
+#| tbl-cap: "Records of the Parisian high school *LYCEE GENERAL HENRI IV* across the six academic years."
+data |> 
+  mutate(row_number = row_number()) |> 
+  filter(Institution == "LYCEE GENERAL HENRI IV", Dept == "PARIS") |> 
+  select(row_number, Academic_Year, Institution, Dept)
+```
+
+**Add a `public_type` column to the data frame that characterizes the students in the high school.** It should take 3 values:
+
+-   `"gt"` if the school only has GT students
+-   `"mixed"` if the school only has both GT students and PRO students
+-   `"pro"` if the school only has PRO students
+
+You can look at the `if_else()` and/or `case_when()` functions to help you.
+
+```{r}
+#| label: public-type
+data <- data |> 
+  mutate(public_type = case_when(
+    ## Scores available for both GT and PRO students, the school is mixed
+    !is.na(IPS_gt) & !is.na(IPS_pro) ~ "mixed", 
+    ## Scores available for GT students only, the school is gt
+    !is.na(IPS_gt)                   ~ "gt", 
+    ## Scores available for PRO students, the school is pro
+    !is.na(IPS_pro)                  ~ "pro", 
+  ))
+```
+
+
+
+**Recode the `Sector` column so that the two values it takes are:**
+
+-   `"public"` if the high school is public
+-   `"private"` if the high school is private
+
+There are many ways to do this but this is an excuse to have you look at `if_else().` The information is already present but takes values `"public"` and `"privé sous contrat"` and we just want to change `"privé sous contrat"` to `"private"` and keep the rest unchanged.
+
+```{r}
+#| label: recode-sector
+data <- data |> 
+  mutate(Sector = if_else(Sector == "privé sous contrat", "private", "public"))
+```
+
+# Check the data (3 = 0.5+0.5+1+1 pt)
+
+**How many records do we have in `data` ? How does it compare to the number of records in `ips_data` ?**
+
+There are exactly as many records in `data` and in `ips_data`, that is 21 777.
+
+```{r}
+#| label: nrow-check
+nrow(data)
+nrow(data) - nrow(ips_data) ## = 0
+```
+
+**Explain why.**
+
+`data` contains all the records from `ips_data` but additional columns (information about the high school) extracted from `academy_data`. It is therefore wider than `data` (more columns) but as long (as many rows). Since we performed a inner join, we'll lose records from `ips_data` for which the `Institution_ID` is absent from `academy_data`. The fact that this doesn't happen means that all high schools occurring in `ips_data` are also described in `academy_data`. 
+
+**How many high schools appear in the dataset ?**
+
+We can just count the number of different values in the columns `Institution_ID`. There are 3697 high schools in the dataset.
+
+```{r}
+#| label: n-academies
+data |> pull(Institution_ID) |> n_distinct() 
+```
+
+**How many high schools have records for the 6 academic years ?**
+
+For each high school, each academic year corresponds to one records. We therefore just have to count the high schools for which we have 6 records. There are 3557 high schools with full records.
+
+```{r}
+#| label: full-records
+data |> 
+  ## number of records per high schools
+  count(Institution_ID) |> 
+  ## Keep only high schools with 6 records
+  filter(n == 6) |> 
+  ## How many are there
+  nrow()
+```
+
+**Select parisian public high schools that only have GT students and for which we have 6 years of data and keep only the informative columns. Store the results in a new variable `paris_data`.**
+
+We must perform the following steps:
+
+-   Select parisian high schools from the public sector
+-   For each high school, add the number of records and test whether the high school was GT for all records. Since we want to **add** those summaries to the full data frame rather than get a smaller data frame with the summaries, we use `mutate()` rather than `summarize()` after the `group_by()`.
+-   Keep only high schools with full records and GT students.
+-   Remove all columns that do not vary in this data set: `Dept` and `Dept_code` (because all schools are in Paris), `Sector`, `public_type` and `is_gt` (because all schools are public and host only GT students), `IPS` or `IPS_gt` (the two are redundant since the schools are GT), `n_records` (used only for filtering), `IPS_pro` and `IPS_sd_pro` (the school have no PRO students).
+
+```{r}
+#| label: paris-data
+paris_data <- data |> 
+  ## select parisian high schools from the public sector
+  filter(Dept == "PARIS", Sector == "public") |> 
+  ## add number of record and public type for each high school
+  group_by(Institution_ID) |> 
+  mutate(is_gt = all(public_type == "gt"), 
+         n_records = n()) |> 
+  ## keep only the requested high schools
+  filter(is_gt, n_records == 6) |> 
+  ## remove uninformative colmuns
+  select(-Dept, -Dept_code, - Sector, -IPS, -IPS_pro, -IPS_sd_pro, -public_type, -is_gt, -n_records)
+```
+
+# Explore the data (10 = 5 + 5 pt)
+
+In the following, we're interested in the social heterogeneity of high schools across academy.
+
+## Public and private schools (5 = 1 + 2 + 2 pt)
+
+### Mean IPS values
+
+**Plot the mean `IPS` for each year in each academy in GT high schools.** Distinguish the public and private highschools. Use informative title and axis labels and use facets to separate to separate the different years. Comment the results.
+
+We must first compute the data required for the plot: mean IPS for each (academy, year, sector) combination and only for GT schools. The results, shown in @fig-ips-mean, are not very surprising:
+
+-   the (mean) IPS is (almost) always higher in private high schools than in public ones
+-   the two academy with the highest (private) IPS are Paris and Versailles
+-   the gap between private and public schools is usually small, except in DOM-TOM (especially La Réunion and Guyane).
+-   the mean IPS evolves slowly over time.
+
+```{r}
+#| label: fig-ips-mean
+#| fig-cap: "Mean IPS by academy and academic year for GT high schools, split by sector."
+#| fig-width: 8
+#| fig-height: 7
+data |> 
+  ## Compute the plot data
+  filter(public_type == "gt") |> 
+  summarize(IPS_mean = mean(IPS), .by = c(Academy, Academic_Year, Sector)) |> 
+  ## Order the academy by decreasing IPS score to improve plot
+  mutate(Academy = fct_reorder(Academy, IPS_mean, max)) |> 
+  ## Plot the data as requested
+  ggplot(aes(y = Academy, x = IPS_mean, color = Sector)) + 
+  geom_point() + 
+  facet_wrap(~Academic_Year) + 
+  ## Better legend and axes title. 
+  ## NB: `Sector` has 2 discrete levels (alphabetical order: "private", 
+  ## "public"), so the same palette is assigned in the same order in every 
+  ## figure below to keep colours consistent across figures.
+  scale_color_brewer(name = "Highschool type", palette = "Set1", 
+                     breaks = c("private", "public")) + 
+  labs(x = "Mean IPS", y = "Academy") + 
+  theme_bw()
+```
+
+### Spread of IPS values
+
+The average values can hide large discrepancies. **Focus on the academic year 2016-2017 for GT schools and show the spread of IPS scores, again separating public and private high schools, in each academy. Use an appropriate visualisation and informative axis labels and justify your choice.** Comment the result.
+
+We're going to use a boxplot to represent the spread of the IPS score (@fig-ips-spread). The conclusions remain roughly the same but we see that the dispersion of IPS score around the median is huge. Although the IPS scores are, on average, higher in private high schools than in public ones, you can find plenty of public high schools with higher IPS than their private counterpart. In other words, the ordering is not strict.
+
+And the high school public - private difference in Guyane and la Réunion come from a limited number of elite private high schools (resp. 1 and 2).
+
+```{r}
+#| label: fig-ips-spread
+#| fig-cap: "Spread of IPS scores in 2016-2017 for GT high schools by academy and sector."
+#| fig-width: 8
+#| fig-height: 7
+data |> 
+  ## select a subset of the data
+  filter(public_type == "gt", Academic_Year == "2016-2017") |> 
+  ## Order the academy by decreasing median public schools IPS: advanced stuff
+  mutate(Academy = fct_reorder2(
+    Academy, IPS, Sector, 
+    .fun = function(IPS, Sector) { median(IPS[Sector == "public"]) }, 
+    .desc = FALSE)) |> 
+  ## Plot the data 
+  ggplot(aes(y = Academy, x = IPS, fill = Sector)) + 
+  geom_boxplot() + 
+  ## Better legend and axes labels. Palette matches @fig-ips-mean (Set1).
+  scale_fill_brewer(name = "Highschool type", palette = "Set1", 
+                    breaks = c("private", "public")) + 
+  labs(x = "IPS", y = "Academy")  + 
+  theme_bw()
+```
+
+### Comparing public and private IPS
+
+We're going to focus on GT high schools in the Academy of Versailles for the last academic year (2021-2022). It's often claimed that private high schools serve a more privileged audience that public ones. **Compare the IPS of public and private high schools to confirm or infirm that claim.**
+
+**Specify the test and model you use.**
+
+This is a t-test of equality of means in two populations. The IPS data are continuous and for lack of a better distribution, we're going to assume they're gaussian. There were 54 private high schools and 79 public ones in the Versailles academy in 2021-2002. We thus consider the following model.
+
+-   Note $X_i$ ($i = 1,\dots, 79$) the IPS of the $i$-th public highschool.
+-   Note $Y_j$ ($j = 1,\dots, 54$) the IPS of the $j$-th private highschool.
+
+We assume that the $X_i$ and the $Y_j$ are all independant and that $X_i \sim \mathcal{N}(\mu_1, \sigma_1^2)$ and $Y_j \sim \mathcal{N}(\mu_2, \sigma_2^2)$. We want to test $H_0: \{ \mu_1 \geq \mu_2 \}$ (higher IPS in public high schools) against $H_1: \{ \mu_1 < \mu_2 \}$ (higher IPS in private high schools). Since we have no information on $\sigma_1$ and $\sigma_2$, we assume that they are unequal to be conservative and use a Welch test (two samples t-test with unequal variances).
+
+```{r}
+#| label: t-test-versailles
+versailles_data <- data |> 
+  filter(Academy == "VERSAILLES", Academic_Year == "2021-2022", public_type == "gt")
+t.test(IPS ~ Sector, data = versailles_data, alternative = "greater")
+```
+
+The result of the unilateral test conforts the claim that private schools serve a more privileged audience: the p-value is very small (5.781e-10) and we can thus reject the null hypothesis with very high confidence. The estimated means are $\hat{\mu}_1 = 1232$ for public high schools and $\hat{\mu}_2 = 1393$ for private ones, so private schools have, *on average*, an IPS about 160 points higher. The unilateral 95% confidence interval tells us that this difference is, with 95% confidence, larger than $120$ points — a substantively large gap given that IPS values roughly range between 500 and 1500.
+
+The boxplot in @fig-versailles-box confirms visually what the test establishes statistically: not only is the *average* IPS higher in private schools, but the two distributions are almost disjoint, with very little overlap between the central 50% of each group.
+
+```{r}
+#| label: fig-versailles-box
+#| fig-cap: "Distribution of IPS in 2021-2022 in the Academy of Versailles for GT high schools, by sector."
+#| fig-width: 6
+#| fig-height: 4
+versailles_data |> 
+  ggplot(aes(y = Sector, x = IPS, fill = Sector)) + 
+  geom_boxplot() + 
+  ## Same palette as @fig-ips-mean and @fig-ips-spread for consistency
+  scale_fill_brewer(name = "Highschool type", palette = "Set1", 
+                    breaks = c("private", "public")) + 
+  labs(x = "IPS", y = NULL) + 
+  theme_bw()
+```
+
+## Affelnet reform in Paris (5 = 2+1.5+1.5 pt)
+
+### Graphical assessment
+
+The Affelnet reform, introduced in Paris in 2021, aims at reducing the segregation of students in public high schools by changing the accession. It should in principle:
+
+-   reduce the spread of IPS and homogeneize schools' IPS across the mean region mean IPS
+-   increase the standard deviation of the IPS in each school as they should serve students with more diverse background.
+
+**Going back the `paris_dataset`, filter (once) and pivot (twice) the data to make it look like @fig-expected-pivot:**
+
+![Expected structure of the pivoted `paris_data`.](images/image-621493253.png){#fig-expected-pivot}
+
+I removed the columns `Institution` and `City` from the screen shot but you should keep them.
+
+Looking carefully at the expected result:
+
+-   we need one filter to keep only the last two academic years (2020-2021 and 2021-2022)
+-   we need one `pivot_longer()` to change the two columns `IPS_gt` and `IPS_gt_sd` into two records
+-   we need one `pivot_wider()` to change the two rows corresponding to years 2020-2021 and 2021-2022 into two columns.
+
+```{r}
+#| label: pivot
+paris_data <- paris_data |> 
+  filter(Academic_Year %in% c("2020-2021", "2021-2022")) |> 
+  pivot_longer(cols = IPS_gt:IPS_sd_gt, 
+               names_to  = "IPS_metric", 
+               values_to = "Value") |> 
+  pivot_wider(values_from = Value, names_from = Academic_Year)
+```
+
+**Plot the IPS scores (not the IPS_sd) of 2021-2022 against those of 2020-2021.**
+
+This is a straightforward question, see @fig-ips-score-shift. I just added the $y = x$ line (in black) to the graph and the regression line (in blue) to show that the regression line has a slope lower than 1. This means that extreme IPS scores in 2020-2021 tend be less extreme in 2021-2022.
+
+```{r}
+#| label: fig-ips-score-shift
+#| fig-cap: "IPS score of 2021-2022 against 2020-2021 for Parisian public GT high schools."
+ggplot(paris_data |> filter(IPS_metric == "IPS_gt"), 
+       aes(x = `2020-2021`, `2021-2022`)) + 
+  geom_point() + 
+  geom_abline(slope = 1, intercept = 0, color = "grey20") + 
+  geom_smooth(method = "lm", se = FALSE) + 
+  labs(x = "IPS in 2021", y = "IPS in 2022") + 
+  coord_equal() + 
+  theme_bw()
+```
+
+**Now plot the social heterogeneity scores of 2021-2022 against those of 2020-2021.** **Important:** to use a column starting with a number in `ggplot()`, you must use backquotes, like in `` aes(x = `2021-2022`, y = `2021-2022`) ``.
+
+Same as above, I just added the $y = x$ line (@fig-hetero-shift). The results are less clear here but most point are above the line, meaning the heterogeneity is higher in 2022 than it was in 2021 (students from more diverse backgrounds in each school).
+
+```{r}
+#| label: fig-hetero-shift
+#| fig-cap: "Social heterogeneity score of 2021-2022 against 2020-2021 for Parisian public GT high schools."
+ggplot(paris_data |> filter(IPS_metric == "IPS_sd_gt"), 
+       aes(x = `2020-2021`, `2021-2022`)) + 
+  geom_point(aes(color = `2021-2022` > `2020-2021`)) + 
+  geom_abline(slope = 1, intercept = 0, color = "grey20") + 
+  labs(x = "Social heterogeneity in 2021", y = "Social heterogeneity in 2022") + 
+  scale_color_brewer(name = "Heterogeneity change\nfrom 2021 and 2022", 
+                     labels = c("decrease", "increase"), 
+                     type = "qual", 
+                     guide = guide_legend(reverse = TRUE)) + 
+  coord_equal() + 
+  theme_bw() + 
+  theme(legend.position = "inside", 
+        legend.position.inside = c(0.05, 0.95), 
+        legend.justification = c(0, 1))
+```
+
+It looks like schools who add a low IPS in 2020 have a higher IPS in 2021 and vice versa and IPS heterogeneity increased between 2020 and 2021. To make easier to see, **add a `change` column in the dataset that records the change in the IPS metric between 2021 and 2020.**
+
+```{r}
+#| label: add-change
+paris_data <- paris_data |> 
+  mutate(change = `2021-2022` - `2020-2021`)
+```
+
+### Change in IPS score (1.5 pt)
+
+**We're now going to regress `change` against the 2020 score. Use `summary()` on your linear model and interpret the results. Did the reform impact the IPS score of public highschools ? Back your conclusion with numerical values. You can also use a graphic to illustrate your conclusion.**
+
+```{r}
+#| label: lm-model
+model <- lm(
+  change ~ `2020-2021`, 
+  data = paris_data |> filter(IPS_metric == "IPS_gt")
+)
+summary(model)
+```
+
+The summary shows that the regression coefficient of the 2020-2021 score on the change is negative (-0.06) and significant (p-value of 0.01). This means that high schools with high 2020-2021 IPS score underwent a decrease and have a lower IPS in 2021-2022 whereas the reverse is true for high schools with a low IPS score in 2020-2021. Overall, IPS score are less spread out in 2021-2022 than in 2020-2021 and inequalities are reduced: the reform seems to have achieved its goal.
+
+We can have a look at the raw data used for the regression (@fig-regression) to see that the trend is not perfect with some low IPS high schools evolving towards even lower IPS. This is in line with the $R^2=0.147$: last year IPS only explains 14.7% of the total variance and other factors are at play.
+
+```{r}
+#| label: fig-regression
+#| fig-cap: "Change in IPS score between 2020-2021 and 2021-2022 against the 2020-2021 IPS score, with fitted linear model."
+ggplot(paris_data |> filter(IPS_metric == "IPS_gt"), 
+       aes(x = `2020-2021`, change)) + 
+  geom_point() + 
+  geom_abline(slope = 0, intercept = 0, color = "grey20") + 
+  geom_smooth(method = "lm", se = FALSE) + 
+  ggpubr::stat_regline_equation() + 
+  labs(x = "IPS score in 2020", y = "Change in IPS score between 2020 and 2021") + 
+  theme_bw()
+```
+
+Note also that the *average* change is close to zero ($\overline{\text{change}} = -1.09$ with a sample standard deviation of $25$) while individual changes range from $-40$ to $+73$ (see @fig-ips-change-dist). The reform thus mostly *reshuffles* schools rather than shifting the whole distribution up or down: some schools gain students with higher IPS, others lose them, but the overall mean barely moves. What the regression shows is that this reshuffling is, on average, in the expected direction — the schools that lose IPS points were the ones that were already best off.
+
+```{r}
+#| label: fig-ips-change-dist
+#| fig-cap: "Distribution of the change in IPS between 2020-2021 and 2021-2022 for Parisian public GT high schools."
+#| fig-width: 6
+#| fig-height: 4
+paris_data |> 
+  filter(IPS_metric == "IPS_gt") |> 
+  ggplot(aes(x = change)) + 
+  geom_histogram(bins = 15, fill = "grey70", color = "white") + 
+  geom_vline(xintercept = 0, color = "grey20", linetype = "dashed") + 
+  geom_vline(xintercept = mean(paris_data$change[paris_data$IPS_metric == "IPS_gt"]), 
+             color = "firebrick") + 
+  labs(x = "Change in IPS between 2020 and 2021", y = "Number of high schools") + 
+  theme_bw()
+```
+
+### Change in social heterogeneity
+
+**Test whether social heterogeneity increased or decreased after the reform. Specify the test and model you use.**
+
+We work on the change in social heterogeneity. It's a continuous variable and for lack of a better model, we're going to assume it's gaussian.
+
+This is a t-test of equality of mean in one population. There were 44 public high schools in the Paris academy. We thus consider the following model.
+
+-   Note $X_i$ ($i = 1,\dots, 44$) the change in social heterogeneity in the $i$-th public highschool.
+
+We assume that the $X_i$ all i.i.d. and that $X_i \sim \mathcal{N}(\mu, \sigma^2)$ with sigma unknown. We want to test $H_0: \{ \mu \leq 0 \}$ (social heterogeneity decreased between 2021 and 2022) against $H_1: \{ \mu > 0 \}$ (social heterogeneity increased between 2021 and 2022). 
+
+```{r}
+#| label: t-test-heterogeneity
+sd_change <- paris_data |> 
+  filter(IPS_metric == "IPS_sd_gt") |> 
+  pull(change)
+t.test(x = sd_change, mu = 0, alternative = "greater")
+```
+
+The result of the unilateral test is quite significant (p-value = 0.004) and we can thus reject the null hypothesis (decreasing social heterogeneity in each high school) with very high confidence in favor of the alternative (increased social heterogeneity, or more diverse students, in each high school). On average, the within-school standard deviation of IPS increased by $\hat{\mu} = 0.61$ points, and the one-sided 95% confidence interval places this increase above $0.24$. The reform seems to have achieved its goal here too.
+
+The histogram in @fig-hetero-change-dist shows that the majority of schools saw their heterogeneity increase or stay roughly constant, while a few schools experienced a marked decrease. This is consistent with the positive mean and the moderate magnitude of the effect.
+
+```{r}
+#| label: fig-hetero-change-dist
+#| fig-cap: "Distribution of the change in social heterogeneity between 2020-2021 and 2021-2022 for Parisian public GT high schools."
+#| fig-width: 6
+#| fig-height: 4
+paris_data |> 
+  filter(IPS_metric == "IPS_sd_gt") |> 
+  ggplot(aes(x = change)) + 
+  geom_histogram(bins = 15, fill = "grey70", color = "white") + 
+  geom_vline(xintercept = 0, color = "grey20", linetype = "dashed") + 
+  geom_vline(xintercept = mean(sd_change), color = "firebrick") + 
+  labs(x = "Change in social heterogeneity between 2020 and 2021", 
+       y = "Number of high schools") + 
+  theme_bw()
+```

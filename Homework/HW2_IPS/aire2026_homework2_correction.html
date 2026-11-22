@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.9.38">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Mahendra Mariadassou">
+<meta name="dcterms.date" content="2026-07-14">
+
+<title>AIRE 2026 - IPS and Affelnet</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="aire2026_homework2_correction_files/libs/clipboard/clipboard.min.js"></script>
+<script src="aire2026_homework2_correction_files/libs/quarto-html/quarto.js" type="module"></script>
+<script src="aire2026_homework2_correction_files/libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="aire2026_homework2_correction_files/libs/quarto-html/popper.min.js"></script>
+<script src="aire2026_homework2_correction_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="aire2026_homework2_correction_files/libs/quarto-html/anchor.min.js"></script>
+<link href="aire2026_homework2_correction_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="aire2026_homework2_correction_files/libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="aire2026_homework2_correction_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="aire2026_homework2_correction_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="aire2026_homework2_correction_files/libs/bootstrap/bootstrap-e0fcf4fb66416ca5194791244d72ae83.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="aire2026_homework2_correction_files/libs/quarto-contrib/glightbox/glightbox.min.js"></script>
+<link href="aire2026_homework2_correction_files/libs/quarto-contrib/glightbox/glightbox.min.css" rel="stylesheet">
+<link href="aire2026_homework2_correction_files/libs/quarto-contrib/glightbox/lightbox.css" rel="stylesheet">
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+</head>
+
+<body class="quarto-light">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background">Background</a></li>
+  <li><a href="#session-setup-1-pt" id="toc-session-setup-1-pt" class="nav-link" data-scroll-target="#session-setup-1-pt">Session Setup (1 pt)</a></li>
+  <li><a href="#import-the-data-1-pt" id="toc-import-the-data-1-pt" class="nav-link" data-scroll-target="#import-the-data-1-pt">Import the data (1 pt)</a></li>
+  <li><a href="#missing-data-2-11-pt" id="toc-missing-data-2-11-pt" class="nav-link" data-scroll-target="#missing-data-2-11-pt">Missing data (2 = 1+1 pt)</a></li>
+  <li><a href="#manipulate-the-data-3-0.5110.5-pt" id="toc-manipulate-the-data-3-0.5110.5-pt" class="nav-link" data-scroll-target="#manipulate-the-data-3-0.5110.5-pt">Manipulate the data (3 = 0.5+1+1+0.5 pt)</a></li>
+  <li><a href="#check-the-data-3-0.50.511-pt" id="toc-check-the-data-3-0.50.511-pt" class="nav-link" data-scroll-target="#check-the-data-3-0.50.511-pt">Check the data (3 = 0.5+0.5+1+1 pt)</a></li>
+  <li><a href="#explore-the-data-10-5-5-pt" id="toc-explore-the-data-10-5-5-pt" class="nav-link" data-scroll-target="#explore-the-data-10-5-5-pt">Explore the data (10 = 5 + 5 pt)</a>
+  <ul class="collapse">
+  <li><a href="#public-and-private-schools-5-1-2-2-pt" id="toc-public-and-private-schools-5-1-2-2-pt" class="nav-link" data-scroll-target="#public-and-private-schools-5-1-2-2-pt">Public and private schools (5 = 1 + 2 + 2 pt)</a>
+  <ul class="collapse">
+  <li><a href="#mean-ips-values" id="toc-mean-ips-values" class="nav-link" data-scroll-target="#mean-ips-values">Mean IPS values</a></li>
+  <li><a href="#spread-of-ips-values" id="toc-spread-of-ips-values" class="nav-link" data-scroll-target="#spread-of-ips-values">Spread of IPS values</a></li>
+  <li><a href="#comparing-public-and-private-ips" id="toc-comparing-public-and-private-ips" class="nav-link" data-scroll-target="#comparing-public-and-private-ips">Comparing public and private IPS</a></li>
+  </ul></li>
+  <li><a href="#affelnet-reform-in-paris-5-21.51.5-pt" id="toc-affelnet-reform-in-paris-5-21.51.5-pt" class="nav-link" data-scroll-target="#affelnet-reform-in-paris-5-21.51.5-pt">Affelnet reform in Paris (5 = 2+1.5+1.5 pt)</a>
+  <ul class="collapse">
+  <li><a href="#graphical-assessment" id="toc-graphical-assessment" class="nav-link" data-scroll-target="#graphical-assessment">Graphical assessment</a></li>
+  <li><a href="#change-in-ips-score-1.5-pt" id="toc-change-in-ips-score-1.5-pt" class="nav-link" data-scroll-target="#change-in-ips-score-1.5-pt">Change in IPS score (1.5 pt)</a></li>
+  <li><a href="#change-in-social-heterogeneity" id="toc-change-in-social-heterogeneity" class="nav-link" data-scroll-target="#change-in-social-heterogeneity">Change in social heterogeneity</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+</nav>
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">AIRE 2026 - IPS and Affelnet</h1>
+<p class="subtitle lead">Homework II - Correction</p>
+</div>
+
+
+<div class="quarto-title-meta-author">
+  <div class="quarto-title-meta-heading">Author</div>
+  <div class="quarto-title-meta-heading">Affiliation</div>
+  
+    <div class="quarto-title-meta-contents">
+    <p class="author">Mahendra Mariadassou <a href="mailto:mahendra.mariadassou@inrae.fr" class="quarto-title-author-email"><i class="bi bi-envelope"></i></a> <a href="https://orcid.org/0000-0003-2986-354X" class="quarto-title-author-orcid"> <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo1N0NEMjA4MDI1MjA2ODExOTk0QzkzNTEzRjZEQTg1NyIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDozM0NDOEJGNEZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozM0NDOEJGM0ZGNTcxMUUxODdBOEVCODg2RjdCQ0QwOSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOkZDN0YxMTc0MDcyMDY4MTE5NUZFRDc5MUM2MUUwNEREIiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjU3Q0QyMDgwMjUyMDY4MTE5OTRDOTM1MTNGNkRBODU3Ii8+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+84NovQAAAR1JREFUeNpiZEADy85ZJgCpeCB2QJM6AMQLo4yOL0AWZETSqACk1gOxAQN+cAGIA4EGPQBxmJA0nwdpjjQ8xqArmczw5tMHXAaALDgP1QMxAGqzAAPxQACqh4ER6uf5MBlkm0X4EGayMfMw/Pr7Bd2gRBZogMFBrv01hisv5jLsv9nLAPIOMnjy8RDDyYctyAbFM2EJbRQw+aAWw/LzVgx7b+cwCHKqMhjJFCBLOzAR6+lXX84xnHjYyqAo5IUizkRCwIENQQckGSDGY4TVgAPEaraQr2a4/24bSuoExcJCfAEJihXkWDj3ZAKy9EJGaEo8T0QSxkjSwORsCAuDQCD+QILmD1A9kECEZgxDaEZhICIzGcIyEyOl2RkgwAAhkmC+eAm0TAAAAABJRU5ErkJggg=="></a></p>
+  </div>
+  <div class="quarto-title-meta-contents">
+        <p class="affiliation">
+            INRAE - MaIAGE
+          </p>
+      </div>
+  </div>
+
+<div class="quarto-title-meta">
+
+      
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">July 14, 2026</p>
+    </div>
+  </div>
+  
+    <div>
+    <div class="quarto-title-meta-heading">Modified</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date-modified">November 4, 2026</p>
+    </div>
+  </div>
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="background" class="level1">
+<h1>Background</h1>
+<p>In this homework assignment, we will examine the Social Position Index (IPS, for <em>Indice de Positionnement Social</em>, its French name). This is a synthetic index that helps to understand the social status of students based on the professions and social categories (PCS) of their parents. For each PCS, the numerical value of the IPS represents a quantitative summary of a set of socio-economic and cultural attributes related to academic success. The social level of a school is assessed by calculating the average IPS of the students enrolled there.</p>
+<p>The social heterogeneity index of a school corresponds to the standard deviation of the IPS of its students. The higher it is, the more diverse the social profile of the students. This index has been calculated since the 2019 school year, only for secondary education institutions.</p>
+<p>The data come from the open data platform of Education, Sports, and Youth and were retrieved <a href="https://data.education.gouv.fr/api/explore/v2.1/catalog/datasets/fr-en-ips_lycees/exports/csv?lang=fr&amp;timezone=Europe%2FBerlin&amp;use_labels=true&amp;delimiter=%3B">here</a> in CSV format.</p>
+<p>We will start by describing the data using some descriptive statistics before addressing two questions:</p>
+<ul>
+<li>Is the IPS higher in certain regions?</li>
+<li>Has the Affelnet reform in Paris had an impact on the IPS of high schools?</li>
+</ul>
+</section>
+<section id="session-setup-1-pt" class="level1">
+<h1>Session Setup (1 pt)</h1>
+<p><strong>Start your analysis by loading useful packages</strong> (intended to be the tidyverse ensemble of packages).</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="import-the-data-1-pt" class="level1">
+<h1>Import the data (1 pt)</h1>
+<p>The data are stored in two flat tsv files located files located on moodle. <strong>Use one of the <code>read_*()</code> from the <em>readr</em> pacakge to import them as <code>ips_data</code> and <code>academy_data</code>.</strong> Each dataset consists of tabular data with several colums.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ips_data <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_tsv</span>(<span class="st">"data/ips_data.tsv"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>academy_data <span class="ot">&lt;-</span> readr<span class="sc">::</span><span class="fu">read_tsv</span>(<span class="st">"data/academy_data.tsv"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p><code>academy</code> has 6 variables:</p>
+<ul>
+<li><code>Academy</code>: academy (administrative division for higher education) of the high school</li>
+<li><code>Dept</code>: departement (medium scale administrative division) of the high school</li>
+<li><code>Dept_code</code>: departement number</li>
+<li><code>Institution</code>: institution name</li>
+<li><code>Institution_ID</code>: high school unique ID</li>
+<li><code>Sector</code>: whether the school is <em>public</em> or <em>privé sous contrat</em></li>
+<li><code>City</code>: city name</li>
+</ul>
+<p><code>ips_data</code> has 7 variables:</p>
+<ul>
+<li><code>Academic_Year</code>: academic year</li>
+<li><code>Institution_ID</code>: high school unique ID</li>
+<li><code>IPS</code>: mean IPS for students in both <em>Voie Générale et Technologique</em> (hereafter GT) and <em>Voie Professionnelle</em> (hereafter PRO)</li>
+<li><code>IPS_gt</code>: mean IPS for GT students</li>
+<li><code>IPS_pro</code>: mean IPS for PRO students</li>
+<li><code>IPS_sd_gt</code>: standard deviation of the IPS for GT students</li>
+<li><code>IPS_sd_pro</code>: standard deviation of the IPS for PRO students</li>
+</ul>
+</section>
+<section id="missing-data-2-11-pt" class="level1">
+<h1>Missing data (2 = 1+1 pt)</h1>
+<p><strong>Inspect the data to find missing values. How many high school(s) have any missing value for the <code>IPS</code> value ? And for the <code>IPS_gt</code> and <code>IPS_pro</code> values ?</strong></p>
+<p>In order to answer the first question, we:</p>
+<ul>
+<li>select the records where the <code>IPS</code> value is missing</li>
+<li>extract and count all distinct high schools in this subset (based on their <code>Institution_ID</code>)</li>
+</ul>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## IPS score</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>ips_data <span class="sc">|&gt;</span> </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="do">## extract records with missing IPS </span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">is.na</span>(IPS)) <span class="sc">|&gt;</span> </span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="do">## extract high schools in the subset</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(Institution_ID) <span class="sc">|&gt;</span> </span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="do">## count the number of distinct high schools</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">n_distinct</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<p>No school is missing any IPS value (as expected).</p>
+<p>We then repeat the operation for <code>IPS_gt</code> and <code>IPS_pro</code> (using slightly different codes, that perform the same task).</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="do">## IPS gt score</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>ips_data <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="fu">is.na</span>(IPS_gt)) <span class="sc">|&gt;</span> <span class="fu">distinct</span>(Institution_ID) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1229</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="do">## IPS pro score</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>ips_data <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="fu">is.na</span>(IPS_pro)) <span class="sc">|&gt;</span> <span class="fu">distinct</span>(Institution_ID) <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1614</code></pre>
+</div>
+</div>
+<p>We find 1229 (resp. 1614) high school with missing <code>IPS_gt</code> (resp. <code>IPS_pro</code>) values at some point.</p>
+<p>A sanity check also shows that each school has either an <code>IPS_gt</code> or <code>IPS_pro</code> value.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ips_data <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="fu">is.na</span>(IPS_gt) <span class="sc">&amp;</span> <span class="fu">is.na</span>(IPS_pro))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 0 × 7
+# ℹ 7 variables: Academic_Year &lt;chr&gt;, Institution_ID &lt;chr&gt;, IPS &lt;dbl&gt;,
+#   IPS_gt &lt;dbl&gt;, IPS_pro &lt;dbl&gt;, IPS_sd_gt &lt;dbl&gt;, IPS_sd_pro &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<p><strong>Count the fraction of missing values for <code>IPS_sd_gt</code> (and then for <code>IPS_sd_pro</code>) for each academic year. Comment the results.</strong></p>
+<p>To perfom this computation, we</p>
+<ul>
+<li>group the data by year</li>
+<li>compute the fraction of missing value for <code>IPS_sd_gt</code> and <code>IPS_sd_pro</code> by transforming <code>NA</code> to 1 and other values to 0 computing the mean.</li>
+</ul>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>ips_data <span class="sc">|&gt;</span> </span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Group the data by year</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Academic_Year) <span class="sc">|&gt;</span> </span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Compute the fraction of missing values</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">frac_na_sd_gt =</span> <span class="fu">mean</span>(<span class="fu">is.na</span>(IPS_sd_gt)), </span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">frac_na_sd_pro =</span> <span class="fu">mean</span>(<span class="fu">is.na</span>(IPS_sd_pro)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="tbl-frac-missing" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-frac-missing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: Fraction of missing values for <code>IPS_sd_gt</code> and <code>IPS_sd_pro</code> by academic year.
+</figcaption>
+<div aria-describedby="tbl-frac-missing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 3
+  Academic_Year frac_na_sd_gt frac_na_sd_pro
+  &lt;chr&gt;                 &lt;dbl&gt;          &lt;dbl&gt;
+1 2016-2017             1              1    
+2 2017-2018             1              1    
+3 2018-2019             1              1    
+4 2019-2020             0.320          0.422
+5 2020-2021             0.315          0.421
+6 2021-2022             0.314          0.421</code></pre>
+</div>
+</div>
+</figure>
+</div>
+<p>As visible in <a href="#tbl-frac-missing" class="quarto-xref">Table&nbsp;1</a>, 100% of values were missing before the year 2019-2020. This is expected as this metric was not collected before 2019. Afterwards, we have roughly 31% of missing values for <code>IPS_sd_gt</code> and 42% for <code>IPS_sd_pro</code>. This corresponds, for the former, to the fraction of high schools with no <em>Voie Professionnelle</em> and, for the latter, with no <em>Voie Générale et Technologique</em>. The remaining 27% are high schools offering both <em>Voies</em>.</p>
+<p>The same result is more easily visualised in <a href="#fig-frac-missing" class="quarto-xref">Figure&nbsp;1</a>, which also makes it clear that this fraction is very stable from 2019 onward. It never reaches zero: some high schools systematically report no standard deviation for one of the two <em>Voies</em>, either because they only host students from one <em>Voie</em> or because the figure is simply not published.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>ips_data <span class="sc">|&gt;</span> </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="do">## pivot the two sd columns into a single long variable</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">c</span>(IPS_sd_gt, IPS_sd_pro), </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to =</span> <span class="st">"metric"</span>, <span class="at">values_to =</span> <span class="st">"value"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="do">## fraction of missing values per year and metric</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">frac_missing =</span> <span class="fu">mean</span>(<span class="fu">is.na</span>(value)), <span class="at">.by =</span> <span class="fu">c</span>(Academic_Year, metric)) <span class="sc">|&gt;</span> </span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="do">## label the metrics more clearly</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">metric =</span> <span class="fu">recode</span>(metric, <span class="at">IPS_sd_gt =</span> <span class="st">"GT students"</span>, <span class="at">IPS_sd_pro =</span> <span class="st">"PRO students"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Academic_Year, <span class="at">y =</span> frac_missing, <span class="at">fill =</span> metric)) <span class="sc">+</span> </span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_col</span>(<span class="at">position =</span> <span class="fu">position_dodge</span>()) <span class="sc">+</span> </span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">name =</span> <span class="st">"Voie"</span>, <span class="at">palette =</span> <span class="st">"Set2"</span>) <span class="sc">+</span> </span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_continuous</span>(<span class="at">labels =</span> scales<span class="sc">::</span>percent) <span class="sc">+</span> </span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Academic year"</span>, <span class="at">y =</span> <span class="st">"Fraction of missing values"</span>) <span class="sc">+</span> </span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span> </span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-frac-missing" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-frac-missing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="aire2026_homework2_correction_files/figure-html/fig-frac-missing-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-1" title="Figure&nbsp;1: Fraction of high schools with a missing IPS_sd_gt / IPS_sd_pro value by academic year."><img src="aire2026_homework2_correction_files/figure-html/fig-frac-missing-1.png" class="img-fluid figure-img" width="768"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-frac-missing-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Fraction of high schools with a missing <code>IPS_sd_gt</code> / <code>IPS_sd_pro</code> value by academic year.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="manipulate-the-data-3-0.5110.5-pt" class="level1">
+<h1>Manipulate the data (3 = 0.5+1+1+0.5 pt)</h1>
+<p>Some high schools can change name (but not their unique ID). <strong>How many high schools have one more than one names ?</strong></p>
+<p>To identify those, we must</p>
+<ul>
+<li>group records by high schools (<code>Institution_ID</code>)</li>
+<li>count the number of distinct names for each high schools</li>
+<li>filter only high schools with more than one name</li>
+</ul>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>academy_data <span class="sc">|&gt;</span> </span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Group records by high schools</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Institution_ID) <span class="sc">|&gt;</span> </span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Count number of different names for each school</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">n_names =</span> <span class="fu">n_distinct</span>(Institution)) <span class="sc">|&gt;</span> </span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Keep only high schools with more than one name</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n_names <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Count the number of high schools</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nrow</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 743</code></pre>
+</div>
+</div>
+<p>We find 743 high schools that changed name over the period.</p>
+<p>A naive approach (which turns out to be mistaken here) consists in counting the number of <strong>records</strong> for each high schools and keep all highschools with more than 1 records.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>academy_data <span class="sc">|&gt;</span> </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Number of records for each high school</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(Institution_ID, <span class="at">name =</span> <span class="st">"n_records"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n_records <span class="sc">&gt;</span> <span class="dv">1</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nrow</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 936</code></pre>
+</div>
+</div>
+<p>The two results differ (743 versus 936) because of high schools like this one, where the academy changed name (and thus there are more than one records for the same high school) but not the high school, as shown in <a href="#tbl-school-name" class="quarto-xref">Table&nbsp;2</a>.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>academy_data <span class="sc">|&gt;</span> <span class="fu">filter</span>(Institution_ID <span class="sc">==</span> <span class="st">"0140004D"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="tbl-school-name" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-school-name-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2: Multiple records for the same high school (ID 0140004D) due to an academy name change.
+</figcaption>
+<div aria-describedby="tbl-school-name-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output-display">
+<table class="cell caption-top table table-sm table-striped small">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 10%">
+<col style="width: 11%">
+<col style="width: 33%">
+<col style="width: 17%">
+<col style="width: 8%">
+<col style="width: 8%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Academy</th>
+<th style="text-align: left;">Dept</th>
+<th style="text-align: left;">Dept_code</th>
+<th style="text-align: left;">Institution</th>
+<th style="text-align: left;">Institution_ID</th>
+<th style="text-align: left;">Sector</th>
+<th style="text-align: left;">City</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">CAEN</td>
+<td style="text-align: left;">CALVADOS</td>
+<td style="text-align: left;">14</td>
+<td style="text-align: left;">LYCEE GENERAL ALAIN CHARTIER</td>
+<td style="text-align: left;">0140004D</td>
+<td style="text-align: left;">public</td>
+<td style="text-align: left;">BAYEUX</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">NORMANDIE</td>
+<td style="text-align: left;">CALVADOS</td>
+<td style="text-align: left;">14</td>
+<td style="text-align: left;">LYCEE GENERAL ALAIN CHARTIER</td>
+<td style="text-align: left;">0140004D</td>
+<td style="text-align: left;">public</td>
+<td style="text-align: left;">BAYEUX</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</figure>
+</div>
+</div>
+<p><strong>Clean <code>academy_data</code> by removing the duplicates. If a high-school has multiple names, keep only the first that appears in the dataset.</strong></p>
+<p>To select only the first instance of a high school, we can use <code>duplicated()</code> on the high school ID (which returns <code>FALSE</code> for the first occurence of any ID and <code>TRUE</code> for the latter ones).</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>academy_data <span class="ot">&lt;-</span> academy_data <span class="sc">|&gt;</span> </span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">duplicated</span>(Institution_ID))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>To keep in line with the tidyverse, I’m going to do it differently:</p>
+<ul>
+<li>group the data by high school</li>
+<li>select the first record in each group using <code>slice()</code></li>
+</ul>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>academy_data <span class="ot">&lt;-</span> academy_data <span class="sc">|&gt;</span> </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Institution_ID) <span class="sc">|&gt;</span> </span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="do">## select the first record (in each group)</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>The two approaches are equivalent here but the second is more flexible if you want to accomplish more complex tasks.</p>
+<p><strong>Join the two datasets (<code>ips_data</code> and <code>academy_data</code>) in a single dataset called <code>data</code> and order the record by year, department and high school name.</strong></p>
+<p>This is a simple example of a join, followed by sorting. The only column shared between the two datasets is <code>Institution_ID</code> and will serve as join key.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">inner_join</span>(ips_data, academy_data, <span class="at">by =</span> <span class="st">"Institution_ID"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(Academic_Year, Dept, Institution)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p><strong>Which records (row number) correspond to the Parisian high school “Henri IV”?</strong></p>
+<p>To keep track of the row numbers, we must add them to the data frame before searching for Henri IV (identified in the data by <code>"LYCEE GENERAL HENRI IV"</code>). Just out of caution, we filter for record in the Paris department (in case there are other high schools called Henri IV outside of Paris).</p>
+<p>We end up with 6 records: 2491, 6145, 9786, 13407, 17025 and 20633 which correspond to the six years of the study, as reported in <a href="#tbl-henri-iv" class="quarto-xref">Table&nbsp;3</a>.</p>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>data <span class="sc">|&gt;</span> </span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">row_number =</span> <span class="fu">row_number</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Institution <span class="sc">==</span> <span class="st">"LYCEE GENERAL HENRI IV"</span>, Dept <span class="sc">==</span> <span class="st">"PARIS"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(row_number, Academic_Year, Institution, Dept)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div id="tbl-henri-iv" class="cell quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-henri-iv-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;3: Records of the Parisian high school <em>LYCEE GENERAL HENRI IV</em> across the six academic years.
+</figcaption>
+<div aria-describedby="tbl-henri-iv-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 4
+  row_number Academic_Year Institution            Dept 
+       &lt;int&gt; &lt;chr&gt;         &lt;chr&gt;                  &lt;chr&gt;
+1       2491 2016-2017     LYCEE GENERAL HENRI IV PARIS
+2       6145 2017-2018     LYCEE GENERAL HENRI IV PARIS
+3       9786 2018-2019     LYCEE GENERAL HENRI IV PARIS
+4      13407 2019-2020     LYCEE GENERAL HENRI IV PARIS
+5      17025 2020-2021     LYCEE GENERAL HENRI IV PARIS
+6      20633 2021-2022     LYCEE GENERAL HENRI IV PARIS</code></pre>
+</div>
+</div>
+</figure>
+</div>
+<p><strong>Add a <code>public_type</code> column to the data frame that characterizes the students in the high school.</strong> It should take 3 values:</p>
+<ul>
+<li><code>"gt"</code> if the school only has GT students</li>
+<li><code>"mixed"</code> if the school only has both GT students and PRO students</li>
+<li><code>"pro"</code> if the school only has PRO students</li>
+</ul>
+<p>You can look at the <code>if_else()</code> and/or <code>case_when()</code> functions to help you.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data <span class="sc">|&gt;</span> </span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">public_type =</span> <span class="fu">case_when</span>(</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Scores available for both GT and PRO students, the school is mixed</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">is.na</span>(IPS_gt) <span class="sc">&amp;</span> <span class="sc">!</span><span class="fu">is.na</span>(IPS_pro) <span class="sc">~</span> <span class="st">"mixed"</span>, </span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Scores available for GT students only, the school is gt</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">is.na</span>(IPS_gt)                   <span class="sc">~</span> <span class="st">"gt"</span>, </span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    <span class="do">## Scores available for PRO students, the school is pro</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">is.na</span>(IPS_pro)                  <span class="sc">~</span> <span class="st">"pro"</span>, </span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  ))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p><strong>Recode the <code>Sector</code> column so that the two values it takes are:</strong></p>
+<ul>
+<li><code>"public"</code> if the high school is public</li>
+<li><code>"private"</code> if the high school is private</li>
+</ul>
+<p>There are many ways to do this but this is an excuse to have you look at <code>if_else().</code> The information is already present but takes values <code>"public"</code> and <code>"privé sous contrat"</code> and we just want to change <code>"privé sous contrat"</code> to <code>"private"</code> and keep the rest unchanged.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> data <span class="sc">|&gt;</span> </span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Sector =</span> <span class="fu">if_else</span>(Sector <span class="sc">==</span> <span class="st">"privé sous contrat"</span>, <span class="st">"private"</span>, <span class="st">"public"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="check-the-data-3-0.50.511-pt" class="level1">
+<h1>Check the data (3 = 0.5+0.5+1+1 pt)</h1>
+<p><strong>How many records do we have in <code>data</code> ? How does it compare to the number of records in <code>ips_data</code> ?</strong></p>
+<p>There are exactly as many records in <code>data</code> and in <code>ips_data</code>, that is 21 777.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(data)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 21777</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(data) <span class="sc">-</span> <span class="fu">nrow</span>(ips_data) <span class="do">## = 0</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0</code></pre>
+</div>
+</div>
+<p><strong>Explain why.</strong></p>
+<p><code>data</code> contains all the records from <code>ips_data</code> but additional columns (information about the high school) extracted from <code>academy_data</code>. It is therefore wider than <code>data</code> (more columns) but as long (as many rows). Since we performed a inner join, we’ll lose records from <code>ips_data</code> for which the <code>Institution_ID</code> is absent from <code>academy_data</code>. The fact that this doesn’t happen means that all high schools occurring in <code>ips_data</code> are also described in <code>academy_data</code>.</p>
+<p><strong>How many high schools appear in the dataset ?</strong></p>
+<p>We can just count the number of different values in the columns <code>Institution_ID</code>. There are 3697 high schools in the dataset.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>data <span class="sc">|&gt;</span> <span class="fu">pull</span>(Institution_ID) <span class="sc">|&gt;</span> <span class="fu">n_distinct</span>() </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 3697</code></pre>
+</div>
+</div>
+<p><strong>How many high schools have records for the 6 academic years ?</strong></p>
+<p>For each high school, each academic year corresponds to one records. We therefore just have to count the high schools for which we have 6 records. There are 3557 high schools with full records.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>data <span class="sc">|&gt;</span> </span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="do">## number of records per high schools</span></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(Institution_ID) <span class="sc">|&gt;</span> </span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Keep only high schools with 6 records</span></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n <span class="sc">==</span> <span class="dv">6</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  <span class="do">## How many are there</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nrow</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 3557</code></pre>
+</div>
+</div>
+<p><strong>Select parisian public high schools that only have GT students and for which we have 6 years of data and keep only the informative columns. Store the results in a new variable <code>paris_data</code>.</strong></p>
+<p>We must perform the following steps:</p>
+<ul>
+<li>Select parisian high schools from the public sector</li>
+<li>For each high school, add the number of records and test whether the high school was GT for all records. Since we want to <strong>add</strong> those summaries to the full data frame rather than get a smaller data frame with the summaries, we use <code>mutate()</code> rather than <code>summarize()</code> after the <code>group_by()</code>.</li>
+<li>Keep only high schools with full records and GT students.</li>
+<li>Remove all columns that do not vary in this data set: <code>Dept</code> and <code>Dept_code</code> (because all schools are in Paris), <code>Sector</code>, <code>public_type</code> and <code>is_gt</code> (because all schools are public and host only GT students), <code>IPS</code> or <code>IPS_gt</code> (the two are redundant since the schools are GT), <code>n_records</code> (used only for filtering), <code>IPS_pro</code> and <code>IPS_sd_pro</code> (the school have no PRO students).</li>
+</ul>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>paris_data <span class="ot">&lt;-</span> data <span class="sc">|&gt;</span> </span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="do">## select parisian high schools from the public sector</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Dept <span class="sc">==</span> <span class="st">"PARIS"</span>, Sector <span class="sc">==</span> <span class="st">"public"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="do">## add number of record and public type for each high school</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Institution_ID) <span class="sc">|&gt;</span> </span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">is_gt =</span> <span class="fu">all</span>(public_type <span class="sc">==</span> <span class="st">"gt"</span>), </span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">n_records =</span> <span class="fu">n</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>  <span class="do">## keep only the requested high schools</span></span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(is_gt, n_records <span class="sc">==</span> <span class="dv">6</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>  <span class="do">## remove uninformative colmuns</span></span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>Dept, <span class="sc">-</span>Dept_code, <span class="sc">-</span> Sector, <span class="sc">-</span>IPS, <span class="sc">-</span>IPS_pro, <span class="sc">-</span>IPS_sd_pro, <span class="sc">-</span>public_type, <span class="sc">-</span>is_gt, <span class="sc">-</span>n_records)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="explore-the-data-10-5-5-pt" class="level1">
+<h1>Explore the data (10 = 5 + 5 pt)</h1>
+<p>In the following, we’re interested in the social heterogeneity of high schools across academy.</p>
+<section id="public-and-private-schools-5-1-2-2-pt" class="level2">
+<h2 class="anchored" data-anchor-id="public-and-private-schools-5-1-2-2-pt">Public and private schools (5 = 1 + 2 + 2 pt)</h2>
+<section id="mean-ips-values" class="level3">
+<h3 class="anchored" data-anchor-id="mean-ips-values">Mean IPS values</h3>
+<p><strong>Plot the mean <code>IPS</code> for each year in each academy in GT high schools.</strong> Distinguish the public and private highschools. Use informative title and axis labels and use facets to separate to separate the different years. Comment the results.</p>
+<p>We must first compute the data required for the plot: mean IPS for each (academy, year, sector) combination and only for GT schools. The results, shown in <a href="#fig-ips-mean" class="quarto-xref">Figure&nbsp;2</a>, are not very surprising:</p>
+<ul>
+<li>the (mean) IPS is (almost) always higher in private high schools than in public ones</li>
+<li>the two academy with the highest (private) IPS are Paris and Versailles</li>
+<li>the gap between private and public schools is usually small, except in DOM-TOM (especially La Réunion and Guyane).</li>
+<li>the mean IPS evolves slowly over time.</li>
+</ul>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>data <span class="sc">|&gt;</span> </span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Compute the plot data</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(public_type <span class="sc">==</span> <span class="st">"gt"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">IPS_mean =</span> <span class="fu">mean</span>(IPS), <span class="at">.by =</span> <span class="fu">c</span>(Academy, Academic_Year, Sector)) <span class="sc">|&gt;</span> </span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Order the academy by decreasing IPS score to improve plot</span></span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Academy =</span> <span class="fu">fct_reorder</span>(Academy, IPS_mean, max)) <span class="sc">|&gt;</span> </span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Plot the data as requested</span></span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">y =</span> Academy, <span class="at">x =</span> IPS_mean, <span class="at">color =</span> Sector)) <span class="sc">+</span> </span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>Academic_Year) <span class="sc">+</span> </span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Better legend and axes title. </span></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>  <span class="do">## NB: `Sector` has 2 discrete levels (alphabetical order: "private", </span></span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>  <span class="do">## "public"), so the same palette is assigned in the same order in every </span></span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>  <span class="do">## figure below to keep colours consistent across figures.</span></span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">name =</span> <span class="st">"Highschool type"</span>, <span class="at">palette =</span> <span class="st">"Set1"</span>, </span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>                     <span class="at">breaks =</span> <span class="fu">c</span>(<span class="st">"private"</span>, <span class="st">"public"</span>)) <span class="sc">+</span> </span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Mean IPS"</span>, <span class="at">y =</span> <span class="st">"Academy"</span>) <span class="sc">+</span> </span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-ips-mean" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ips-mean-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="aire2026_homework2_correction_files/figure-html/fig-ips-mean-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-2" title="Figure&nbsp;2: Mean IPS by academy and academic year for GT high schools, split by sector."><img src="aire2026_homework2_correction_files/figure-html/fig-ips-mean-1.png" class="img-fluid figure-img" width="768"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ips-mean-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Mean IPS by academy and academic year for GT high schools, split by sector.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="spread-of-ips-values" class="level3">
+<h3 class="anchored" data-anchor-id="spread-of-ips-values">Spread of IPS values</h3>
+<p>The average values can hide large discrepancies. <strong>Focus on the academic year 2016-2017 for GT schools and show the spread of IPS scores, again separating public and private high schools, in each academy. Use an appropriate visualisation and informative axis labels and justify your choice.</strong> Comment the result.</p>
+<p>We’re going to use a boxplot to represent the spread of the IPS score (<a href="#fig-ips-spread" class="quarto-xref">Figure&nbsp;3</a>). The conclusions remain roughly the same but we see that the dispersion of IPS score around the median is huge. Although the IPS scores are, on average, higher in private high schools than in public ones, you can find plenty of public high schools with higher IPS than their private counterpart. In other words, the ordering is not strict.</p>
+<p>And the high school public - private difference in Guyane and la Réunion come from a limited number of elite private high schools (resp. 1 and 2).</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>data <span class="sc">|&gt;</span> </span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="do">## select a subset of the data</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(public_type <span class="sc">==</span> <span class="st">"gt"</span>, Academic_Year <span class="sc">==</span> <span class="st">"2016-2017"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Order the academy by decreasing median public schools IPS: advanced stuff</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Academy =</span> <span class="fu">fct_reorder2</span>(</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>    Academy, IPS, Sector, </span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">.fun =</span> <span class="cf">function</span>(IPS, Sector) { <span class="fu">median</span>(IPS[Sector <span class="sc">==</span> <span class="st">"public"</span>]) }, </span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">.desc =</span> <span class="cn">FALSE</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Plot the data </span></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">y =</span> Academy, <span class="at">x =</span> IPS, <span class="at">fill =</span> Sector)) <span class="sc">+</span> </span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span> </span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Better legend and axes labels. Palette matches @fig-ips-mean (Set1).</span></span>
+<span id="cb36-13"><a href="#cb36-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">name =</span> <span class="st">"Highschool type"</span>, <span class="at">palette =</span> <span class="st">"Set1"</span>, </span>
+<span id="cb36-14"><a href="#cb36-14" aria-hidden="true" tabindex="-1"></a>                    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="st">"private"</span>, <span class="st">"public"</span>)) <span class="sc">+</span> </span>
+<span id="cb36-15"><a href="#cb36-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"IPS"</span>, <span class="at">y =</span> <span class="st">"Academy"</span>)  <span class="sc">+</span> </span>
+<span id="cb36-16"><a href="#cb36-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-ips-spread" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ips-spread-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="aire2026_homework2_correction_files/figure-html/fig-ips-spread-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-3" title="Figure&nbsp;3: Spread of IPS scores in 2016-2017 for GT high schools by academy and sector."><img src="aire2026_homework2_correction_files/figure-html/fig-ips-spread-1.png" class="img-fluid figure-img" width="768"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ips-spread-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;3: Spread of IPS scores in 2016-2017 for GT high schools by academy and sector.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="comparing-public-and-private-ips" class="level3">
+<h3 class="anchored" data-anchor-id="comparing-public-and-private-ips">Comparing public and private IPS</h3>
+<p>We’re going to focus on GT high schools in the Academy of Versailles for the last academic year (2021-2022). It’s often claimed that private high schools serve a more privileged audience that public ones. <strong>Compare the IPS of public and private high schools to confirm or infirm that claim.</strong></p>
+<p><strong>Specify the test and model you use.</strong></p>
+<p>This is a t-test of equality of means in two populations. The IPS data are continuous and for lack of a better distribution, we’re going to assume they’re gaussian. There were 54 private high schools and 79 public ones in the Versailles academy in 2021-2002. We thus consider the following model.</p>
+<ul>
+<li>Note <span class="math inline">\(X_i\)</span> (<span class="math inline">\(i = 1,\dots, 79\)</span>) the IPS of the <span class="math inline">\(i\)</span>-th public highschool.</li>
+<li>Note <span class="math inline">\(Y_j\)</span> (<span class="math inline">\(j = 1,\dots, 54\)</span>) the IPS of the <span class="math inline">\(j\)</span>-th private highschool.</li>
+</ul>
+<p>We assume that the <span class="math inline">\(X_i\)</span> and the <span class="math inline">\(Y_j\)</span> are all independant and that <span class="math inline">\(X_i \sim \mathcal{N}(\mu_1, \sigma_1^2)\)</span> and <span class="math inline">\(Y_j \sim \mathcal{N}(\mu_2, \sigma_2^2)\)</span>. We want to test <span class="math inline">\(H_0: \{ \mu_1 \geq \mu_2 \}\)</span> (higher IPS in public high schools) against <span class="math inline">\(H_1: \{ \mu_1 &lt; \mu_2 \}\)</span> (higher IPS in private high schools). Since we have no information on <span class="math inline">\(\sigma_1\)</span> and <span class="math inline">\(\sigma_2\)</span>, we assume that they are unequal to be conservative and use a Welch test (two samples t-test with unequal variances).</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>versailles_data <span class="ot">&lt;-</span> data <span class="sc">|&gt;</span> </span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Academy <span class="sc">==</span> <span class="st">"VERSAILLES"</span>, Academic_Year <span class="sc">==</span> <span class="st">"2021-2022"</span>, public_type <span class="sc">==</span> <span class="st">"gt"</span>)</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a><span class="fu">t.test</span>(IPS <span class="sc">~</span> Sector, <span class="at">data =</span> versailles_data, <span class="at">alternative =</span> <span class="st">"greater"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    Welch Two Sample t-test
+
+data:  IPS by Sector
+t = 6.558, df = 130.71, p-value = 5.781e-10
+alternative hypothesis: true difference in means between group private and group public is greater than 0
+95 percent confidence interval:
+ 119.9329      Inf
+sample estimates:
+mean in group private  mean in group public 
+             1392.759              1232.291 </code></pre>
+</div>
+</div>
+<p>The result of the unilateral test conforts the claim that private schools serve a more privileged audience: the p-value is very small (5.781e-10) and we can thus reject the null hypothesis with very high confidence. The estimated means are <span class="math inline">\(\hat{\mu}_1 = 1232\)</span> for public high schools and <span class="math inline">\(\hat{\mu}_2 = 1393\)</span> for private ones, so private schools have, <em>on average</em>, an IPS about 160 points higher. The unilateral 95% confidence interval tells us that this difference is, with 95% confidence, larger than <span class="math inline">\(120\)</span> points — a substantively large gap given that IPS values roughly range between 500 and 1500.</p>
+<p>The boxplot in <a href="#fig-versailles-box" class="quarto-xref">Figure&nbsp;4</a> confirms visually what the test establishes statistically: not only is the <em>average</em> IPS higher in private schools, but the two distributions are almost disjoint, with very little overlap between the central 50% of each group.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>versailles_data <span class="sc">|&gt;</span> </span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">y =</span> Sector, <span class="at">x =</span> IPS, <span class="at">fill =</span> Sector)) <span class="sc">+</span> </span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>() <span class="sc">+</span> </span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="do">## Same palette as @fig-ips-mean and @fig-ips-spread for consistency</span></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">name =</span> <span class="st">"Highschool type"</span>, <span class="at">palette =</span> <span class="st">"Set1"</span>, </span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>                    <span class="at">breaks =</span> <span class="fu">c</span>(<span class="st">"private"</span>, <span class="st">"public"</span>)) <span class="sc">+</span> </span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"IPS"</span>, <span class="at">y =</span> <span class="cn">NULL</span>) <span class="sc">+</span> </span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-versailles-box" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-versailles-box-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="aire2026_homework2_correction_files/figure-html/fig-versailles-box-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-4" title="Figure&nbsp;4: Distribution of IPS in 2021-2022 in the Academy of Versailles for GT high schools, by sector."><img src="aire2026_homework2_correction_files/figure-html/fig-versailles-box-1.png" class="img-fluid figure-img" width="576"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-versailles-box-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;4: Distribution of IPS in 2021-2022 in the Academy of Versailles for GT high schools, by sector.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="affelnet-reform-in-paris-5-21.51.5-pt" class="level2">
+<h2 class="anchored" data-anchor-id="affelnet-reform-in-paris-5-21.51.5-pt">Affelnet reform in Paris (5 = 2+1.5+1.5 pt)</h2>
+<section id="graphical-assessment" class="level3">
+<h3 class="anchored" data-anchor-id="graphical-assessment">Graphical assessment</h3>
+<p>The Affelnet reform, introduced in Paris in 2021, aims at reducing the segregation of students in public high schools by changing the accession. It should in principle:</p>
+<ul>
+<li>reduce the spread of IPS and homogeneize schools’ IPS across the mean region mean IPS</li>
+<li>increase the standard deviation of the IPS in each school as they should serve students with more diverse background.</li>
+</ul>
+<p><strong>Going back the <code>paris_dataset</code>, filter (once) and pivot (twice) the data to make it look like <a href="#fig-expected-pivot" class="quarto-xref">Figure&nbsp;5</a>:</strong></p>
+<div id="fig-expected-pivot" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-expected-pivot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="images/image-621493253.png" class="lightbox" data-gallery="quarto-lightbox-gallery-5" title="Figure&nbsp;5: Expected structure of the pivoted paris_data."><img src="images/image-621493253.png" class="img-fluid figure-img"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-expected-pivot-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;5: Expected structure of the pivoted <code>paris_data</code>.
+</figcaption>
+</figure>
+</div>
+<p>I removed the columns <code>Institution</code> and <code>City</code> from the screen shot but you should keep them.</p>
+<p>Looking carefully at the expected result:</p>
+<ul>
+<li>we need one filter to keep only the last two academic years (2020-2021 and 2021-2022)</li>
+<li>we need one <code>pivot_longer()</code> to change the two columns <code>IPS_gt</code> and <code>IPS_gt_sd</code> into two records</li>
+<li>we need one <code>pivot_wider()</code> to change the two rows corresponding to years 2020-2021 and 2021-2022 into two columns.</li>
+</ul>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>paris_data <span class="ot">&lt;-</span> paris_data <span class="sc">|&gt;</span> </span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(Academic_Year <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"2020-2021"</span>, <span class="st">"2021-2022"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> IPS_gt<span class="sc">:</span>IPS_sd_gt, </span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>               <span class="at">names_to  =</span> <span class="st">"IPS_metric"</span>, </span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>               <span class="at">values_to =</span> <span class="st">"Value"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">values_from =</span> Value, <span class="at">names_from =</span> Academic_Year)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p><strong>Plot the IPS scores (not the IPS_sd) of 2021-2022 against those of 2020-2021.</strong></p>
+<p>This is a straightforward question, see <a href="#fig-ips-score-shift" class="quarto-xref">Figure&nbsp;6</a>. I just added the <span class="math inline">\(y = x\)</span> line (in black) to the graph and the regression line (in blue) to show that the regression line has a slope lower than 1. This means that extreme IPS scores in 2020-2021 tend be less extreme in 2021-2022.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(paris_data <span class="sc">|&gt;</span> <span class="fu">filter</span>(IPS_metric <span class="sc">==</span> <span class="st">"IPS_gt"</span>), </span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> <span class="st">`</span><span class="at">2020-2021</span><span class="st">`</span>, <span class="st">`</span><span class="at">2021-2022</span><span class="st">`</span>)) <span class="sc">+</span> </span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="dv">1</span>, <span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">color =</span> <span class="st">"grey20"</span>) <span class="sc">+</span> </span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span> </span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"IPS in 2021"</span>, <span class="at">y =</span> <span class="st">"IPS in 2022"</span>) <span class="sc">+</span> </span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_equal</span>() <span class="sc">+</span> </span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<div id="fig-ips-score-shift" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ips-score-shift-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="aire2026_homework2_correction_files/figure-html/fig-ips-score-shift-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-6" title="Figure&nbsp;6: IPS score of 2021-2022 against 2020-2021 for Parisian public GT high schools."><img src="aire2026_homework2_correction_files/figure-html/fig-ips-score-shift-1.png" class="img-fluid figure-img" width="672"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ips-score-shift-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;6: IPS score of 2021-2022 against 2020-2021 for Parisian public GT high schools.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p><strong>Now plot the social heterogeneity scores of 2021-2022 against those of 2020-2021.</strong> <strong>Important:</strong> to use a column starting with a number in <code>ggplot()</code>, you must use backquotes, like in <code>aes(x = `2021-2022`, y = `2021-2022`)</code>.</p>
+<p>Same as above, I just added the <span class="math inline">\(y = x\)</span> line (<a href="#fig-hetero-shift" class="quarto-xref">Figure&nbsp;7</a>). The results are less clear here but most point are above the line, meaning the heterogeneity is higher in 2022 than it was in 2021 (students from more diverse backgrounds in each school).</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(paris_data <span class="sc">|&gt;</span> <span class="fu">filter</span>(IPS_metric <span class="sc">==</span> <span class="st">"IPS_sd_gt"</span>), </span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> <span class="st">`</span><span class="at">2020-2021</span><span class="st">`</span>, <span class="st">`</span><span class="at">2021-2022</span><span class="st">`</span>)) <span class="sc">+</span> </span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> <span class="st">`</span><span class="at">2021-2022</span><span class="st">`</span> <span class="sc">&gt;</span> <span class="st">`</span><span class="at">2020-2021</span><span class="st">`</span>)) <span class="sc">+</span> </span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="dv">1</span>, <span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">color =</span> <span class="st">"grey20"</span>) <span class="sc">+</span> </span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Social heterogeneity in 2021"</span>, <span class="at">y =</span> <span class="st">"Social heterogeneity in 2022"</span>) <span class="sc">+</span> </span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">name =</span> <span class="st">"Heterogeneity change</span><span class="sc">\n</span><span class="st">from 2021 and 2022"</span>, </span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"decrease"</span>, <span class="st">"increase"</span>), </span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>                     <span class="at">type =</span> <span class="st">"qual"</span>, </span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>                     <span class="at">guide =</span> <span class="fu">guide_legend</span>(<span class="at">reverse =</span> <span class="cn">TRUE</span>)) <span class="sc">+</span> </span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_equal</span>() <span class="sc">+</span> </span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span> </span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"inside"</span>, </span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.position.inside =</span> <span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.95</span>), </span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">legend.justification =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-hetero-shift" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-hetero-shift-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="aire2026_homework2_correction_files/figure-html/fig-hetero-shift-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-7" title="Figure&nbsp;7: Social heterogeneity score of 2021-2022 against 2020-2021 for Parisian public GT high schools."><img src="aire2026_homework2_correction_files/figure-html/fig-hetero-shift-1.png" class="img-fluid figure-img" width="672"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-hetero-shift-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;7: Social heterogeneity score of 2021-2022 against 2020-2021 for Parisian public GT high schools.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>It looks like schools who add a low IPS in 2020 have a higher IPS in 2021 and vice versa and IPS heterogeneity increased between 2020 and 2021. To make easier to see, <strong>add a <code>change</code> column in the dataset that records the change in the IPS metric between 2021 and 2020.</strong></p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>paris_data <span class="ot">&lt;-</span> paris_data <span class="sc">|&gt;</span> </span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">change =</span> <span class="st">`</span><span class="at">2021-2022</span><span class="st">`</span> <span class="sc">-</span> <span class="st">`</span><span class="at">2020-2021</span><span class="st">`</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="change-in-ips-score-1.5-pt" class="level3">
+<h3 class="anchored" data-anchor-id="change-in-ips-score-1.5-pt">Change in IPS score (1.5 pt)</h3>
+<p><strong>We’re now going to regress <code>change</code> against the 2020 score. Use <code>summary()</code> on your linear model and interpret the results. Did the reform impact the IPS score of public highschools ? Back your conclusion with numerical values. You can also use a graphic to illustrate your conclusion.</strong></p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">lm</span>(</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  change <span class="sc">~</span> <span class="st">`</span><span class="at">2020-2021</span><span class="st">`</span>, </span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> paris_data <span class="sc">|&gt;</span> <span class="fu">filter</span>(IPS_metric <span class="sc">==</span> <span class="st">"IPS_gt"</span>)</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(model)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+Call:
+lm(formula = change ~ `2020-2021`, data = filter(paris_data, 
+    IPS_metric == "IPS_gt"))
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-50.869 -16.524  -0.654  11.344  54.250 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)  
+(Intercept) 73.25830   27.85612   2.630   0.0119 *
+`2020-2021` -0.05983    0.02224  -2.691   0.0102 *
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+Residual standard error: 23.33 on 42 degrees of freedom
+Multiple R-squared:  0.147, Adjusted R-squared:  0.1267 
+F-statistic: 7.239 on 1 and 42 DF,  p-value: 0.01019</code></pre>
+</div>
+</div>
+<p>The summary shows that the regression coefficient of the 2020-2021 score on the change is negative (-0.06) and significant (p-value of 0.01). This means that high schools with high 2020-2021 IPS score underwent a decrease and have a lower IPS in 2021-2022 whereas the reverse is true for high schools with a low IPS score in 2020-2021. Overall, IPS score are less spread out in 2021-2022 than in 2020-2021 and inequalities are reduced: the reform seems to have achieved its goal.</p>
+<p>We can have a look at the raw data used for the regression (<a href="#fig-regression" class="quarto-xref">Figure&nbsp;8</a>) to see that the trend is not perfect with some low IPS high schools evolving towards even lower IPS. This is in line with the <span class="math inline">\(R^2=0.147\)</span>: last year IPS only explains 14.7% of the total variance and other factors are at play.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(paris_data <span class="sc">|&gt;</span> <span class="fu">filter</span>(IPS_metric <span class="sc">==</span> <span class="st">"IPS_gt"</span>), </span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> <span class="st">`</span><span class="at">2020-2021</span><span class="st">`</span>, change)) <span class="sc">+</span> </span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="dv">0</span>, <span class="at">intercept =</span> <span class="dv">0</span>, <span class="at">color =</span> <span class="st">"grey20"</span>) <span class="sc">+</span> </span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>) <span class="sc">+</span> </span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>  ggpubr<span class="sc">::</span><span class="fu">stat_regline_equation</span>() <span class="sc">+</span> </span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"IPS score in 2020"</span>, <span class="at">y =</span> <span class="st">"Change in IPS score between 2020 and 2021"</span>) <span class="sc">+</span> </span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>`geom_smooth()` using formula = 'y ~ x'</code></pre>
+</div>
+<div class="cell-output-display">
+<div id="fig-regression" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-regression-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="aire2026_homework2_correction_files/figure-html/fig-regression-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-8" title="Figure&nbsp;8: Change in IPS score between 2020-2021 and 2021-2022 against the 2020-2021 IPS score, with fitted linear model."><img src="aire2026_homework2_correction_files/figure-html/fig-regression-1.png" class="img-fluid figure-img" width="672"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-regression-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;8: Change in IPS score between 2020-2021 and 2021-2022 against the 2020-2021 IPS score, with fitted linear model.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>Note also that the <em>average</em> change is close to zero (<span class="math inline">\(\overline{\text{change}} = -1.09\)</span> with a sample standard deviation of <span class="math inline">\(25\)</span>) while individual changes range from <span class="math inline">\(-40\)</span> to <span class="math inline">\(+73\)</span> (see <a href="#fig-ips-change-dist" class="quarto-xref">Figure&nbsp;9</a>). The reform thus mostly <em>reshuffles</em> schools rather than shifting the whole distribution up or down: some schools gain students with higher IPS, others lose them, but the overall mean barely moves. What the regression shows is that this reshuffling is, on average, in the expected direction — the schools that lose IPS points were the ones that were already best off.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>paris_data <span class="sc">|&gt;</span> </span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(IPS_metric <span class="sc">==</span> <span class="st">"IPS_gt"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> change)) <span class="sc">+</span> </span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">15</span>, <span class="at">fill =</span> <span class="st">"grey70"</span>, <span class="at">color =</span> <span class="st">"white"</span>) <span class="sc">+</span> </span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>, <span class="at">color =</span> <span class="st">"grey20"</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> </span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="fu">mean</span>(paris_data<span class="sc">$</span>change[paris_data<span class="sc">$</span>IPS_metric <span class="sc">==</span> <span class="st">"IPS_gt"</span>]), </span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">color =</span> <span class="st">"firebrick"</span>) <span class="sc">+</span> </span>
+<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Change in IPS between 2020 and 2021"</span>, <span class="at">y =</span> <span class="st">"Number of high schools"</span>) <span class="sc">+</span> </span>
+<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-ips-change-dist" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-ips-change-dist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="aire2026_homework2_correction_files/figure-html/fig-ips-change-dist-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-9" title="Figure&nbsp;9: Distribution of the change in IPS between 2020-2021 and 2021-2022 for Parisian public GT high schools."><img src="aire2026_homework2_correction_files/figure-html/fig-ips-change-dist-1.png" class="img-fluid figure-img" width="576"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-ips-change-dist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;9: Distribution of the change in IPS between 2020-2021 and 2021-2022 for Parisian public GT high schools.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="change-in-social-heterogeneity" class="level3">
+<h3 class="anchored" data-anchor-id="change-in-social-heterogeneity">Change in social heterogeneity</h3>
+<p><strong>Test whether social heterogeneity increased or decreased after the reform. Specify the test and model you use.</strong></p>
+<p>We work on the change in social heterogeneity. It’s a continuous variable and for lack of a better model, we’re going to assume it’s gaussian.</p>
+<p>This is a t-test of equality of mean in one population. There were 44 public high schools in the Paris academy. We thus consider the following model.</p>
+<ul>
+<li>Note <span class="math inline">\(X_i\)</span> (<span class="math inline">\(i = 1,\dots, 44\)</span>) the change in social heterogeneity in the <span class="math inline">\(i\)</span>-th public highschool.</li>
+</ul>
+<p>We assume that the <span class="math inline">\(X_i\)</span> all i.i.d. and that <span class="math inline">\(X_i \sim \mathcal{N}(\mu, \sigma^2)\)</span> with sigma unknown. We want to test <span class="math inline">\(H_0: \{ \mu \leq 0 \}\)</span> (social heterogeneity decreased between 2021 and 2022) against <span class="math inline">\(H_1: \{ \mu &gt; 0 \}\)</span> (social heterogeneity increased between 2021 and 2022).</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>sd_change <span class="ot">&lt;-</span> paris_data <span class="sc">|&gt;</span> </span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(IPS_metric <span class="sc">==</span> <span class="st">"IPS_sd_gt"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(change)</span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a><span class="fu">t.test</span>(<span class="at">x =</span> sd_change, <span class="at">mu =</span> <span class="dv">0</span>, <span class="at">alternative =</span> <span class="st">"greater"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+    One Sample t-test
+
+data:  sd_change
+t = 2.7704, df = 43, p-value = 0.004118
+alternative hypothesis: true mean is greater than 0
+95 percent confidence interval:
+ 0.2394906       Inf
+sample estimates:
+mean of x 
+0.6090909 </code></pre>
+</div>
+</div>
+<p>The result of the unilateral test is quite significant (p-value = 0.004) and we can thus reject the null hypothesis (decreasing social heterogeneity in each high school) with very high confidence in favor of the alternative (increased social heterogeneity, or more diverse students, in each high school). On average, the within-school standard deviation of IPS increased by <span class="math inline">\(\hat{\mu} = 0.61\)</span> points, and the one-sided 95% confidence interval places this increase above <span class="math inline">\(0.24\)</span>. The reform seems to have achieved its goal here too.</p>
+<p>The histogram in <a href="#fig-hetero-change-dist" class="quarto-xref">Figure&nbsp;10</a> shows that the majority of schools saw their heterogeneity increase or stay roughly constant, while a few schools experienced a marked decrease. This is consistent with the positive mean and the moderate magnitude of the effect.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>paris_data <span class="sc">|&gt;</span> </span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(IPS_metric <span class="sc">==</span> <span class="st">"IPS_sd_gt"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> change)) <span class="sc">+</span> </span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">15</span>, <span class="at">fill =</span> <span class="st">"grey70"</span>, <span class="at">color =</span> <span class="st">"white"</span>) <span class="sc">+</span> </span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>, <span class="at">color =</span> <span class="st">"grey20"</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> </span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="fu">mean</span>(sd_change), <span class="at">color =</span> <span class="st">"firebrick"</span>) <span class="sc">+</span> </span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Change in social heterogeneity between 2020 and 2021"</span>, </span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Number of high schools"</span>) <span class="sc">+</span> </span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<div class="cell-output-display">
+<div id="fig-hetero-change-dist" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-hetero-change-dist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<a href="aire2026_homework2_correction_files/figure-html/fig-hetero-change-dist-1.png" class="lightbox" data-gallery="quarto-lightbox-gallery-10" title="Figure&nbsp;10: Distribution of the change in social heterogeneity between 2020-2021 and 2021-2022 for Parisian public GT high schools."><img src="aire2026_homework2_correction_files/figure-html/fig-hetero-change-dist-1.png" class="img-fluid figure-img" width="576"></a>
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-hetero-change-dist-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;10: Distribution of the change in social heterogeneity between 2020-2021 and 2021-2022 for Parisian public GT high schools.
+</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+</div> <!-- /content -->
+<script>var lightboxQuarto = GLightbox({"closeEffect":"zoom","descPosition":"bottom","loop":false,"openEffect":"zoom","selector":".lightbox"});
+(function() {
+  let previousOnload = window.onload;
+  window.onload = () => {
+    if (previousOnload) {
+      previousOnload();
+    }
+    lightboxQuarto.on('slide_before_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      const href = trigger.getAttribute('href');
+      if (href !== null) {
+        const imgEl = window.document.querySelector(`a[href="${href}"] img`);
+        if (imgEl !== null) {
+          const srcAttr = imgEl.getAttribute("src");
+          if (srcAttr && srcAttr.startsWith("data:")) {
+            slideConfig.href = srcAttr;
+          }
+        }
+      } 
+    });
+  
+    lightboxQuarto.on('slide_after_load', (data) => {
+      const { slideIndex, slideNode, slideConfig, player, trigger } = data;
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(slideNode);
+      }
+    });
+  
+  };
+  
+})();
+          </script>
+
+
+
+
+</body></html>

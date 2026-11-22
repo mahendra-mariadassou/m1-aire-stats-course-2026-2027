@@ -1,0 +1,361 @@
+---
+title: "M1 AIRE 2026 - Titanic dataset"
+subtitle: "Exploring missing data"
+from: markdown+emoji
+author:
+  - name: Mahendra Mariadassou
+    orcid: 0000-0003-2986-354X
+    email: mahendra.mariadassou@inrae.fr
+    affiliations:
+      - name: INRAE - MaIAGE
+        adress: Domaine de Vilvert
+        city: Jouy-en-Josas
+        state: France
+date: "2026-07-14"
+date-modified: today
+lightbox: true
+format: 
+  html:
+    toc: true
+    code-fold: show
+engine: knitr
+---
+
+## Data presentation
+
+The sinking of the Titanic is one of the most infamous shipwrecks in history.
+
+On April 15, 1912, during her maiden voyage, the widely considered “unsinkable” RMS Titanic sank after colliding with an iceberg. Unfortunately, there weren’t enough lifeboats for everyone on board, resulting in the death of 1502 out of 2224 passengers and crew.
+
+While there was some element of luck involved in surviving, it seems some groups of people were more likely to survive than others. The following dataset documents passenger data (ie name, age, gender, socio-economic class, etc) for 891 of the passengers riding the ship:
+
+-   **PassengerId**: Unique passenger ID
+-   **Survived**: Whether Survived or not: 0 = No, 1 = Yes
+-   **Pclass**: Ticket class: 1 = 1st, 2 = 2nd, 3 = 3rd
+-   **Name**: Name of the Passenger
+-   **Sex**: Gender of the passenger
+-   **Age**: Age in Years
+-   **SibSp**: No. of siblings / spouses aboard the Titanic
+-   **Parch**: No. of parents / children aboard the Titanic
+-   **Ticket**: Ticket number (people from the same family can travel on the same ticket)
+-   **Fare**: Passenger fare
+-   **Cabin**: Cabin number:
+-   **Embarked**: Port of Embarkation:C = Cherbourg, Q = Queenstown, S = Southampton
+
+This notebook will guide you through how to handle missing values.
+
+Before getting started, let's just refresh ourself on what missing values are and how they can affect our dataset and model.
+
+## Missing Values
+
+Missing values are data points that are absent for a specific variable in a dataset. They can be represented in various ways, such as blank cells, null values, or special symbols like "NA" or “unknown.”
+
+There are many reasons for a dataset to contain missing values-:
+
+-   Due to technical issues.
+-   If the data comes from a survey then many people can leave blank response which can lead to missing values in the data.
+-   Data processing issues, privacy concerns etc.
+
+## Types of Missing Values
+
+-   **Missing Completely at Random (MCAR)**: MCAR is a specific type of missing data in which the probability of a data point being missing is entirely random and independent of any other variable in the dataset. In simpler terms, whether a value is missing or not has nothing to do with the values of other variables or the characteristics of the data point itself.
+-   **Missing at Random (MAR)**: MAR is a type of missing data where the probability of a data point missing depends on the values of other variables in the dataset, but not on the missing variable itself.
+-   **Missing not at random (MNAR)**: MNAR is the most challenging type of missing data to deal with. It occurs when the probability of a data point being missing is related to the missing value itself. This means that the reason for the missing data is informative and directly associated with the variable that is missing.
+
+## How missing values impact our dataset?
+
+-   It can reduce the size of the sample or dataset.
+-   Lack of information. If the dataset has large amount of missing values then there are high chances of lacking useful information.
+-   If the missing data is not handled properly, it can bias (model not properly training on dataset) the results of your analysis.
+-   Some statistical techniques require complete data for all variables, making them inapplicable when missing values are present.
+
+## Importing Libraries and Datasets
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** Import the necessary libraries and load the Titanic dataset in a tibble called `data`. Change the relevant variables to factor.  
+
+-   **Instructions:**
+
+    -   Import libraries: `tidyverse` (which loads `readr`, `dplyr`, `tidyr`, `ggplot2`, `purrr`, ...).
+
+    -   Load the dataset from [a file](data/Titanic-Dataset.csv) or [URL](https://mahendra-mariadassou.pages-forge.inrae.fr/m1-aire-stats-course-2026-2027/Tutorials/data/Titanic-Dataset.csv) using `read_csv()`.
+
+#### Solution
+
+```{r}
+#| label: importLibraries
+#Import the Libraries
+library(tidyverse)
+theme_set(theme_minimal())
+```
+
+```{r}
+#| label: loadData
+#Load dataset
+data <- read_csv("data/Titanic-Dataset.csv")
+# Or from URL
+# url <- "https://mahendra-mariadassou.pages-forge.inrae.fr/m1-aire-stats-course-2026-2027/Tutorials/data/Titanic-Dataset.csv"
+# data <- read_csv(url)
+## Change Survived, Pclass, Sex, Embarked to factor
+data <- data |> 
+  mutate(across(c(Survived, Pclass, Sex, Embarked), factor))
+```
+
+```{r}
+#| label: showColumnNames
+names(data)
+```
+
+```{r}
+#| label: defineHelpers
+# Small helpers used later in the notebook, mimicking pandas' `.info()` and `.describe()`
+
+# Column types and number of non-missing values
+df_info <- function(df) {
+  tibble(
+    column   = names(df),
+    non_null = map_int(df, \(x) sum(!is.na(x))),
+    type     = map_chr(df, \(x) class(x)[1])
+  )
+}
+```
+
+:::
+
+We observe that there is a lot of missing data (coded as `NA`) for the `Cabin`
+
+```{r}
+#| label: head
+## Show the first five lines of the dataset
+data |> slice_head(n = 5)
+```
+
+Let's have a quick summary of the data:
+
+-   the dimensions of the data set (number of passengers, number of variables)
+
+```{r}
+#| label: dimensions
+dim(data)
+```
+
+-   and a short summary of data type.
+
+```{r}
+#| label: summaryTypes
+data |> df_info()
+```
+
+We notice that `Age` and `Cabin` are missing for many passengers. This is unexpected for `Age` but less so for `Cabin`. Can you think of why?
+
+## Data cleaning: Embarked
+
+::: panel-tabset
+#### Exercise
+
+Remove the two passengers for whom the port of embarkation is unknown.
+
+#### Solution
+
+```{r}
+#| label: dropEmbarked
+# Drop rows with missing `Embarked`
+data <- data |> drop_na(Embarked)
+```
+
+:::
+
+::: {.callout-note appearance="simple"}
+Note that the number of passengers decreased by 2, as expected.
+
+```{r}
+#| label: rowCountAfterDrop
+nrow(data)
+```
+
+:::
+
+## **Simple Data Visualization**
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** Create basic visualizations to understand the dataset distribution and spot missing data patterns.
+
+-   **Instructions:**
+
+    -   **Histogram**: For continuous variables like `Age` and `Fare`.
+
+    -   **Box Plot**: To detect outliers in `Fare`.
+
+    -   **Bar Plot**: For categorical data like `Pclass` (Passenger Class) and `Survived` using small multiple plots.
+
+    ::: {.callout-tip appearance="simple"}
+    Interpret each plot and note any trends, outliers, or missing data (if any).
+    :::
+
+#### Solution
+
+```{r}
+#| label: histogramAge
+#| fig-width: 8
+#| fig-height: 5
+# Histogram for Age (with a density curve rescaled to counts, like seaborn's `kde=True`)
+bin_width <- diff(range(data$Age, na.rm = TRUE)) / 20
+
+data |>
+  drop_na(Age) |>
+  ggplot(aes(x = Age)) +
+  geom_histogram(binwidth = bin_width) +
+  geom_density(aes(y = after_stat(count) * bin_width), linewidth = 1) +
+  labs(title = "Age Distribution", y = "Count")
+```
+
+```{r}
+#| label: boxplotFare
+#| fig-width: 8
+#| fig-height: 5
+# Box Plot for Fare
+data |>
+  ggplot(aes(x = Fare)) +
+  geom_boxplot() +
+  labs(title = "Fare Box Plot (for Outlier Detection)") +
+  theme(axis.text.y = element_blank(), axis.ticks.y = element_blank())
+```
+
+```{r}
+#| label: barplotSurvival
+#| fig-width: 8
+#| fig-height: 5
+# Bar Plot for Passenger Class and Survival
+data |>
+  ggplot(aes(x = factor(Pclass), fill = factor(Survived))) +
+  geom_bar(position = position_dodge()) +
+  labs(
+    title = "Survival by Passenger Class",
+    x = "Pclass", y = "Count", fill = "Survived"
+  )
+```
+
+:::
+
+::: {.callout-note appearance="simple"}
+The distributions of fares is a bit odd with an extreme value at 512, quite higher than the rest. In this example, the fare is [probably genuine](https://www.cruisemummy.co.uk/titanic-ticket-prices/) but without external information, you could flag this point (and all fares above 200£, corresponding to high-luxury suites) as outliers and remove them from downstream analyses.
+:::
+
+## Data cleaning
+
+### Handling Missing data
+
+We could try to handle missing data by simply removing all rows with any missing value. However, the table has the following number of passengers before cleaning
+
+```{r}
+#| label: rowCountBefore
+nrow(data)
+```
+
+and after cleaning.
+
+```{r}
+#| label: rowCountDropNA
+data |> drop_na() |> nrow()
+```
+
+The data loss of the naive method is quite brutal and we'd like to do something more sophisticated.
+
+::: panel-tabset
+#### Exercise
+
+**Instructions:**
+
+-   Check for missing values with `summarise(across(everything(), \(x) sum(is.na(x))))`.
+
+-   Impute missing values in `Age` using the mean.
+
+#### Solution
+
+```{r}
+#| label: imputeMissingAge
+# Check for missing data
+data |>
+  summarise(across(everything(), \(x) sum(is.na(x)))) |>
+  pivot_longer(everything(), names_to = "column", values_to = "n_missing")
+
+# Impute missing Age values with mean
+age_mean <- mean(data$Age, na.rm = TRUE)
+data <- data |> mutate(Age_imputed = replace_na(Age, age_mean))
+```
+
+:::
+
+::: {.callout-note appearance="simple"}
+Calculate and compare the mean of `Age` before and after imputation to see the effect.
+:::
+
+::: {.callout-note appearance="simple"}
+Implement and compare other imputation schemes (median, mode, etc).
+:::
+
+### Handling Outliers
+
+We know that the fares are probably genuine and correspond to real fares. We're nevertheless going to assume it's not the case and use the IQR (Inter Quartile Range) method to detect and remove outliers. The IQR is the difference between the third (Q3) and the first (Q1) quartiles. Flag and remove all data points for which the fare is further away from Q1 (resp. Q3) than 1.5 $\times$ IQR.
+
+::: panel-tabset
+#### Exercise
+
+**Instructions:**
+
+-   Detect outliers in `Fare` using the Interquartile Range (IQR) method.
+
+-   Remove rows where `Fare` falls outside 1.5 \* IQR.
+
+#### Solution
+
+```{r}
+#| label: iqrOutliers
+# Detect outliers in Fare using IQR
+Q1 <- quantile(data$Fare, 0.25, names = FALSE)
+Q3 <- quantile(data$Fare, 0.75, names = FALSE)
+IQR <- Q3 - Q1
+lower_bound <- Q1 - 1.5 * IQR
+upper_bound <- Q3 + 1.5 * IQR
+
+# Remove outliers in Fare
+data <- data |> filter(between(Fare, lower_bound, upper_bound))
+```
+
+:::
+
+::: {.callout-note appearance="simple"}
+Visualize `Fare` again using a boxplot to see how removing outliers affected the distribution.
+:::
+
+## Final Check and Summary
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** Summarize the cleaned dataset.
+
+-   **Instructions:**
+
+    -   Use `df_info()` and `df_describe()` (defined above) to confirm that missing values and outliers have been handled.
+
+#### Solution
+
+```{r}
+#| label: finalSummary
+data |> df_info()
+## Nice summary table for categorical / continuous variables
+data |> skimr::skim()
+```
+
+:::
+
+::: {.callout-note appearance="simple"}
+Compare summary statistics like mean, median, variance and count for `Age` and `Fare` before and after cleaning, noting any significant changes.
+
+Can you make sens of the (absence of) changes ?
+:::

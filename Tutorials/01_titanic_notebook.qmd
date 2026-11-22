@@ -1,0 +1,324 @@
+---
+title: "M1 AIRE 2026 - Titanic dataset"
+subtitle: "Exploring missing data"
+from: markdown+emoji
+author:
+  - name: Mahendra Mariadassou
+    orcid: 0000-0003-2986-354X
+    email: mahendra.mariadassou@inrae.fr
+    affiliations:
+      - name: INRAE - MaIAGE
+        adress: Domaine de Vilvert
+        city: Jouy-en-Josas
+        state: France
+date: "2026-07-14"
+date-modified: today
+lightbox: true
+format: 
+  html:
+    toc: true
+    code-fold: show
+jupyter: python3
+---
+
+## Data presentation
+
+The sinking of the Titanic is one of the most infamous shipwrecks in history.
+
+On April 15, 1912, during her maiden voyage, the widely considered “unsinkable” RMS Titanic sank after colliding with an iceberg. Unfortunately, there weren’t enough lifeboats for everyone on board, resulting in the death of 1502 out of 2224 passengers and crew.
+
+While there was some element of luck involved in surviving, it seems some groups of people were more likely to survive than others. The following dataset documents passenger data (ie name, age, gender, socio-economic class, etc) for 891 of the passengers riding the ship:
+
+-   **PassengerId**: Unique passenger ID
+-   **Survived**: Whether Survived or not: 0 = No, 1 = Yes
+-   **Pclass**: Ticket class: 1 = 1st, 2 = 2nd, 3 = 3rd
+-   **Name**: Name of the Passenger
+-   **Sex**: Gender of the passenger
+-   **Age**: Age in Years
+-   **SibSp**: No. of siblings / spouses aboard the Titanic
+-   **Parch**: No. of parents / children aboard the Titanic
+-   **Ticket**: Ticket number (people from the same family can travel on the same ticket)
+-   **Fare**: Passenger fare
+-   **Cabin**: Cabin number:
+-   **Embarked**: Port of Embarkation:C = Cherbourg, Q = Queenstown, S = Southampton
+
+This notebook will guide you through how to handle missing values.
+
+Before getting started, let's just refresh ourself on what missing values are and how they can affect our dataset and model.
+
+## Missing Values
+
+Missing values are data points that are absent for a specific variable in a dataset. They can be represented in various ways, such as blank cells, null values, or special symbols like "NA" or “unknown.”
+
+There are many reasons for a dataset to contain missing values-:
+
+-   Due to technical issues.
+-   If the data comes from a survey then many people can leave blank response which can lead to missing values in the data.
+-   Data processing issues, privacy concerns etc.
+
+## Types of Missing Values
+
+-   **Missing Completely at Random (MCAR)**: MCAR is a specific type of missing data in which the probability of a data point being missing is entirely random and independent of any other variable in the dataset. In simpler terms, whether a value is missing or not has nothing to do with the values of other variables or the characteristics of the data point itself.
+-   **Missing at Random (MAR)**: MAR is a type of missing data where the probability of a data point missing depends on the values of other variables in the dataset, but not on the missing variable itself.
+-   **Missing not at random (MNAR)**: MNAR is the most challenging type of missing data to deal with. It occurs when the probability of a data point being missing is related to the missing value itself. This means that the reason for the missing data is informative and directly associated with the variable that is missing.
+
+## How missing values impact our dataset?
+
+-   It can reduce the size of the sample or dataset.
+-   Lack of information. If the dataset has large amount of missing values then there are high chances of lacking useful information.
+-   If the missing data is not handled properly, it can bias (model not properly training on dataset) the results of your analysis.
+-   Some statistical techniques require complete data for all variables, making them inapplicable when missing values are present.
+
+## Importing Libraries and Datasets
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** Import the necessary libraries and load the Titanic dataset in a pandas dataframe called `data`
+
+-   **Instructions:**
+
+    -   Import libraries: `pandas`, `numpy`, `matplotlib`, `seaborn`.
+
+    -   Load the dataset from [a file](data/Titanic-Dataset.csv) or [URL](https://mahendra-mariadassou.pages-forge.inrae.fr/m1-aire-stats-course-2026-2027/Tutorials/data/Titanic-Dataset.csv) using `pd.read_csv()`.
+
+#### Solution
+
+```{python}
+#| label: importLibraries
+#Import the Libraries
+import pandas as pd
+import seaborn as sns
+import numpy as np
+import matplotlib.pyplot as plt
+```
+
+```{python}
+#| label: loadData
+#Load dataset
+data=pd.read_csv('data/Titanic-Dataset.csv')
+# Or from URL
+# url = "https://mahendra-mariadassou.pages-forge.inrae.fr/m1-aire-stats-course-2026-2027/Tutorials/data/Titanic-Dataset.csv"
+# data = pd.read_csv(url)
+```
+
+:::
+
+We observe that there is a lot of missing data (coded as `NaN`) for the `Cabin`
+
+```{python}
+#| label: head
+## Show the first five lines of the dataset
+data.head()
+```
+
+Let's have a quick summary of the data:
+
+-   the dimensions of the data set (number of passengers, number of variables)
+
+```{python}
+#| label: dimensions
+data.shape
+```
+
+-   and a short summary of data type.
+
+```{python}
+#| label: summaryTypes
+data.info()
+```
+
+We notice that `Age` and `Cabin` are missing for many passengers. This is unexpected for `Age` but less so for `Cabin`. Can you think of why?
+
+## Data cleaning: Embarked
+
+::: panel-tabset
+#### Exercise
+
+Remove the two passengers for whom the port of embarkation is unknown.
+
+#### Solution
+
+```{python}
+#| label: dropEmbarked
+# Drop rows with missing `Embarked`
+data = data.dropna(subset=['Embarked'])
+```
+
+:::
+
+::: {.callout-note appearance="simple"}
+Note that the number of passengers decreased by 2, as expected.
+
+```{python}
+#| label: rowCountAfterDrop
+data.shape[0]
+```
+
+:::
+
+## **Simple Data Visualization**
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** Create basic visualizations to understand the dataset distribution and spot missing data patterns.
+
+-   **Instructions:**
+
+    -   **Histogram**: For continuous variables like `Age` and `Fare`.
+
+    -   **Box Plot**: To detect outliers in `Fare`.
+
+    -   **Bar Plot**: For categorical data like `Pclass` (Passenger Class) and `Survived` using small multiple plots.
+
+    ::: {.callout-tip appearance="simple"}
+    Interpret each plot and note any trends, outliers, or missing data (if any).
+    :::
+
+#### Solution
+
+```{python}
+#| label: histogramAge
+# Histogram for Age
+plt.figure(figsize=(8, 5))
+sns.histplot(data['Age'].dropna(), bins=20, kde=True)
+plt.title("Age Distribution")
+plt.show()
+```
+
+```{python}
+#| label: boxplotFare
+# Box Plot for Fare
+plt.figure(figsize=(8, 5))
+sns.boxplot(x=data['Fare'])
+plt.title("Fare Box Plot (for Outlier Detection)")
+plt.show()
+```
+
+```{python}
+#| label: barplotSurvival
+# Bar Plot for Passenger Class and Survival
+plt.figure(figsize=(8, 5))
+sns.countplot(x='Pclass', hue='Survived', data=data)
+plt.title("Survival by Passenger Class")
+plt.show()
+```
+
+:::
+
+::: {.callout-note appearance="simple"}
+The distributions of fares is a bit odd with an extreme value at 512, quite higher than the rest. In this example, the fare is [probably genuine](https://www.cruisemummy.co.uk/titanic-ticket-prices/) but without external information, you could flag this point (and all fares above 200£, corresponding to high-luxury suites) as outliers and remove them from downstream analyses.
+:::
+
+## Data cleaning
+
+### Handling Missing data
+
+We could try to handle missing data by simply removing all rows with any missing value. However, the table has the following number of passengers before cleaning
+
+```{python}
+#| label: rowCountBefore
+data.shape[0]
+```
+
+and after cleaning.
+
+```{python}
+#| label: rowCountDropNA
+data.dropna().shape[0]
+```
+
+The data loss of the naive method is quite brutal and we'd like to do something more sophisticated.
+
+::: panel-tabset
+#### Exercise
+
+**Instructions:**
+
+-   Check for missing values with `data.isnull().sum()`.
+
+-   Impute missing values in `Age` using the mean.
+
+#### Solution
+
+```{python}
+#| label: imputeMissingAge
+# Check for missing data
+print(data.isnull().sum())
+
+# Impute missing Age values with mean
+age_mean = data['Age'].mean()
+data['Age_imputed']=data['Age'].fillna(age_mean)
+```
+
+:::
+
+::: {.callout-note appearance="simple"}
+Calculate and compare the mean of `Age` before and after imputation to see the effect.
+:::
+
+::: {.callout-note appearance="simple"}
+Implement and compare other imputation schemes (median, mode, etc).
+:::
+
+### Handling Outliers
+
+We know that the fares are probably genuine and correspond to real fares. We're nevertheless going to assume it's not the case and use the IQR (Inter Quartile Range) method to detect and remove outliers. The IQR is the difference between the third (Q3) and the first (Q1) quartiles. Flag and remove all data points for which the fare is further away from Q1 (resp. Q3) than 1.5 $\times$ IQR.
+
+::: panel-tabset
+#### Exercise
+
+**Instructions:**
+
+-   Detect outliers in `Fare` using the Interquartile Range (IQR) method.
+
+-   Remove rows where `Fare` falls outside 1.5 \* IQR.
+
+#### Solution
+
+```{python}
+#| label: iqrOutliers
+# Detect outliers in Fare using IQR
+Q1 = data['Fare'].quantile(0.25)
+Q3 = data['Fare'].quantile(0.75)
+IQR = Q3 - Q1
+lower_bound = Q1 - 1.5 * IQR
+upper_bound = Q3 + 1.5 * IQR
+
+# Remove outliers in Fare
+data = data[(data['Fare'] >= lower_bound) & (data['Fare'] <= upper_bound)]
+```
+
+:::
+
+::: {.callout-note appearance="simple"}
+Visualize `Fare` again using a boxplot to see how removing outliers affected the distribution.
+:::
+
+## Final Check and Summary
+
+::: panel-tabset
+#### Exercise
+
+-   **Objective:** Summarize the cleaned dataset.
+
+-   **Instructions:**
+
+    -   Use `data.info()` and `data.describe()` to confirm that missing values and outliers have been handled.
+
+#### Solution
+
+```{python}
+#| label: finalSummary
+data.info()
+data.describe()
+```
+
+:::
+
+::: {.callout-note appearance="simple"}
+Compare summary statistics like mean, median, variance and count for `Age` and `Fare` before and after cleaning, noting any significant changes.
+
+Can you make sens of the (absence of) changes ?
+:::
